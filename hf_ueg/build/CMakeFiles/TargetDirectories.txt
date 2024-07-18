@@ -1,0 +1,3 @@
+/Users/patrykkozlowski/harvard/joonho/hf_ueg/build/CMakeFiles/my_project.dir
+/Users/patrykkozlowski/harvard/joonho/hf_ueg/build/CMakeFiles/edit_cache.dir
+/Users/patrykkozlowski/harvard/joonho/hf_ueg/build/CMakeFiles/rebuild_cache.dir

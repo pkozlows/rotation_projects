@@ -1,0 +1,156 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{physics}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings} % Required for insertion of code
+\usepackage{color} % Required for custom colors
+
+
+% Define custom colors
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+% Setup the style for code listings
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+% Activate the style
+\lstset{style=mystyle}
+
+\author{Patryk Kozlowski}
+\title{Hartree-Fock for the uniform electron gas}
+\date{\today}
+\begin{document}
+\maketitle
+\section{Bases}
+We are working with a basis of plane waves that must be normalized. We do this by enforcing the following condition:
+\begin{equation}
+    \int_0^L \int_0^L \int_0^L d\mathbf{r} e^{i\mathbf{k}\cdot\mathbf{r}} e^{-i\mathbf{k}\cdot\mathbf{r}} = \iiint_0^L d\mathbf{r} = L^3 \rightarrow \phi_\mu(\mathbf{r}) = \frac{1}{L^{3/2}} e^{i\mathbf{k}_\mu\cdot\mathbf{r}}
+\end{equation}
+We also know that different plane waves with different wave vectors, but that satisfy the same boundary condition, must be orthogonal, so:
+\begin{equation}
+    \int d\mathbf{r} \phi^*_\mu(\mathbf{r}) \phi_\nu(\mathbf{r}) = \frac{1}{L^3} \int_0^L d\mathbf{r} e^{i\mathbf{k}_\mu\cdot\mathbf{r}} e^{-i\mathbf{k}_\nu\cdot\mathbf{r}} = \delta_{\mu\nu}
+\end{equation}
+\section{Hamiltonian}
+In second quantization, the Hamiltonian can be given by the sum of one and two-electron integrals:
+\begin{equation}
+    \hat{H} = \sum_{\mu\nu} h_{\mu\nu} a^\dagger_\mu a_\nu + \frac{1}{2} \sum_{\mu\lambda\nu\sigma} g_{\mu\lambda\nu\sigma} a^\dagger_\mu a^\dagger_\nu a_\sigma a_\lambda
+\end{equation}
+where $h_{\mu\nu}$ is the one-electron integral and $g_{\mu\lambda\nu\sigma}$ is the two-electron integral. We start by simplifying the operator strings using Wick's theorem. 
+\begin{equation}
+   a^\dagger_\mu a_\nu \rightarrow \langle a^\dagger_\mu a_\nu \rangle = \delta_{\mu\nu}
+\end{equation}
+
+
+This was a trivial application of Wick's theorem leading to the observation that the only contribution to the one-electron term occurs for diagonal basis functions
+\begin{equation}
+    \sum_{\mu\nu} h_{\mu\nu} a^\dagger_\mu a_\nu = \sum_\mu h_{\mu\mu}= \sum_{\mu} \int d\mathbf{r} \phi^*_\mu(\mathbf{r}) \left( -\frac{1}{2} \nabla^2 \right) \phi_\mu(\mathbf{r}) = \sum_{\mu} \frac{\mathbf{k}_\mu^2}{2}
+\end{equation}
+Next, we do the same for the two-electron term
+\begin{equation}
+    a^\dagger_\mu a^\dagger_\nu a_\sigma a_\lambda \rightarrow \langle a^\dagger_\mu a_\lambda \rangle \langle a^\dagger_\nu a_\sigma \rangle - \langle a^\dagger_\mu a_\sigma \rangle \langle a^\dagger_\nu a_\lambda \rangle = \delta_{\mu\lambda} \delta_{\nu\sigma} - \delta_{\mu\sigma} \delta_{\nu\lambda}
+\end{equation}
+Now, plugging this into the expression for the two-electron integral
+\begin{equation}
+    \frac{1}{2} \sum_{\mu\lambda\nu\sigma} g_{\mu\lambda\nu\sigma} a^\dagger_\mu a^\dagger_\nu a_\sigma a_\lambda = \frac{1}{2} \sum_{\mu\lambda\nu\sigma} g_{\mu\lambda\nu\sigma} \left( \delta_{\mu\lambda} \delta_{\nu\sigma} - \delta_{\mu\sigma} \delta_{\nu\lambda} \right) = \frac{1}{2} \sum_{\mu\nu} g_{\mu\mu\nu\nu} - g_{\mu\nu\nu\mu}
+\end{equation}
+The first term is the Hartree term and the second term is the exchange term. In the uniform electron gas, we assume that the Hartree term vanishes because it exactly cancels out with the attraction of the electron to the positive background, so we are only left with the exchange term, arising from the antisymmetry we have mandated on the wave function. In the chemist's notation, the two-electron integral can be written as:
+\begin{equation}
+    g_{\mu\lambda\nu\sigma} = [\mu\lambda|\nu\sigma] = \int d\mathbf{x}_1 d\mathbf{x}_2 \phi^*_\mu(\mathbf{x}_1) \phi_\lambda(\mathbf{x}_1) \frac{1}{|\mathbf{x}_1 - \mathbf{x}_2|} \phi^*_\nu(\mathbf{x}_2) \phi_\sigma(\mathbf{x}_2)
+\end{equation}
+Neglecting the spin for now, since we know what the final factor will be for the exchange term, we continue by just considering the position $\mathbf{r}$.
+The matrix element can be simplified to
+\begin{equation}
+\begin{aligned}
+    g_{\mu\lambda\nu\sigma} &=\frac{1}{L^6} \int d\mathbf{r}_1 d\mathbf{r}_2 e^{-i\mathbf{k}_\mu\cdot\mathbf{r}_1} e^{i\mathbf{k}_\lambda\cdot\mathbf{r}_1} \frac{1}{|\mathbf{r}_1 - \mathbf{r}_2|} e^{-i\mathbf{k}_\nu\cdot\mathbf{r}_2} e^{i\mathbf{k}_\sigma\cdot\mathbf{r}_2} \\
+\end{aligned}
+\end{equation}
+We want to simplify the term $\frac{1}{|\mathbf{r}_1 - \mathbf{r}_2|}$ in the expression for $g_{\mu\lambda\nu\sigma}$.
+Let's call the difference between the position vectors $\mathbf{r}_1$ and $\mathbf{r}_2$ as $\mathbf{r} = \mathbf{r}_1 - \mathbf{r}_2$. Then, the Fourier transform of the $f(\mathbf{r}) = 1/|\mathbf{r}|$ is given by:
+\begin{equation}
+    \tilde{f}(\mathbf{q})
+= \int d\mathbf{r} e^{-i \mathbf{q}\cdot\mathbf{r}} f(\mathbf{r})
+\end{equation}
+A standard integral table will show that the Fourier coefficient of $1/|\mathbf{r}|$ is:
+\begin{equation}
+    \tilde{f}(\mathbf{q}) = \frac{4\pi}{|\mathbf{q}|^2}
+\end{equation}
+Taking the inverse Fourier transform of this, we get:
+\begin{equation}
+    f(\mathbf{r}) = \frac{1}{|\mathbf{r}|} = \frac{4\pi}{(2\pi)^3} \int d\mathbf{q} \frac{e^{i\mathbf{q}\cdot\mathbf{r}}}{|\mathbf{q}|^2} \rightarrow  1/|\mathbf{r}_1 - \mathbf{r}_2| = \frac{4\pi}{\left(2\pi\right)^3} \int d\mathbf{q} \frac{e^{i\mathbf{q}\cdot\left(\mathbf{r}_1 - \mathbf{r}_2\right)}}{|\vb{q}|^2}
+\end{equation}
+Plugging this into the expression for $g_{\mu\lambda\nu\sigma}$ we get:
+\begin{equation}
+\begin{aligned}
+    g_{\mu\lambda\nu\sigma} &= \frac{4\pi}{L^6\left(2\pi\right)^3} \int d\mathbf{r}_1 d\mathbf{r}_2 e^{i(\mathbf{k}_\lambda - \mathbf{k}_\mu)\cdot\mathbf{r}_1} e^{i(\mathbf{k}_\sigma - \mathbf{k}_\nu)\cdot\mathbf{r}_2} \int d\mathbf{q} \frac{e^{i\mathbf{q}\cdot\left(\mathbf{r}_1 - \mathbf{r}_2\right)}}{|\vb{q}|^2} \\
+\end{aligned}
+\end{equation}
+Moving the integral over the wave vector and front and separating out the integrals over position vectors, we get:
+\begin{equation}
+\begin{aligned}
+    g_{\mu\lambda\nu\sigma} &= \frac{4\pi}{L^6\left(2\pi\right)^3} \int d\mathbf{q} \frac{1}{|\vb{q}|^2} \int d\mathbf{r}_1 e^{i(\mathbf{k}_\lambda - \mathbf{k}_\mu + \mathbf{q})\cdot\mathbf{r}_1} \int d\mathbf{r}_2 e^{i(\mathbf{k}_\sigma - \mathbf{k}_\nu - \mathbf{q})\cdot\mathbf{r}_2} \\
+    &= \frac{4\pi}{L^6\left(2\pi\right)^3} \int d\mathbf{q} \frac{1}{|\vb{q}|^2} (2\pi)^3 \delta(\mathbf{k}_\lambda - \mathbf{k}_\mu + \mathbf{q}) (2\pi)^3 \delta(\mathbf{k}_\sigma - \mathbf{k}_\nu - \mathbf{q}) \\
+\end{aligned}
+\end{equation}
+Canceling out the constant factors of $(2\pi)^3$ and \emph{assuming that $L^3 \approx (2\pi)^3$, we get:}
+\begin{equation}
+    g_{\mu\lambda\nu\sigma} = \frac{4\pi}{L^3} \int d\mathbf{q} \frac{1}{|\vb{q}|^2} \delta(\mathbf{k}_\lambda - \mathbf{k}_\mu + \mathbf{q}) \delta(\mathbf{k}_\sigma - \mathbf{k}_\nu - \mathbf{q})
+\end{equation}
+This tells us that the constraint $\mathbf{q} = \mathbf{k}_\mu - \mathbf{k}_\lambda = \mathbf{k}_\sigma - \mathbf{k}_\nu$ must be satisfied. We simplify the expression for $g_{\mu\lambda\nu\sigma}$ to:
+\begin{equation}
+    g_{\mu\lambda\nu\sigma} = \frac{4\pi}{L^3} \frac{1}{|\mathbf{k}_\mu - \mathbf{k}_\lambda|^2} \delta_{\mathbf{k}_\mu - \mathbf{k}_\lambda, \mathbf{k}_\sigma - \mathbf{k}_\nu}
+\end{equation}
+
+
+\section{Kinetic energy}
+
+We started by specifying a kinetic energy cutoff. In atomic units, the kinetic energy of a plane wave is given by:
+\begin{equation}
+    E_{\text{kinetic}} = \frac{\vb{k}^2}{2}
+\end{equation}
+Now if we try to evaluate $\vb{k}^2$ for a plane wave with wave vector $\vb{k} = (k_x, k_y, k_z)$, we get:
+\begin{equation}
+    k^2 = k_x^2 + k_y^2 + k_z^2 =  \left(\frac{2\pi}{L}\right)^2 \left(n_x^2 + n_y^2 + n_z^2\right)
+\end{equation}
+where $L$ is the length of the box and $n_x, n_y, n_z$ are integers. In terms of the Wigner-Seitz radius $r_s$, the volume of the cell is given by the volume of the sphere of a single electron multiplied by the number of electrons
+\begin{equation}
+    V = \left(\frac{4\pi N}{3}\right) r_s^3
+\end{equation}
+\emph{We can approximate it as a box with the same volume} and $V= L^3$. So, we get an expression for $L$ as:
+\begin{equation}
+    L = \left( \frac{4\pi N}{3} \right)^{1/3} r_s
+\end{equation}
+Plugging this into the expression for $E_{\text{kinetic}}$ we get:
+\begin{equation}
+    E_{\text{kinetic}} = \frac{1}{2}\left(\frac{2 \pi}{\left( \frac{4\pi N}{3} \right)^{1/3} r_s}\right)^2 \left(n_x^2 + n_y^2 + n_z^2\right) = 7.5963 \cdot N^{-2/3} r_s^{-2} \left(n_x^2 + n_y^2 + n_z^2\right)
+\end{equation}
+\section{SCF procedure}
+Once we specify the kinetic energy cutoff, we are left with a number of valid plane wave basis states $N_{\text{PW}}$. We construct the kinetic and Coulomb matrices using this basis. For the initial guess of the one-electron density matrix in the restricted formalism, we just have its diagonal filled with 2s up to $N_\text{elec}/2$ and 0s for the rest.
+\begin{equation}
+    P^{(0)}_{\mu\nu} = \begin{cases}
+    2 & \text{if } \mu = \nu \leq N_\text{elec}/2 \\
+    0 & \text{otherwise}
+    \end{cases}
+\end{equation}
+Next, we construct a Fock matrix and then diagonalize it to get the new orbital coefficients and we add up the eigenvalues to get an energy. We also construct a new density matrix using the new orbital coefficients which voted with respect to the original gas. The convergence criteria are for the change in energy and the norm of the density matrix between iterations to be minimal.
+\end{document}
