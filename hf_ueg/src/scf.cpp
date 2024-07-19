@@ -31,10 +31,6 @@ arma::mat Scf::make_fock_matrix(arma::mat &density_matrix) {
                     sum += density_matrix(k, l) * coulomb(i * npws + k, l * npws + j);
                 }
             }
-            // if (i != j) {
-            //     //fund out all of the of diagonal elements
-            //     cout << "The sum for the off diagonal element" << i << " " << j << " is: " << sum << endl;
-            // }
             exchange_matrix(i, j) = sum;
         }
     }
@@ -46,9 +42,15 @@ arma::mat Scf::make_fock_matrix(arma::mat &density_matrix) {
 
 
 //based on the some of the eigenvalues, compute total RHF energy 
-double Scf::compute_rhf_energy(arma::vec &eigenvalues) {
-    double energy = arma::sum(eigenvalues);
-    return energy;
+double Scf::compute_rhf_energy(arma::mat &density_matrix, arma::mat &fock_matrix) {
+    double energy = 0.0;
+    int npws = density_matrix.n_rows;
+    for (int i = 0; i < npws; ++i) {
+        for (int j = 0; j < npws; ++j) {
+            energy += density_matrix(j, i) * (kinetic(i, j) + fock_matrix(i, j));
+        }
+    }
+    return 0.5 * energy;
 }
 
 // Construct the density matrix

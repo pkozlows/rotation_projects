@@ -153,4 +153,8 @@ Once we specify the kinetic energy cutoff, we are left with a number of valid pl
     \end{cases}
 \end{equation}
 Next, we construct a Fock matrix and then diagonalize it to get the new orbital coefficients and we add up the eigenvalues to get an energy. We also construct a new density matrix using the new orbital coefficients which voted with respect to the original gas. The convergence criteria are for the change in energy and the norm of the density matrix between iterations to be minimal.
+The formular for the restricted Hartree-Fock energy is given by:
+\begin{equation}
+    E_0=\frac{1}{2} \sum_\mu \sum_v P_{v u}\left(H_{\mu \nu}^{\mathrm{core}}+F_{\mu \nu}\right)
+\end{equation}
 \end{document}

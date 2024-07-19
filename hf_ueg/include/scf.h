@@ -11,7 +11,7 @@ class Scf {
     //make a function that generates the Fock matrix from the guess density
     arma::mat make_fock_matrix(arma::mat &guess_density);
     //compute the RHF energy from the eigenvalues
-    double compute_rhf_energy(arma::vec &eigenvalues);
+    double compute_rhf_energy(arma::mat &density_matrix, arma::mat &fock_matrix);
     //generate a matrix of coefficients and density by diagonalizing the fock matrix 
     arma::mat generate_density_matrix(arma::mat &eigenvectors);
     private:

@@ -10,8 +10,8 @@ using namespace std;
 
 int main() {
     const int nelec = 4;
-    const double ke_cutoff = 16;
-    const double rs = 0.8;
+    const double ke_cutoff = 1;
+    const double rs = 5;
 
     Basis pw_3d(ke_cutoff, rs, nelec);
     int n_pw = pw_3d.n_plane_waves();
@@ -39,25 +39,18 @@ int main() {
         arma::vec eigenvalues;
         arma::mat eigenvectors;
         arma::eig_sym(eigenvalues, eigenvectors, fock_matrix);
-        cout << "The lowest eigenvalue is " << eigenvalues(0) << endl;
-
-        // Compute the RHF energy
-        double rhf_energy = rhf.compute_rhf_energy(eigenvalues);
 
         // Construct the new density matrix
         arma::mat new_density = rhf.generate_density_matrix(eigenvectors);
 
-        // Check if the new density matrix is the same as the previous one
-        if (arma::approx_equal(new_density, guess, "absdiff", density_threshold)) {
-            cout << "Density matrix has not changed significantly in iteration " << iteration << "." << endl;
-            break; // Break the loop if the density matrix has not changed
-        }
+        // Compute the RHF energy
+        double rhf_energy = rhf.compute_rhf_energy(new_density, fock_matrix);
+        cout << "The RHF energy is: " << rhf_energy << endl;
 
-        // Find the difference in the trace norm of the new density versus the old density
-        arma::mat density_difference_matrix = new_density - guess;
-        arma::vec diff_eigenvalues;
-        arma::mat diff_eigenvectors;
-        arma::eig_sym(diff_eigenvalues, diff_eigenvectors, density_difference_matrix);
+        // Check if the new density matrix is the same as the previous one and if the energy has converged
+        if (arma::approx_equal(new_density, guess, "absdiff", density_threshold) && abs(rhf_energy - previous_energy) < energy_threshold) {
+            break;
+        }
 
         cout << "SCF iteration number: " << iteration << endl;
 
@@ -66,7 +59,7 @@ int main() {
         guess = new_density;  // This updates the guess for the next iteration
         iteration++;
 
-    } while (iteration < 40); // Convergence criteria or maximum iterations
+    } while (iteration < 100); // Convergence criteria or maximum iterations
 
     cout << "The SCF procedure has converged!" << endl;
 
