@@ -164,7 +164,7 @@ arma::mat Basis_3D::coulombIntegrals() {
                     // Check if the momentum transfer differences are equal
                     if (qx1 == qx2 && qy1 == qy2 && qz1 == qz2) {
                         // Calculate the squared momentum transfer
-                        double q_squared = qx1 * qx1 + qy1 * qy1 + qz1 * qz1;
+                        double q_squared = pow(sqrt(qx1 * qx1 + qy1 * qy1 + qz1 * qz1), 2);
 
                         if (q_squared != 0) {
                             // Compute the Coulomb integral
