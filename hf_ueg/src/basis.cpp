@@ -41,8 +41,6 @@ int Basis::n_plane_waves() {
                 int nz2 = nz * nz;
                 double ke = ke_nx_ny + ke_factor * nz2;
                 //check if we have a valid plane wave
-                // print all info
-                cout << "nx: " << nx << " ny: " << ny << " nz: " << nz << " ke: " << ke << endl;
                 if (ke <= ke_cutoff) {
                     plane_waves.emplace_back(nx, ny, nz);
                     kinetic_energies.push_back(ke); // Store the kinetic energy
@@ -113,9 +111,6 @@ arma::mat Basis::coulombIntegrals() {
                         double q_squared = qx1 * qx1 + qy1 * qy1 + qz1 * qz1;
 
                         if (q_squared != 0) {
-                            // print all info
-                            cout << "i: " << i << " j: " << j << " k: " << k << " l: " << l << endl;
-                            cout << "qx1: " << qx1 << " qy1: " << qy1 << " qz1: " << qz1 << endl;
                             // Compute the Coulomb integral
                             // L = \left( \frac{4\pi N}{3} \right)^{1/3} r_s
                             double length = pow(4.0 * M_PI * n_elec / 3.0, 1.0 / 3.0) * rs;
