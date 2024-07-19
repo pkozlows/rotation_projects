@@ -14,7 +14,7 @@ int main() {
     const double ke_cutoff = 50;
     const double rs = 0.5;
 
-    Basis pw_3d(ke_cutoff, rs, nelec);
+    Basis_3D pw_3d(ke_cutoff, rs, nelec);
     int n_pw = pw_3d.n_plane_waves();
     cout << "The number of plane waves within the kinetic energy cutoff is: " << n_pw << endl;
     assert(n_pw > 0 && n_pw < 250);
