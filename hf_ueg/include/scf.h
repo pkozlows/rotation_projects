@@ -7,7 +7,9 @@ using namespace std;
 class Scf {
     public:
     //make a constructor to take in the kinetic and clump matrices
-    Scf(const arma::mat &kinetic, const arma::mat &coulomb, const int &nelec);
+    Scf(const arma::mat &kinetic, const arma::mat &coulomb, const int &nelec, const int &npws);
+    //make a function that generates an initial guess for the density matrix
+    arma::mat generate_initial_guess();
     //make a function that generates the Fock matrix from the guess density
     arma::mat make_fock_matrix(arma::mat &guess_density);
     //compute the RHF energy from the eigenvalues
@@ -18,5 +20,6 @@ class Scf {
         arma::mat kinetic;
         arma::mat coulomb;
         int nelec;
+        int n_pw;
 };
 #endif

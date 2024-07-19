@@ -1,0 +1,12 @@
+Number of electrons: 4
+0.861408
+0.34614
+Number of electrons: 6
+1.01076
+0.352667
+Number of electrons: 8
+0.973799
+0.337188
+Number of electrons: 10
+1.10648
+0.381738

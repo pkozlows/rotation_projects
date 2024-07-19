@@ -7,14 +7,21 @@
 using namespace std;
 
 
-Scf::Scf(const arma::mat& kinetic_integral, const arma::mat& coulombIntegral, const int& nelec) {
+Scf::Scf(const arma::mat& kinetic_integral, const arma::mat& coulombIntegral, const int& nelec, const int& npws) {
     kinetic = kinetic_integral;
     coulomb = coulombIntegral;
     this->nelec = nelec;
+    this->n_pw = npws;
 }
 
+// generate a rhf initial guess for the density matrix
+arma::mat Scf::generate_initial_guess() {
+    // Initialize the density matrix to zeros
+    arma::mat density_matrix(n_pw, n_pw, arma::fill::zeros);
 
-
+    return density_matrix;
+        
+}
 
 arma::mat Scf::make_fock_matrix(arma::mat &density_matrix) {
     int npws = density_matrix.n_rows;

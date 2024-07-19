@@ -5,17 +5,20 @@
 
 using namespace std;
 
-// Constructor for the Basis class
-Basis_3D::Basis_3D(const double &ke_cutoff, const double &rs, const int &n_elec) {
-    this->ke_cutoff = ke_cutoff;
-    this->rs = rs;
-    this->n_elec = n_elec;
+// Base class constructor
+Basis::Basis(const double &ke_cutoff, const double &rs, const int &n_elec)
+    : ke_cutoff(ke_cutoff), rs(rs), n_elec(n_elec) {
+        this->ke_cutoff = ke_cutoff;
+        this->rs = rs;
+        this->n_elec = n_elec;
+    }
+
+// 3D Basis implementation
+Basis_3D::Basis_3D(const double &ke_cutoff, const double &rs, const int &n_elec)
+    : Basis(ke_cutoff, rs, n_elec) {
 }
-Basis_2d::Basis_2d(const double &ke_cutoff, const double &rs, const int &n_elec) {
-    this->ke_cutoff = ke_cutoff;
-    this->rs = rs;
-    this->n_elec = n_elec;
-}
+
+
 // Function to determine the number of plane waves within the kinetic energy cutoff and compute the kinetic energy integral matrix
 int Basis_3D::n_plane_waves() {
     int n_pw = 0;
@@ -61,64 +64,6 @@ int Basis_3D::n_plane_waves() {
     return n_pw;
 }
 
-int Basis_2d::n_plane_waves() {
-    int n_pw = 0;
-    std::vector<std::tuple<int, int>> plane_waves;
-    std::vector<double> kinetic_energies; // To store kinetic energies
-
-    // Define the numerical factor used to compute the kinetic energy = 2\pi N^{-1} r_s^{-2} \left(n_x^2 + n_y^2\right)
-    double ke_factor = 2 * M_PI * pow(n_elec, -1.0) * pow(rs, -2.0);
-    
-    // Define the maximum value that nx can take
-    int max_nx = static_cast<int>(std::floor(std::sqrt(ke_cutoff / ke_factor)));
-
-    for (int nx = -max_nx; nx <= max_nx; nx++) {
-        int nx2 = nx * nx;
-        double ke_nx = ke_factor * nx2;
-        if (ke_nx > ke_cutoff) {
-            continue; // Skip if nx alone exceeds the cutoff
-        }
-        int max_ny = static_cast<int>(std::floor(std::sqrt((ke_cutoff - ke_nx) / ke_factor)));
-        for (int ny = -max_ny; ny <= max_ny; ny++) {
-            int ny2 = ny * ny;
-            double ke_nx_ny = ke_nx + ke_factor * ny2;
-            if (ke_nx_ny > ke_cutoff) {
-                continue; // Skip further processing if the energy is already above the cutoff
-            }
-            //check if we have a valid plane wave
-            if (ke_nx_ny <= ke_cutoff) {
-                plane_waves.emplace_back(nx, ny);
-                kinetic_energies.push_back(ke_nx_ny); // Store the kinetic energy
-                n_pw++;
-            }
-        }
-    }
-
-    this->n_pw = n_pw;
-    this->plane_waves = plane_waves;
-    this->kinetic_energies = kinetic_energies;
-    return n_pw;
-}
-
-
-// generate a rhf initial guess for the density matrix
-arma::mat Basis_3D::generate_initial_guess() {
-    // Initialize the density matrix to zeros
-    arma::mat density_matrix(n_pw, n_pw, arma::fill::zeros);
-
-    return density_matrix;
-        
-}
-
-arma::mat Basis_2d::generate_initial_guess() {
-    // Initialize the density matrix to zeros
-    arma::mat density_matrix(n_pw, n_pw, arma::fill::zeros);
-
-    return density_matrix;
-        
-}
-
-
 // Function to generate the kinetic integral matrix
 arma::mat Basis_3D::kinetic_integrals() {
     // Create a diagonal matrix directly from the std::vector<double>
@@ -127,15 +72,7 @@ arma::mat Basis_3D::kinetic_integrals() {
     return kinetic_integral_matrix;
 }
 
-arma::mat Basis_2d::kinetic_integrals() {
-    // Create a diagonal matrix directly from the std::vector<double>
-    arma::mat kinetic_integral_matrix = arma::diagmat(arma::vec(kinetic_energies));
-
-    return kinetic_integral_matrix;
-}
-
-
-// Function to generate the exchange portion of the Coulomb integral matrix
+// Function to generate the Coulomb integral matrix
 arma::mat Basis_3D::coulombIntegrals() {
     int pair_product = n_pw * n_pw;
     // Initialize a partially flattened 4-tensor of 0s to store the matrix elements
@@ -186,7 +123,60 @@ arma::mat Basis_3D::coulombIntegrals() {
     return coulomb_integral;
 }
 
-arma::mat Basis_2d::coulombIntegrals() {
+// 2D Basis implementation
+Basis_2D::Basis_2D(const double &ke_cutoff, const double &rs, const int &n_elec)
+    : Basis(ke_cutoff, rs, n_elec) {
+}
+
+
+
+arma::mat Basis_2D::kinetic_integrals() {
+    // Create a diagonal matrix directly from the std::vector<double>
+    arma::mat kinetic_integral_matrix = arma::diagmat(arma::vec(kinetic_energies));
+
+    return kinetic_integral_matrix;
+}
+
+int Basis_2D::n_plane_waves() {
+    int n_pw = 0;
+    std::vector<std::tuple<int, int>> plane_waves;
+    std::vector<double> kinetic_energies; // To store kinetic energies
+
+    // Define the numerical factor used to compute the kinetic energy = 2\pi N^{-1} r_s^{-2} \left(n_x^2 + n_y^2\right)
+    double ke_factor = 2 * M_PI * pow(n_elec, -1.0) * pow(rs, -2.0);
+    
+    // Define the maximum value that nx can take
+    int max_nx = static_cast<int>(std::floor(std::sqrt(ke_cutoff / ke_factor)));
+
+    for (int nx = -max_nx; nx <= max_nx; nx++) {
+        int nx2 = nx * nx;
+        double ke_nx = ke_factor * nx2;
+        if (ke_nx > ke_cutoff) {
+            continue; // Skip if nx alone exceeds the cutoff
+        }
+        int max_ny = static_cast<int>(std::floor(std::sqrt((ke_cutoff - ke_nx) / ke_factor)));
+        for (int ny = -max_ny; ny <= max_ny; ny++) {
+            int ny2 = ny * ny;
+            double ke_nx_ny = ke_nx + ke_factor * ny2;
+            if (ke_nx_ny > ke_cutoff) {
+                continue; // Skip further processing if the energy is already above the cutoff
+            }
+            //check if we have a valid plane wave
+            if (ke_nx_ny <= ke_cutoff) {
+                plane_waves.emplace_back(nx, ny);
+                kinetic_energies.push_back(ke_nx_ny); // Store the kinetic energy
+                n_pw++;
+            }
+        }
+    }
+
+    this->n_pw = n_pw;
+    this->plane_waves = plane_waves;
+    this->kinetic_energies = kinetic_energies;
+    return n_pw;
+}
+
+arma::mat Basis_2D::coulombIntegrals() {
     int pair_product = n_pw * n_pw;
     // Initialize a partially flattened 4-tensor of 0s to store the matrix elements
     arma::mat coulomb_integral(pair_product, pair_product, arma::fill::zeros);

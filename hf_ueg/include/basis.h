@@ -7,48 +7,44 @@
 
 using namespace std;
 
-class Basis_3D{
-    public:
-        //make a constructor that takes in the kinetic energy cutoff the Wigner-Seitz radius, and the number of electrons
-        Basis_3D(const double &, const double &, const int &);
-        //make a function that determines the number of plane waves within the kinetic industry cutoff
-        int n_plane_waves();
-        //make a function that generates an initial guess for the density matrix
-        arma::mat generate_initial_guess();
-        //make a function that generates the kinetic integral matrix
-        arma::mat kinetic_integrals();
-        //make a function that generates the coulomb integral matrix
-        arma::mat coulombIntegrals();
-    private:
-        double ke_cutoff;
-        double rs;
-        int n_elec;
-        int n_pw;
-        vector<tuple<int, int, int>> plane_waves;
-        vector<double> kinetic_energies;
+class Basis {
+public:
+    Basis(const double &ke_cutoff, const double &rs, const int &n_elec);
+    virtual ~Basis() = default;
+    virtual int n_plane_waves() = 0;
+    virtual arma::mat kinetic_integrals() = 0;
+    virtual arma::mat coulombIntegrals() = 0;
+
+protected:
+    double ke_cutoff;
+    double rs;
+    int n_elec;
+    int n_pw;
 };
 
-class Basis_2d{
-    public:
-        //make a constructor that takes in the kinetic energy cutoff the Wigner-Seitz radius, and the number of electrons
-        Basis_2d(const double &, const double &, const int &);
-        //make a function that determines the number of plane waves within the kinetic industry cutoff
-        int n_plane_waves();
-        //make a function that generates an initial guess for the density matrix
-        arma::mat generate_initial_guess();
-        //make a function that generates the kinetic integral matrix
-        arma::mat kinetic_integrals();
-        //make a function that generates the coulomb integral matrix
-        arma::mat coulombIntegrals();
-    private:
-        double ke_cutoff;
-        double rs;
-        int n_elec;
-        int n_pw;
-        vector<tuple<int, int>> plane_waves;
-        vector<double> kinetic_energies;
+class Basis_3D : public Basis {
+public:
+    Basis_3D(const double &ke_cutoff, const double &rs, const int &n_elec);
+    int n_plane_waves() override;
+    arma::mat kinetic_integrals() override;
+    arma::mat coulombIntegrals() override;
+
+protected:
+    vector<tuple<int, int, int>> plane_waves;
+    vector<double> kinetic_energies;
 };
 
+class Basis_2D : public Basis {
+public:
+    Basis_2D(const double &ke_cutoff, const double &rs, const int &n_elec);
+    int n_plane_waves() override;
+    arma::mat kinetic_integrals() override;
+    arma::mat coulombIntegrals() override;
 
+protected:
+    vector<tuple<int, int>> plane_waves;
+    vector<double> kinetic_energies;
+
+};
 
 #endif
