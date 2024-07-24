@@ -14,10 +14,22 @@ Scf::Scf(const arma::mat& kinetic_integral, const arma::mat& coulombIntegral, co
     this->n_pw = npws;
 }
 
-// generate a rhf initial guess for the density matrix
-arma::mat Scf::generate_initial_guess() {
+// Generate an initial guess of zeros for the density matrix
+arma::mat Scf::zeros_guess() {
     // Initialize the density matrix to zeros
     arma::mat density_matrix(n_pw, n_pw, arma::fill::zeros);
+
+    return density_matrix;
+        
+}
+
+// Generate an initial rhf identity matrix for the density matrix
+arma::mat Scf::identity_guess() {
+    // Initialize the density matrix to zeros
+    arma::mat density_matrix(n_pw, n_pw, arma::fill::zeros);
+    for (int i = 0; i < nelec/2; ++i) {
+        density_matrix(i, i) = 2.0;
+    }
 
     return density_matrix;
         
