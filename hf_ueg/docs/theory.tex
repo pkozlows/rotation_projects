@@ -125,32 +125,32 @@ This tells us that the constraint $\mathbf{q} = \mathbf{k}_\mu - \mathbf{k}_\lam
 \begin{equation}
     g_{\mu\lambda\nu\sigma} = \frac{4\pi}{L^3} \frac{1}{|\mathbf{k}_\mu - \mathbf{k}_\lambda|^2} \delta_{\mathbf{k}_\mu - \mathbf{k}_\lambda, \mathbf{k}_\sigma - \mathbf{k}_\nu}
 \end{equation}
-\subsubsection{Alternate formulation}
-Here we will continue by not assuming that $L^3 \approx (2\pi)^3$ and we will try to simplify the expression for $g_{\mu\lambda\nu\sigma}$ further. We start by simplifying the expression for $g_{\mu\lambda\nu\sigma}$ to:
-\begin{equation}
-    g_{\mu\lambda\nu\sigma} = \frac{4\pi(2\pi)^3}{L^6} \int d\mathbf{q} \frac{1}{|\vb{q}|^2} \delta(\mathbf{k}_\lambda - \mathbf{k}_\mu + \mathbf{q}) \delta(\mathbf{k}_\sigma - \mathbf{k}_\nu - \mathbf{q})
-\end{equation}
-The simplification now becomes:
-\begin{equation}
-    g_{\mu\lambda\nu\sigma} = \frac{4\pi(2\pi)^3}{L^6} \frac{1}{|\mathbf{k}_\mu - \mathbf{k}_\lambda|^2} \delta_{\mathbf{k}_\mu - \mathbf{k}_\lambda, \mathbf{k}_\sigma - \mathbf{k}_\nu} = \frac{32\pi^4}{L^6} \frac{1}{|\mathbf{k}_\mu - \mathbf{k}_\lambda|^2} \delta_{\mathbf{k}_\mu - \mathbf{k}_\lambda, \mathbf{k}_\sigma - \mathbf{k}_\nu}
-\end{equation}
+% \subsubsection{Alternate formulation}
+% Here we will continue by not assuming that $L^3 \approx (2\pi)^3$ and we will try to simplify the expression for $g_{\mu\lambda\nu\sigma}$ further. We start by simplifying the expression for $g_{\mu\lambda\nu\sigma}$ to:
+% \begin{equation}
+%     g_{\mu\lambda\nu\sigma} = \frac{4\pi(2\pi)^3}{L^6} \int d\mathbf{q} \frac{1}{|\vb{q}|^2} \delta(\mathbf{k}_\lambda - \mathbf{k}_\mu + \mathbf{q}) \delta(\mathbf{k}_\sigma - \mathbf{k}_\nu - \mathbf{q})
+% \end{equation}
+% The simplification now becomes:
+% \begin{equation}
+%     g_{\mu\lambda\nu\sigma} = \frac{4\pi(2\pi)^3}{L^6} \frac{1}{|\mathbf{k}_\mu - \mathbf{k}_\lambda|^2} \delta_{\mathbf{k}_\mu - \mathbf{k}_\lambda, \mathbf{k}_\sigma - \mathbf{k}_\nu} = \frac{32\pi^4}{L^6} \frac{1}{|\mathbf{k}_\mu - \mathbf{k}_\lambda|^2} \delta_{\mathbf{k}_\mu - \mathbf{k}_\lambda, \mathbf{k}_\sigma - \mathbf{k}_\nu}
+% \end{equation}
 
 \subsection{2D case}
 Here we might have the similar thing with the Fourier transform of $1/|\mathbf{r}|$ being $\frac{2\pi}{\mathbf{q}}$ and the two-electron integral simplifying to:
 \begin{equation}
     g_{\mu\lambda\nu\sigma} = \frac{2\pi}{L^2} \frac{1}{|\mathbf{k}_\mu - \mathbf{k}_\lambda|} \delta_{\mathbf{k}_\mu - \mathbf{k}_\lambda, \mathbf{k}_\sigma - \mathbf{k}_\nu}
 \end{equation}
-\subsubsection{Alternative formulation}
-Here we will continue by not assuming that $L^2 \approx (2\pi)^2$ and we will try to simplify the expression for $g_{\mu\lambda\nu\sigma}$ further. We start by simplifying the expression for $g_{\mu\lambda\nu\sigma}$ to:
-\begin{equation}
-    g_{\mu\lambda\nu\sigma} = \frac{2\pi(2\pi)^2}{L^4} \int d\mathbf{q} \frac{1}{|\vb{q}|} \delta(\mathbf{k}_\lambda - \mathbf{k}_\mu + \mathbf{q}) \delta(\mathbf{k}_\sigma - \mathbf{k}_\nu - \mathbf{q}) = \frac{8\pi^3}{L^4} \frac{1}{|\mathbf{k}_\mu - \mathbf{k}_\lambda|} \delta_{\mathbf{k}_\mu - \mathbf{k}_\lambda, \mathbf{k}_\sigma - \mathbf{k}_\nu}
-\end{equation}
+% \subsubsection{Alternative formulation}
+% Here we will continue by not assuming that $L^2 \approx (2\pi)^2$ and we will try to simplify the expression for $g_{\mu\lambda\nu\sigma}$ further. We start by simplifying the expression for $g_{\mu\lambda\nu\sigma}$ to:
+% \begin{equation}
+%     g_{\mu\lambda\nu\sigma} = \frac{2\pi(2\pi)^2}{L^4} \int d\mathbf{q} \frac{1}{|\vb{q}|} \delta(\mathbf{k}_\lambda - \mathbf{k}_\mu + \mathbf{q}) \delta(\mathbf{k}_\sigma - \mathbf{k}_\nu - \mathbf{q}) = \frac{8\pi^3}{L^4} \frac{1}{|\mathbf{k}_\mu - \mathbf{k}_\lambda|} \delta_{\mathbf{k}_\mu - \mathbf{k}_\lambda, \mathbf{k}_\sigma - \mathbf{k}_\nu}
+% \end{equation}
 
 
 \section{Kinetic energy}
 
 We started by specifying a kinetic energy cutoff. In atomic units, the kinetic energy of a plane wave is given by:
-\begin{equation}
+\begin{equation},
     E_{\text{kinetic}} = \frac{\vb{k}^2}{2}
 \end{equation}
 Now if we try to evaluate $\vb{k}^2$ for a plane wave with wave vector $\vb{k} = (k_x, k_y, k_z)$, we get:

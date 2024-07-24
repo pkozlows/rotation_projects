@@ -109,7 +109,7 @@ arma::mat Basis_3D::coulombIntegrals() {
                             double length = pow(4.0 * M_PI * n_elec / 3.0, 1.0 / 3.0) * rs;
                             // double factor = ((4 * M_PI) / pow(length, 3));
                             // = \frac{32\pi^4}{L^6}
-                            double factor = 32 * pow(M_PI, 4) / pow(length, 6);
+                            double factor = (4 * M_PI) / pow(length, 3); 
                             double term = factor / q_squared;
 
 
@@ -212,7 +212,7 @@ arma::mat Basis_2D::coulombIntegrals() {
                             double length = pow(M_PI * n_elec, 1.0 / 2.0) * rs;
                             // double factor = ((2 * M_PI) / pow(length, 2));
                             // \frac{8\pi^3}{L^4}
-                            double factor = 8 * pow(M_PI, 3) / pow(length, 4);
+                            double factor = 2 * M_PI / pow(length, 2);
                             double term = factor / q;
                             // Assign the computed Coulomb integral to the matrix elements
                             coulomb_integral(i * n_pw + j, k * n_pw + l) = term;
