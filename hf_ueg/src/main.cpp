@@ -35,13 +35,14 @@ void run_scf(Basis &basis, const int nelec, ofstream &results_file) {
         arma::vec eigenvalues;
         arma::mat eigenvectors;
         arma::eig_sym(eigenvalues, eigenvectors, fock_matrix);
-        // print eigenvalues
-        print_matrix(eigenvalues);
+        
+        rhf_energy = rhf.compute_rhf_energy(guess, fock_matrix);
 
         results_file << iteration << " " << rhf_energy / nelec << endl;
         cout << "Energy: " << rhf_energy / nelec << " at iteration: " << iteration << endl;
 
         arma::mat new_density = rhf.generate_density_matrix(eigenvectors);
+        print_matrix(new_density);
         if (arma::approx_equal(new_density, guess, "absdiff", density_threshold) &&
             abs(rhf_energy - previous_energy) < energy_threshold) {
                 cout << "The converged RHF energy is: " << rhf_energy / nelec << " after " << iteration << " iterations." << endl;
@@ -56,7 +57,7 @@ void run_scf(Basis &basis, const int nelec, ofstream &results_file) {
 }
 
 int main() {
-    const double ke_cutoff = 5;
+    const double ke_cutoff = 3;
     const double rs = 2;
     // Open a file to save the results
     ofstream results_file("hf_ueg/plt/scf_ld.txt");

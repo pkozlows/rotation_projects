@@ -68,11 +68,6 @@ int Basis_3D::n_plane_waves() {
         sorted_plane_waves.push_back(pair.first);
         sorted_kinetic_energies.push_back(pair.second);
     }
-    // print plane waaves with corresponding kinetic energies
-    for (int i = 0; i < n_pw; i++) {
-        auto [nx, ny, nz] = sorted_plane_waves[i];
-        cout << "Plane wave: " << nx << " " << ny << " " << nz << " with kinetic energy: " << sorted_kinetic_energies[i] << endl;
-    }
     // Assign to class members
     this->n_pw = n_pw;
     this->plane_waves = sorted_plane_waves;

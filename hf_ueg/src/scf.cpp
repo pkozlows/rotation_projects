@@ -37,7 +37,7 @@ arma::mat Scf::make_fock_matrix(arma::mat &density_matrix) {
     }
 
     // Since we are just considering the exchange contribution, we can subtract out 0.5 * exchange_matrix
-    arma::mat fock_matrix = hcore - 0.5 * exchange_matrix;
+    arma::mat fock_matrix = hcore;
     return fock_matrix;
 }
 
