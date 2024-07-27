@@ -198,8 +198,32 @@ Once we specify the kinetic energy cutoff, we are left with a number of valid pl
     0 & \text{otherwise}
     \end{cases}
 \end{equation}
-Next, we construct a Fock matrix and then diagonalize it to get the new orbital coefficients and we add up the eigenvalues to get an energy. We also construct a new density matrix using the new orbital coefficients which voted with respect to the original gas. The convergence criteria are for the change in energy and the norm of the density matrix between iterations to be minimal.
-The formular for the restricted Hartree-Fock energy is given by:
+Next, we construct a Fock matrix with:
+\begin{equation}
+    F_{\mu\nu} = H_{\mu\nu}^{\text{core}} + \sum_{\lambda\sigma} P_{\lambda\sigma} \left(g_{\mu\lambda\nu\sigma} - \frac{1}{2}g_{\mu\nu\sigma\lambda}\right)
+\end{equation}
+and then diagonalize it to get the new orbital coefficients $C_{\mu i}$ and the single particle energies $\varepsilon_i$:
+\begin{equation}
+    \varepsilon_i = h_{ii} + \sum_{a}^{N_\text{elec}/2} \left(2J_{ia} - K_{ia}\right)
+\end{equation}
+ We also construct a new density matrix using the new orbital coefficients:
+\begin{equation}
+    P_{\mu\nu} = 2\sum_{i=1}^{N_\text{elec}/2} C_{\mu i} C_{\nu i}
+\end{equation}
+ The convergence criteria are for the change in energy and the norm of the density matrix between iterations to be minimal.
+The formular for the restricted Hartree-Fock energy is not just the sum of the single particle energies, because this double counts the electron-electron repulsion. The correct formula is:
+\begin{equation}
+    E_{HF} = \frac{1}{2} \sum_{i=1}^{N_\text{elec}/2} \left(\varepsilon_i + h_{ii}\right)
+\end{equation}
+By plugging in the single protocol energy, we see that this simplifies to:
+\begin{equation}
+    E_{HF} = \frac{1}{2} \sum_{i=1}^{N_\text{elec}/2} \left(h_{ii} + \sum_{a}^{N_\text{elec}/2} \left(2J_{ia} - K_{ia}\right) + h_{ii}\right) = \sum_{i=1}^{N_\text{elec}/2} h_{ii} + \frac{1}{2} \sum_{i=1}^{N_\text{elec}/2} \sum_{a}^{N_\text{elec}/2} \left(2J_{ia} - K_{ia}\right)
+\end{equation}
+which is NOT the same as:
+\begin{equation}
+    \sum_{i=1}^{N_\text{elec}/2} \varepsilon_i = \sum_{i=1}^{N_\text{elec}/2} h_{ii} + \sum_{i=1}^{N_\text{elec}/2} \sum_{a}^{N_\text{elec}/2} \left(2J_{ia} - K_{ia}\right) 
+\end{equation}
+we can also equivalently write the energy as:
 \begin{equation}
     E_0=\frac{1}{2} \sum_\mu \sum_v P_{v u}\left(H_{\mu \nu}^{\mathrm{core}}+F_{\mu \nu}\right)
 \end{equation}

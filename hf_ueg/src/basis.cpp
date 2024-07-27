@@ -91,54 +91,36 @@ arma::mat Basis_3D::kinetic_integrals() {
 
 // Function to generate the Coulomb integral matrix
 arma::mat Basis_3D::coulombIntegrals() {
-    int pair_product = n_pw * n_pw;
-    // Initialize a partially flattened 4-tensor of 0s to store the matrix elements
-    arma::mat coulomb_integral(pair_product, pair_product, arma::fill::zeros);
+    arma::mat coulomb_integral(n_pw, n_pw, arma::fill::zeros);
 
     // Make the necessary loops
     for (int i = 0; i < n_pw; i++) {
         for (int j = 0; j < n_pw; j++) {
-            for (int k = 0; k < n_pw; k++) {
-                for (int l = 0; l < n_pw; l++) {
-                    // Get momentum vectors
-                    auto [qxi, qyi, qzi] = plane_waves[i];
-                    auto [qxj, qyj, qzj] = plane_waves[j];
-                    auto [qxk, qyk, qzk] = plane_waves[k];
-                    auto [qxl, qyl, qzl] = plane_waves[l];
+            // Get momentum vectors
+            auto [qxi, qyi, qzi] = plane_waves[i];
+            auto [qxj, qyj, qzj] = plane_waves[j];
 
-                    // Compute the momentum transfer vectors
-                    int qx1 = qxi - qxj;
-                    int qy1 = qyi - qyj;
-                    int qz1 = qzi - qzj;
+            // Compute the momentum transfer vectors
+            int qx1 = qxi - qxj;
+            int qy1 = qyi - qyj;
+            int qz1 = qzi - qzj;
 
-                    int qx2 = qxk - qxl;
-                    int qy2 = qyk - qyl;
-                    int qz2 = qzk - qzl;
-                    
-                    // Check if the momentum transfer differences are equal
-                    if (qx1 == qx2 && qy1 == qy2 && qz1 == qz2) {
-                        // Calculate the squared momentum transfer
-                        double q_squared = pow(sqrt(qx1 * qx1 + qy1 * qy1 + qz1 * qz1), 2);
+            // Calculate the squared momentum transfer
+            double q_squared = pow(sqrt(qx1 * qx1 + qy1 * qy1 + qz1 * qz1), 2);
 
-                        if (q_squared != 0) {
-                            // Compute the Coulomb integral
-                            // L = \left( \frac{4\pi N}{3} \right)^{1/3} r_s
-                            double length = pow(4.0 * M_PI * n_elec / 3.0, 1.0 / 3.0) * rs;
-                            // double factor = ((4 * M_PI) / pow(length, 3));
-                            // = \frac{32\pi^4}{L^6}
-                            double factor = 32 * pow(M_PI, 4) / pow(length, 6);
-                            double term = factor / q_squared;
+            if (q_squared != 0) {
+                // Compute the Coulomb integral
+                // L = \left( \frac{4\pi N}{3} \right)^{1/3} r_s
+                double length = pow(4.0 * M_PI * n_elec / 3.0, 1.0 / 3.0) * rs;
+                double factor = ((4 * M_PI) / pow(length, 3));
+                double term = factor / q_squared;
 
 
-                            // Assign the computed Coulomb integral to the matrix elements
-                            coulomb_integral(i * n_pw + j, k * n_pw + l) = term;
-                        }
-                    }
-                }
+                // Assign the computed Coulomb integral to the matrix elements
+                coulomb_integral(i, j) = term;
             }
         }
     }
-
     return coulomb_integral;
 }
 

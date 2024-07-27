@@ -32,13 +32,7 @@ arma::mat Scf::make_fock_matrix(arma::mat &density_matrix) {
     // Calculate the Coulomb contribution
     for (int i = 0; i < npws; ++i) {
         for (int j = 0; j < npws; ++j) {
-            double sum = 0.0;
-            for (int k = 0; k < npws; ++k) {
-                for (int l = 0; l < npws; ++l) {
-                    sum += density_matrix(k, l) * coulomb(i * npws + k, l * npws + j);
-                }
-            }
-            exchange_matrix(i, j) = sum;
+            exchange_matrix(i, j) = density_matrix(i, j) * coulomb(i, j);
         }
     }
 
