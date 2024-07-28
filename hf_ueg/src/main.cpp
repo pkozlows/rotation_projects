@@ -13,13 +13,13 @@ void run_scf(Basis &basis, const int nelec, ofstream &results_file) {
     int n_pw = basis.n_plane_waves();
     cout << "Number of plane waves: " << n_pw << endl;
     results_file << "Number of plane waves: " << n_pw << endl;
-    assert(n_pw > 12 && n_pw < 250);
+    // assert(n_pw > 12 && n_pw < 250);
 
     arma::mat kinetic_integral_matrix = basis.kinetic_integrals();
-    arma::mat coulomb_integral_matrix = basis.coulombIntegrals();
+    arma::mat exchange_integral_matrix = basis.exchangeIntegrals();
 
     // Generate the SCF object
-    Scf rhf(kinetic_integral_matrix, coulomb_integral_matrix, nelec, n_pw);
+    Scf rhf(kinetic_integral_matrix, exchange_integral_matrix, nelec, n_pw);
 
     // Generate initial guess for the density matrix
     arma::mat guess = rhf.generate_initial_guess();
@@ -42,27 +42,34 @@ void run_scf(Basis &basis, const int nelec, ofstream &results_file) {
         cout << "Energy: " << rhf_energy / nelec << " at iteration: " << iteration << endl;
 
         arma::mat new_density = rhf.generate_density_matrix(eigenvectors);
-        print_matrix(new_density);
-        if (arma::approx_equal(new_density, guess, "absdiff", density_threshold) &&
-            abs(rhf_energy - previous_energy) < energy_threshold) {
-                cout << "The converged RHF energy is: " << rhf_energy / nelec << " after " << iteration << " iterations." << endl;
-                break;
+        //find the trace of the new density matrix
+        double trace = arma::trace(new_density);
+        cout << "Trace of the density matrix: " << trace << endl;
+        // print_matrix(new_density);
+        // Calculate the Frobenius norm of the difference between the new and old density matrices
+        double density_diff = arma::norm(new_density - guess, "fro");
+        cout << "Density difference: " << density_diff << endl;
+
+        // Check for convergence
+        if (density_diff < density_threshold && std::abs(rhf_energy - previous_energy) < energy_threshold) {
+            std::cout << "The converged RHF energy is: " << rhf_energy / nelec << " after " << iteration << " iterations." << std::endl;
+            break;
         }
 
         previous_energy = rhf_energy;
-        guess = new_density;
+        guess = (new_density + guess) / 2;
         iteration++;
 
     } while (iteration < 100);
 }
 
 int main() {
-    const double ke_cutoff = 3;
-    const double rs = 2;
+    const double ke_cutoff = 1;
+    const double rs = 4;
     // Open a file to save the results
     ofstream results_file("hf_ueg/plt/scf_ld.txt");
 
-    for (int nelec = 8; nelec <= 8; nelec += 2) {
+    for (int nelec = 14; nelec <= 14; nelec += 2) {
         cout << "Number of electrons: " << nelec << endl;
         results_file << "Number of electrons: " << nelec << endl;
         const int n_elec = nelec;
