@@ -9,7 +9,7 @@ using namespace std;
 
 Scf::Scf(const arma::mat& kinetic_integral, const arma::mat& coulombIntegral, const int& nelec, const int& npws) {
     kinetic = kinetic_integral;
-    coulomb = coulombIntegral;
+    exchange = coulombIntegral;
     this->nelec = nelec;
     this->n_pw = npws;
 }
@@ -18,6 +18,9 @@ Scf::Scf(const arma::mat& kinetic_integral, const arma::mat& coulombIntegral, co
 arma::mat Scf::generate_initial_guess() {
     // Initialize the density matrix to zeros
     arma::mat density_matrix(n_pw, n_pw, arma::fill::zeros);
+    for (int i = 0; i < nelec / 2; ++i) {
+        density_matrix(i, i) = 2.0;
+    }
 
     return density_matrix;
         
@@ -32,12 +35,18 @@ arma::mat Scf::make_fock_matrix(arma::mat &density_matrix) {
     // Calculate the Coulomb contribution
     for (int i = 0; i < npws; ++i) {
         for (int j = 0; j < npws; ++j) {
-            exchange_matrix(i, j) = density_matrix(i, j) * coulomb(i, j);
+            double sum = 0.0;
+            for (int k = 0; k < npws; ++k) {
+                for (int l = 0; l < npws; ++l) {
+                    sum += density_matrix(k, l) * exchange(i, j);
+
+                }
+            }
+            exchange_matrix(i, j) = sum;
         }
     }
-
     // Since we are just considering the exchange contribution, we can subtract out 0.5 * exchange_matrix
-    arma::mat fock_matrix = hcore;
+    arma::mat fock_matrix = hcore - 0.5 * exchange_matrix;
     return fock_matrix;
 }
 

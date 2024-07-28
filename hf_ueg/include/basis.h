@@ -13,7 +13,7 @@ public:
     virtual ~Basis() = default;
     virtual int n_plane_waves() = 0;
     virtual arma::mat kinetic_integrals() = 0;
-    virtual arma::mat coulombIntegrals() = 0;
+    virtual arma::mat exchangeIntegrals() = 0;
 
 protected:
     double ke_cutoff;
@@ -27,7 +27,7 @@ public:
     Basis_3D(const double &ke_cutoff, const double &rs, const int &n_elec);
     int n_plane_waves() override;
     arma::mat kinetic_integrals() override;
-    arma::mat coulombIntegrals() override;
+    arma::mat exchangeIntegrals() override;
 
 protected:
     vector<tuple<int, int, int>> plane_waves;
@@ -39,7 +39,7 @@ public:
     Basis_2D(const double &ke_cutoff, const double &rs, const int &n_elec);
     int n_plane_waves() override;
     arma::mat kinetic_integrals() override;
-    arma::mat coulombIntegrals() override;
+    arma::mat exchangeIntegrals() override;
 
 protected:
     vector<tuple<int, int>> plane_waves;

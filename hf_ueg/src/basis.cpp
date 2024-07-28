@@ -85,8 +85,8 @@ arma::mat Basis_3D::kinetic_integrals() {
 }
 
 // Function to generate the Coulomb integral matrix
-arma::mat Basis_3D::coulombIntegrals() {
-    arma::mat coulomb_integral(n_pw, n_pw, arma::fill::zeros);
+arma::mat Basis_3D::exchangeIntegrals() {
+    arma::mat exchange(n_pw, n_pw, arma::fill::zeros);
 
     // Make the necessary loops
     for (int i = 0; i < n_pw; i++) {
@@ -112,11 +112,11 @@ arma::mat Basis_3D::coulombIntegrals() {
 
 
                 // Assign the computed Coulomb integral to the matrix elements
-                coulomb_integral(i, j) = term;
+                exchange(i, j) = term;
             }
         }
     }
-    return coulomb_integral;
+    return exchange;
 }
 
 // 2D Basis implementation
@@ -172,7 +172,7 @@ int Basis_2D::n_plane_waves() {
     return n_pw;
 }
 
-arma::mat Basis_2D::coulombIntegrals() {
+arma::mat Basis_2D::exchangeIntegrals() {
     int pair_product = n_pw * n_pw;
     // Initialize a partially flattened 4-tensor of 0s to store the matrix elements
     arma::mat coulomb_integral(pair_product, pair_product, arma::fill::zeros);

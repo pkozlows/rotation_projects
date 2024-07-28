@@ -1,5 +1,4 @@
-Number of electrons: 8
-Number of plane waves: 81
-0 0
-1 0.356077
-2 0.356077
+Number of electrons: 14
+Number of plane waves: 179
+0 0.0700567
+1 -0.149937

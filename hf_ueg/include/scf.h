@@ -18,7 +18,7 @@ class Scf {
     arma::mat generate_density_matrix(arma::mat &eigenvectors);
     private:
         arma::mat kinetic;
-        arma::mat coulomb;
+        arma::mat exchange;
         int nelec;
         int n_pw;
 };
