@@ -22,7 +22,8 @@ void run_scf(Basis &basis, const int nelec, ofstream &results_file) {
     Scf rhf(kinetic_integral_matrix, exchange_integral_matrix, nelec, n_pw);
 
     // Generate initial guess for the density matrix
-    arma::mat guess = rhf.generate_initial_guess();
+    arma::mat guess = rhf.zeros_guess();
+    // arma::mat guess = rhf.identity_guess();
     
     double previous_energy = 0.0;
     double rhf_energy = 0.0;

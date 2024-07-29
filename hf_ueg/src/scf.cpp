@@ -15,12 +15,21 @@ Scf::Scf(const arma::mat& kinetic_integral, const arma::mat& coulombIntegral, co
 }
 
 // generate a rhf initial guess for the density matrix
-arma::mat Scf::generate_initial_guess() {
+arma::mat Scf::identity_guess() {
     // Initialize the density matrix to zeros
     arma::mat density_matrix(n_pw, n_pw, arma::fill::zeros);
     for (int i = 0; i < nelec / 2; ++i) {
         density_matrix(i, i) = 2.0;
     }
+
+    return density_matrix;
+        
+}
+
+arma::mat Scf::zeros_guess() {
+    // Initialize the density matrix to zeros
+    arma::mat density_matrix(n_pw, n_pw, arma::fill::zeros);
+
 
     return density_matrix;
         
@@ -36,12 +45,10 @@ arma::mat Scf::make_fock_matrix(arma::mat &density_matrix) {
     for (int i = 0; i < npws; ++i) {
         for (int j = 0; j < npws; ++j) {
             double sum = 0.0;
-            for (int k = 0; k < npws; ++k) {
-                for (int l = 0; l < npws; ++l) {
-                    sum += density_matrix(k, l) * exchange(i, j);
-
+            for (int Q = 0; Q < npws; ++Q) {
+                    sum += density_matrix(abs(i-Q), abs(j-Q)) * abs(exchange(Q, i));
                 }
-            }
+
             exchange_matrix(i, j) = sum;
         }
     }
