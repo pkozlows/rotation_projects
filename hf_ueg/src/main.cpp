@@ -10,7 +10,7 @@
 using namespace std;
 
 void run_scf(Basis &basis, const int nelec, ofstream &results_file) {
-    int n_pw = basis.n_plane_waves();
+    auto [n_pw, sorted_plane_waves] = basis.n_plane_waves(); // Unpack the pair
     cout << "Number of plane waves: " << n_pw << endl;
     results_file << "Number of plane waves: " << n_pw << endl;
     // assert(n_pw > 12 && n_pw < 250);
@@ -19,7 +19,7 @@ void run_scf(Basis &basis, const int nelec, ofstream &results_file) {
     arma::mat exchange_integral_matrix = basis.exchangeIntegrals();
 
     // Generate the SCF object
-    Scf rhf(kinetic_integral_matrix, exchange_integral_matrix, nelec, n_pw);
+    Scf rhf(kinetic_integral_matrix, exchange_integral_matrix, nelec, n_pw, sorted_plane_waves);
 
     // Generate initial guess for the density matrix
     arma::mat guess = rhf.zeros_guess();
