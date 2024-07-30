@@ -9,17 +9,18 @@
 
 using namespace std;
 
-void run_scf(Basis &basis, const int nelec, ofstream &results_file) {
-    auto [n_pw, sorted_plane_waves] = basis.n_plane_waves(); // Unpack the pair
+void run_scf(Basis_3D &basis, const int nelec, ofstream &results_file) {
+    auto [n_pw, sorted_plane_waves] = basis.generate_plan_waves(); // Unpack the pair
     cout << "Number of plane waves: " << n_pw << endl;
     results_file << "Number of plane waves: " << n_pw << endl;
-    // assert(n_pw > 12 && n_pw < 250);
+
+    arma::mat lookup_table = basis.make_lookup_table();
 
     arma::mat kinetic_integral_matrix = basis.kinetic_integrals();
-    arma::mat exchange_integral_matrix = basis.exchangeIntegrals();
+    arma::vec exchange_integral_matrix = basis.exchangeIntegrals();
 
     // Generate the SCF object
-    Scf rhf(kinetic_integral_matrix, exchange_integral_matrix, nelec, n_pw, sorted_plane_waves);
+    Scf rhf(kinetic_integral_matrix, exchange_integral_matrix, nelec, n_pw, sorted_plane_waves, lookup_table);
 
     // Generate initial guess for the density matrix
     arma::mat guess = rhf.zeros_guess();
@@ -38,6 +39,12 @@ void run_scf(Basis &basis, const int nelec, ofstream &results_file) {
         arma::eig_sym(eigenvalues, eigenvectors, fock_matrix);
         
         rhf_energy = rhf.compute_rhf_energy(guess, fock_matrix);
+        // print out sum of eigenvalues of occupied orbitals
+        double sum = 0;
+        for (int i = 0; i < nelec / 2; i++) {
+            sum += eigenvalues(i);
+        }
+        cout << "Sum of eigenvalues of occupied orbitals: " << sum << endl;
 
         results_file << iteration << " " << rhf_energy / nelec << endl;
         cout << "Energy: " << rhf_energy / nelec << " at iteration: " << iteration << endl;

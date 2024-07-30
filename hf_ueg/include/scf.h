@@ -7,7 +7,7 @@ using namespace std;
 class Scf {
     public:
     //make a constructor to take in the kinetic and clump matrices
-    Scf(const arma::mat &kinetic, const arma::mat &coulomb, const int &nelec, const int &npws, const vector<tuple<int, int, int>> &plane_waves);
+    Scf(const arma::mat &kinetic, const arma::vec &coulomb, const int &nelec, const int &npws, const vector<tuple<int, int, int>> &plane_waves, const arma::mat &lookup_table);
     //make a function that generates an initial guess for the density matrix
     arma::mat identity_guess();
     arma::mat zeros_guess();
@@ -19,7 +19,8 @@ class Scf {
     arma::mat generate_density_matrix(arma::mat &eigenvectors);
     private:
         arma::mat kinetic;
-        arma::mat exchange;
+        arma::vec exchange;
+        arma::mat lookup_table;
         int nelec;
         int n_pw;
         vector<tuple<int, int, int>> plane_waves;
