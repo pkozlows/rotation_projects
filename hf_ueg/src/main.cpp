@@ -39,12 +39,7 @@ void run_scf(Basis_3D &basis, const int nelec, ofstream &results_file) {
         arma::eig_sym(eigenvalues, eigenvectors, fock_matrix);
         
         rhf_energy = rhf.compute_rhf_energy(guess, fock_matrix);
-        // print out sum of eigenvalues of occupied orbitals
-        double sum = 0;
-        for (int i = 0; i < nelec / 2; i++) {
-            sum += eigenvalues(i);
-        }
-        cout << "Sum of eigenvalues of occupied orbitals: " << sum << endl;
+
 
         results_file << iteration << " " << rhf_energy / nelec << endl;
         cout << "Energy: " << rhf_energy / nelec << " at iteration: " << iteration << endl;

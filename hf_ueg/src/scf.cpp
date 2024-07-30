@@ -80,16 +80,24 @@ arma::mat Scf::make_fock_matrix(arma::mat &density_matrix) {
 }
 
 
-//based on the some of the eigenvalues, compute total RHF energy 
+// //based on the some of the eigenvalues, compute total RHF energy 
+// double Scf::compute_rhf_energy_old(arma::mat &density_matrix, arma::mat &fock_matrix) {
+//     double energy = 0.0;
+//     size_t npws = density_matrix.n_rows;
+//     for (size_t i = 0; i < npws; ++i) {
+//         for (size_t j = 0; j < npws; ++j) {
+//             energy += density_matrix(j, i) * (kinetic(i, j) + fock_matrix(i, j));
+//         }
+//     }
+//     return 0.5 * energy;
+// }
+
 double Scf::compute_rhf_energy(arma::mat &density_matrix, arma::mat &fock_matrix) {
     double energy = 0.0;
-    size_t npws = density_matrix.n_rows;
-    for (size_t i = 0; i < npws; ++i) {
-        for (size_t j = 0; j < npws; ++j) {
-            energy += density_matrix(j, i) * (kinetic(i, j) + fock_matrix(i, j));
-        }
+    for (size_t i = 0; i < nelec / 2; ++i) {
+        energy += fock_matrix(i, i) + kinetic(i, i);
+    return energy;
     }
-    return 0.5 * energy;
 }
 
 // Construct the density matrix
