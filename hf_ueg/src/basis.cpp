@@ -68,8 +68,8 @@ pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
 
 arma::mat Basis_3D::make_lookup_table() {
     arma::mat lookup_table(n_pw, n_pw);
-    for (size_t i = 0; i < n_pw; i++) {
-        for (size_t j = 0; j < n_pw; j++) {
+    for (int i = 0; i < n_pw; i++) {
+        for (int j = 0; j < n_pw; j++) {
             auto [ix, iy, iz] = plane_waves[i];
             auto [jx, jy, jz] = plane_waves[j];
             //compute the momentum transfer vector between these waves
@@ -111,7 +111,7 @@ arma::vec Basis_3D::exchangeIntegrals() {
     double length = pow(4.0 * M_PI * n_elec / 3.0, 1.0 / 3.0) * rs;
     double factor = ((4 * M_PI) / pow(length, 3));
 
-    for (size_t Q = 0; Q < n_pw; Q++) {
+    for (int Q = 0; Q < n_pw; Q++) {
         auto [qx, qy, qz] = plane_waves[Q];
         double q2 = qx * qx + qy * qy + qz * qz;
         if (q2 > 1e-8) {
@@ -124,4 +124,15 @@ arma::vec Basis_3D::exchangeIntegrals() {
     return exchange;
 }
 
+double Basis_3D::compute_madeleung_constant() {
+    // E_M \approx-2.837297 \times\left(\frac{3}{4 \pi}\right)^{1 / 3} N^{2 / 3} r_\pi^{-1}
+    double madeleung_constant = -2.837297 * pow(3.0 / (4.0 * M_PI), 1.0 / 3.0) * pow(n_elec, 2.0 / 3.0) * pow(rs, -1.0);
+    return madeleung_constant;
+}
 
+double Basis_3D::compute_fermi_energy() {
+    // # Express the electron density n in terms of the Wigner-Seitz radius r_s: n_expr = 3 / (4 * sp.pi * r_s**3)
+    double n = 3.0 / (4.0 * M_PI * pow(rs, 3));
+    double fermi_energy = 0.5 * pow(3.0 * M_PI * M_PI * n, 2.0 / 3.0);
+    return fermi_energy;
+}

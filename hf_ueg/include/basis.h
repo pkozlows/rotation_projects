@@ -14,6 +14,9 @@ public:
     arma::mat make_lookup_table();
     arma::mat kinetic_integrals();
     arma::vec exchangeIntegrals();
+    double compute_madeleung_constant();
+    double compute_fermi_energy();
+    
 
 private:
     double ke_cutoff;
