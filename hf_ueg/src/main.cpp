@@ -29,11 +29,10 @@ void run_scf(Basis_3D &basis, const int nelec, ofstream &results_file, double rs
     double madeleung_constant = basis.compute_madeleung_constant();
 
     // Generate the SCF object
-    Scf rhf(kinetic_integral_matrix, exchange_integral_matrix, nelec, n_pw, sorted_plane_waves, lookup_table, madeleung_constant);
+    RHF rhf(kinetic_integral_matrix, exchange_integral_matrix, nelec, n_pw, sorted_plane_waves, lookup_table, madeleung_constant);
 
     // Generate initial guess for the density matrix
-    arma::mat guess = rhf.zeros_guess();
-    // arma::mat guess = rhf.identity_guess();
+    arma::mat guess = rhf.guess_rhf("identity");
     
     double previous_energy = 0.0;
     double rhf_energy = 0.0;
@@ -50,7 +49,7 @@ void run_scf(Basis_3D &basis, const int nelec, ofstream &results_file, double rs
         arma::mat new_density = rhf.generate_density_matrix(eigenvectors);
         guess = (new_density + guess) / 2;
         
-        rhf_energy = rhf.compute_rhf_energy(guess, fock_matrix);
+        rhf_energy = rhf.compute_energy(guess, fock_matrix);
 
         results_file << iteration << " " << rhf_energy / nelec << endl;
         cout << "Energy: " << rhf_energy << " at iteration: " << iteration << endl;
