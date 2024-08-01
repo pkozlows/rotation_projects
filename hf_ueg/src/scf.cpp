@@ -127,7 +127,7 @@ pair<arma::mat, arma::mat> UHF::generate_uhf_density_matrix(const pair<arma::mat
     int n_occ = nelec / 2;
     arma::mat occupied_alpha_eigenvectors = eigenvectors.first.cols(0, n_occ - 1);
     arma::mat occupied_beta_eigenvectors = eigenvectors.second.cols(0, n_occ - 1);
-    arma::mat alpha_density_matrix = 2 * (occupied_alpha_eigenvectors * occupied_alpha_eigenvectors.t());
-    arma::mat beta_density_matrix = 2 * (occupied_beta_eigenvectors * occupied_beta_eigenvectors.t());
+    arma::mat alpha_density_matrix = (occupied_alpha_eigenvectors * occupied_alpha_eigenvectors.t());
+    arma::mat beta_density_matrix = (occupied_beta_eigenvectors * occupied_beta_eigenvectors.t());
     return make_pair(alpha_density_matrix, beta_density_matrix);    
 }

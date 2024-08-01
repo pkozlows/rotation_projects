@@ -72,11 +72,13 @@ double run_scf(Basis_3D &basis, const int nelec, ofstream &results_file, double 
 
             pair<arma::mat, arma::mat> eigenvecs = make_pair(eigenvectors_alpha, eigenvectors_beta);
             pair<arma::mat, arma::mat> new_density = uhf.generate_uhf_density_matrix(eigenvecs);
-            //get the trace of both density matrices
-            double trace_alpha = arma::trace(new_density.first);
-            double trace_beta = arma::trace(new_density.second);
-            cout << "The trace of the alpha density matrix is: " << trace_alpha << endl;
-            cout << "The trace of the beta density matrix is: " << trace_beta << endl;
+
+            // //get the trace of both density matrices
+            // double trace_alpha = arma::trace(new_density.first);
+            // double trace_beta = arma::trace(new_density.second);
+            // cout << "The trace of the alpha density matrix is: " << trace_alpha << endl;
+            // cout << "The trace of the beta density matrix is: " << trace_beta << endl;
+
             uhf_guess = new_density;
 
             energy = uhf.compute_uhf_energy(new_density, fock_matrices);
@@ -114,7 +116,7 @@ int main() {
     }
 
     for (double rs = 4; rs <= 5.0; rs += 0.5) {
-        const double ke_cutoff = 10 / pow(rs, 2);
+        const double ke_cutoff = 12 / pow(rs, 2);
         cout << "Wigner-Seitz radius: " << rs << endl;
         results_file << "Wigner-Seitz radius: " << rs << endl;
         Basis_3D basis_3d(ke_cutoff, rs, nelec);
