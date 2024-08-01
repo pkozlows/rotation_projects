@@ -1,13 +1,3 @@
-Number of electrons: 14
 Wigner-Seitz radius: 4
-Number of plane waves: 81
-0 0.0639582
-1 0.0639582
 Wigner-Seitz radius: 4.5
-Number of plane waves: 81
-0 0.0510703
-1 0.0510703
 Wigner-Seitz radius: 5
-Number of plane waves: 81
-0 0.0417139
-1 0.0417139
