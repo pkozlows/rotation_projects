@@ -83,19 +83,19 @@ CMakeFiles/my_project.dir/src/basis.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/my_project.dir/src/basis.cpp.s"
 	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/patrykkozlowski/harvard/joonho/hf_ueg/src/basis.cpp -o CMakeFiles/my_project.dir/src/basis.cpp.s
 
-CMakeFiles/my_project.dir/src/main.cpp.o: CMakeFiles/my_project.dir/flags.make
-CMakeFiles/my_project.dir/src/main.cpp.o: /Users/patrykkozlowski/harvard/joonho/hf_ueg/src/main.cpp
-CMakeFiles/my_project.dir/src/main.cpp.o: CMakeFiles/my_project.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/patrykkozlowski/harvard/joonho/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/my_project.dir/src/main.cpp.o"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/my_project.dir/src/main.cpp.o -MF CMakeFiles/my_project.dir/src/main.cpp.o.d -o CMakeFiles/my_project.dir/src/main.cpp.o -c /Users/patrykkozlowski/harvard/joonho/hf_ueg/src/main.cpp
+CMakeFiles/my_project.dir/src/main_rhf.cpp.o: CMakeFiles/my_project.dir/flags.make
+CMakeFiles/my_project.dir/src/main_rhf.cpp.o: /Users/patrykkozlowski/harvard/joonho/hf_ueg/src/main_rhf.cpp
+CMakeFiles/my_project.dir/src/main_rhf.cpp.o: CMakeFiles/my_project.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/patrykkozlowski/harvard/joonho/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/my_project.dir/src/main_rhf.cpp.o"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/my_project.dir/src/main_rhf.cpp.o -MF CMakeFiles/my_project.dir/src/main_rhf.cpp.o.d -o CMakeFiles/my_project.dir/src/main_rhf.cpp.o -c /Users/patrykkozlowski/harvard/joonho/hf_ueg/src/main_rhf.cpp
 
-CMakeFiles/my_project.dir/src/main.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/my_project.dir/src/main.cpp.i"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/patrykkozlowski/harvard/joonho/hf_ueg/src/main.cpp > CMakeFiles/my_project.dir/src/main.cpp.i
+CMakeFiles/my_project.dir/src/main_rhf.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/my_project.dir/src/main_rhf.cpp.i"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/patrykkozlowski/harvard/joonho/hf_ueg/src/main_rhf.cpp > CMakeFiles/my_project.dir/src/main_rhf.cpp.i
 
-CMakeFiles/my_project.dir/src/main.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/my_project.dir/src/main.cpp.s"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/patrykkozlowski/harvard/joonho/hf_ueg/src/main.cpp -o CMakeFiles/my_project.dir/src/main.cpp.s
+CMakeFiles/my_project.dir/src/main_rhf.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/my_project.dir/src/main_rhf.cpp.s"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/patrykkozlowski/harvard/joonho/hf_ueg/src/main_rhf.cpp -o CMakeFiles/my_project.dir/src/main_rhf.cpp.s
 
 CMakeFiles/my_project.dir/src/matrix_utils.cpp.o: CMakeFiles/my_project.dir/flags.make
 CMakeFiles/my_project.dir/src/matrix_utils.cpp.o: /Users/patrykkozlowski/harvard/joonho/hf_ueg/src/matrix_utils.cpp
@@ -111,34 +111,34 @@ CMakeFiles/my_project.dir/src/matrix_utils.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/my_project.dir/src/matrix_utils.cpp.s"
 	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/patrykkozlowski/harvard/joonho/hf_ueg/src/matrix_utils.cpp -o CMakeFiles/my_project.dir/src/matrix_utils.cpp.s
 
-CMakeFiles/my_project.dir/src/scf.cpp.o: CMakeFiles/my_project.dir/flags.make
-CMakeFiles/my_project.dir/src/scf.cpp.o: /Users/patrykkozlowski/harvard/joonho/hf_ueg/src/scf.cpp
-CMakeFiles/my_project.dir/src/scf.cpp.o: CMakeFiles/my_project.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/patrykkozlowski/harvard/joonho/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/my_project.dir/src/scf.cpp.o"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/my_project.dir/src/scf.cpp.o -MF CMakeFiles/my_project.dir/src/scf.cpp.o.d -o CMakeFiles/my_project.dir/src/scf.cpp.o -c /Users/patrykkozlowski/harvard/joonho/hf_ueg/src/scf.cpp
+CMakeFiles/my_project.dir/src/rhf.cpp.o: CMakeFiles/my_project.dir/flags.make
+CMakeFiles/my_project.dir/src/rhf.cpp.o: /Users/patrykkozlowski/harvard/joonho/hf_ueg/src/rhf.cpp
+CMakeFiles/my_project.dir/src/rhf.cpp.o: CMakeFiles/my_project.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/patrykkozlowski/harvard/joonho/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/my_project.dir/src/rhf.cpp.o"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/my_project.dir/src/rhf.cpp.o -MF CMakeFiles/my_project.dir/src/rhf.cpp.o.d -o CMakeFiles/my_project.dir/src/rhf.cpp.o -c /Users/patrykkozlowski/harvard/joonho/hf_ueg/src/rhf.cpp
 
-CMakeFiles/my_project.dir/src/scf.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/my_project.dir/src/scf.cpp.i"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/patrykkozlowski/harvard/joonho/hf_ueg/src/scf.cpp > CMakeFiles/my_project.dir/src/scf.cpp.i
+CMakeFiles/my_project.dir/src/rhf.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/my_project.dir/src/rhf.cpp.i"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/patrykkozlowski/harvard/joonho/hf_ueg/src/rhf.cpp > CMakeFiles/my_project.dir/src/rhf.cpp.i
 
-CMakeFiles/my_project.dir/src/scf.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/my_project.dir/src/scf.cpp.s"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/patrykkozlowski/harvard/joonho/hf_ueg/src/scf.cpp -o CMakeFiles/my_project.dir/src/scf.cpp.s
+CMakeFiles/my_project.dir/src/rhf.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/my_project.dir/src/rhf.cpp.s"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/patrykkozlowski/harvard/joonho/hf_ueg/src/rhf.cpp -o CMakeFiles/my_project.dir/src/rhf.cpp.s
 
 # Object files for target my_project
 my_project_OBJECTS = \
 "CMakeFiles/my_project.dir/src/basis.cpp.o" \
-"CMakeFiles/my_project.dir/src/main.cpp.o" \
+"CMakeFiles/my_project.dir/src/main_rhf.cpp.o" \
 "CMakeFiles/my_project.dir/src/matrix_utils.cpp.o" \
-"CMakeFiles/my_project.dir/src/scf.cpp.o"
+"CMakeFiles/my_project.dir/src/rhf.cpp.o"
 
 # External object files for target my_project
 my_project_EXTERNAL_OBJECTS =
 
 my_project: CMakeFiles/my_project.dir/src/basis.cpp.o
-my_project: CMakeFiles/my_project.dir/src/main.cpp.o
+my_project: CMakeFiles/my_project.dir/src/main_rhf.cpp.o
 my_project: CMakeFiles/my_project.dir/src/matrix_utils.cpp.o
-my_project: CMakeFiles/my_project.dir/src/scf.cpp.o
+my_project: CMakeFiles/my_project.dir/src/rhf.cpp.o
 my_project: CMakeFiles/my_project.dir/build.make
 my_project: /opt/homebrew/lib/libarmadillo.dylib
 my_project: CMakeFiles/my_project.dir/link.txt

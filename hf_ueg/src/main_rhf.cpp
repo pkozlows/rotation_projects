@@ -5,14 +5,14 @@
 #include <cassert>
 #include <map>
 #include "basis.h"
-#include "scf.h"
+#include "rhf.h"
 #include "matrix_utils.h"
 
 using namespace std;
 
 void run_scf(Basis_3D &basis, const int nelec, ofstream &results_file, double rs) {
     auto [n_pw, sorted_plane_waves] = basis.generate_plan_waves(); // Unpack the pair
-    // cout << "Number of plane waves: " << n_pw << endl;
+    cout << "Number of plane waves: " << n_pw << endl;
     results_file << "Number of plane waves: " << n_pw << endl;
 
     arma::mat lookup_table = basis.make_lookup_table();
@@ -29,7 +29,7 @@ void run_scf(Basis_3D &basis, const int nelec, ofstream &results_file, double rs
     double madeleung_constant = basis.compute_madeleung_constant();
 
     // Generate the SCF object
-    Scf rhf(kinetic_integral_matrix, exchange_integral_matrix, nelec, n_pw, sorted_plane_waves, lookup_table, madeleung_constant);
+    RHF rhf(kinetic_integral_matrix, exchange_integral_matrix, nelec, n_pw, sorted_plane_waves, lookup_table, madeleung_constant);
 
     // Generate initial guess for the density matrix
     arma::mat guess = rhf.zeros_guess();
@@ -43,25 +43,29 @@ void run_scf(Basis_3D &basis, const int nelec, ofstream &results_file, double rs
 
     do {
         arma::mat fock_matrix = rhf.make_fock_matrix(guess);
+        cout << "The fock is:" << endl;
+        print_matrix(fock_matrix);
         arma::vec eigenvalues;
         arma::mat eigenvectors;
         arma::eig_sym(eigenvalues, eigenvectors, fock_matrix);
         // cout << "Eigenvalues: " << eigenvalues << endl;
         arma::mat new_density = rhf.generate_density_matrix(eigenvectors);
-        guess = (new_density + guess) / 2;
+        guess = new_density;
+        cout << "The density is:" << endl;
+        print_matrix(guess);
         
-        rhf_energy = rhf.compute_rhf_energy(guess, fock_matrix);
+        rhf_energy = rhf.compute_energy(guess, fock_matrix);
 
         results_file << iteration << " " << rhf_energy / nelec << endl;
         cout << "Energy: " << rhf_energy << " at iteration: " << iteration << endl;
 
         // Calculate the Frobenius norm of the difference between the new and old density matrices
         double density_diff = arma::norm(new_density - guess, "fro");
-        // cout << "Density difference: " << density_diff << endl;
+        cout << "Density difference: " << density_diff << endl;
 
         // Check for convergence
         if (density_diff < density_threshold && std::abs(rhf_energy - previous_energy) < energy_threshold) {
-            // std::cout << "The converged RHF energy is: " << rhf_energy << " after " << iteration << " iterations." << std::endl;
+            std::cout << "The converged RHF energy is: " << rhf_energy << " after " << iteration << " iterations." << std::endl;
             break;
         }
 
@@ -85,26 +89,25 @@ void run_scf(Basis_3D &basis, const int nelec, ofstream &results_file, double rs
     // Compare the computed RHF energy with the table value for the given r_s
     if (rs_to_rhf.find(rs) != rs_to_rhf.end()) {
         double table_rhf_energy = rs_to_rhf[rs];
-        std::cout << "r_s: " << rs << ", Table RHF: " << table_rhf_energy << ", Computed RHF: " << rhf_energy << std::endl;
+        std::cout << "Given r_s: " << rs << ", Table RHF energy: " << table_rhf_energy << ", Computed RHF energy: " << rhf_energy << std::endl;
     } else {
         std::cout << "r_s value not found in the table." << std::endl;
     }
 }
 
 int main() {
+    const double ke_cutoff = 1;
+    const double rs = 2; // Change this value to compare with other r_s values
     // Open a file to save the results
     ofstream results_file("hf_ueg/plt/scf_id.txt");
 
-    int nelec = 14;
+    size_t nelec = 4;
     cout << "Number of electrons: " << nelec << endl;
     results_file << "Number of electrons: " << nelec << endl;
-    for (double rs = 4; rs <= 5.0; rs += 0.5) {
-        const double ke_cutoff = 10/pow(rs, 2);
-        // cout << "Wigner-Seitz radius: " << rs << endl;
-        results_file << "Wigner-Seitz radius: " << rs << endl;
-        Basis_3D basis_3d(ke_cutoff, rs, nelec);
-        run_scf(basis_3d, nelec, results_file, rs);
-    }
+    cout << "Wigner-Seitz radius: " << rs << endl;
+    results_file << "Wigner-Seitz radius: " << rs << endl;
+    Basis_3D basis_3d(ke_cutoff, rs, nelec);
+    run_scf(basis_3d, nelec, results_file, rs);
 
     results_file.close();
 
