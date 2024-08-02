@@ -12,59 +12,67 @@ Basis_3D::Basis_3D(const double &ke_cutoff, const double &rs, const int &n_elec)
 
 
 // Function to determine the number of plane waves within the kinetic energy cutoff and compute the kinetic energy integral matrix
-pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
+#include <armadillo>
+#include <vector>
+#include <tuple>
+#include <cmath>
+#include <algorithm>
+
+void generate_plane_waves(
+    double ke_factor,
+    double ke_cutoff,
+    arma::Mat<int>& plane_waves, 
+    arma::vec& kinetic_energies
+) {
     int n_pw = 0;
-    vector<pair<tuple<int, int, int>, double>> plane_wave_kinetic_pairs; // Pair of plane wave and kinetic energy
+    
+    // Determine the maximum value for nx, ny, nz
+    int max_n = static_cast<int>(std::ceil(std::sqrt(ke_cutoff / ke_factor)));
+    
+    // Vectors to store plane waves and their corresponding kinetic energies
+    std::vector<arma::Col<int>> pw_vectors;
+    std::vector<double> pw_energies;
 
-    // Define the numerical factor used to compute the kinetic energy
-    double ke_factor = 7.5963 * pow(n_elec, -2.0 / 3.0) * pow(rs, -2.0);
-
-    // Define the maximum value that nx, ny, nz can take
-    int max_n = static_cast<int>(floor(sqrt(ke_cutoff / ke_factor)));
-
-    for (int nx = -max_n; nx <= max_n; nx++) {
-        int nx2 = nx * nx;
-        double ke_nx = ke_factor * nx2;
-
-
-        int max_ny = static_cast<int>(floor(sqrt((ke_cutoff - ke_nx) / ke_factor)));
-        for (int ny = -max_ny; ny <= max_ny; ny++) {
-            int ny2 = ny * ny;
-            double ke_nx_ny = ke_nx + ke_factor * ny2;
+    // Loop over possible values of nx, ny, nz
+    for (int nx = -max_n; nx <= max_n; ++nx) {
+        double ke_nx = ke_factor * nx * nx;
+        int max_ny = static_cast<int>(std::ceil(std::sqrt((ke_cutoff - ke_nx) / ke_factor)));
+        for (int ny = -max_ny; ny <= max_ny; ++ny) {
+            double ke_nx_ny = ke_nx + ke_factor * ny * ny;
             if (ke_nx_ny > ke_cutoff) continue;
-
-            int max_nz = static_cast<int>(floor(sqrt((ke_cutoff - ke_nx_ny) / ke_factor)));
-            for (int nz = -max_nz; nz <= max_nz; nz++) {
-                int nz2 = nz * nz;
-                double ke = ke_nx_ny + ke_factor * nz2;
+            int max_nz = static_cast<int>(std::ceil(std::sqrt((ke_cutoff - ke_nx_ny) / ke_factor)));
+            for (int nz = -max_nz; nz <= max_nz; ++nz) {
+                double ke = ke_nx_ny + ke_factor * nz * nz;
                 if (ke <= ke_cutoff) {
-                    plane_wave_kinetic_pairs.emplace_back(make_tuple(nx, ny, nz), ke);
+                    arma::Col<int> pw(3);
+                    pw(0) = nx;
+                    pw(1) = ny;
+                    pw(2) = nz;
+                    pw_vectors.push_back(pw);
+                    pw_energies.push_back(ke);
                     n_pw++;
                 }
             }
         }
     }
 
-    // Sort the plane waves based on kinetic energy
-    sort(plane_wave_kinetic_pairs.begin(), plane_wave_kinetic_pairs.end(),
-              [](const pair<tuple<int, int, int>, double>& a,
-                 const pair<tuple<int, int, int>, double>& b) {
-                  return a.second < b.second;
-              });
+    // Convert vectors to Armadillo types
+    plane_waves.set_size(3, n_pw);
+    kinetic_energies.set_size(n_pw);
 
-    // Separate the sorted plane waves and kinetic energies
-    vector<tuple<int, int, int>> sorted_plane_waves;
-    vector<double> sorted_kinetic_energies;
-    for (const auto& pair : plane_wave_kinetic_pairs) {
-        sorted_plane_waves.push_back(pair.first);
-        sorted_kinetic_energies.push_back(pair.second);
+    // Copy data into Armadillo matrices
+    #pragma omp parallel for
+    for (size_t k = 0; k < n_pw; ++k) {
+        plane_waves.col(k) = pw_vectors[k];
+        kinetic_energies(k) = pw_energies[k];
     }
-    this->n_pw = n_pw;
-    this->kinetic_energies = sorted_kinetic_energies;
-    this->plane_waves = sorted_plane_waves;
 
-    return {n_pw, sorted_plane_waves};
+    // Sort based on kinetic energy
+    arma::uvec indices = arma::stable_sort_index(kinetic_energies, "ascend");
+    kinetic_energies = kinetic_energies(indices);
+    plane_waves = plane_waves.cols(indices);
 }
+1
 
 arma::mat Basis_3D::make_lookup_table() {
     arma::mat lookup_table(n_pw, n_pw);
@@ -124,15 +132,14 @@ arma::vec Basis_3D::exchangeIntegrals() {
     return exchange;
 }
 
-double Basis_3D::compute_madeleung_constant() {
+ double Basis_3D::compute_madeleung_constant() {
     // E_M \approx-2.837297 \times\left(\frac{3}{4 \pi}\right)^{1 / 3} N^{2 / 3} r_\pi^{-1}
     double madeleung_constant = -2.837297 * pow(3.0 / (4.0 * M_PI), 1.0 / 3.0) * pow(n_elec, 2.0 / 3.0) * pow(rs, -1.0);
     return madeleung_constant;
 }
 
 double Basis_3D::compute_fermi_energy() {
-    // # Express the electron density n in terms of the Wigner-Seitz radius r_s: n_expr = 3 / (4 * sp.pi * r_s**3)
-    double n = 3.0 / (4.0 * M_PI * pow(rs, 3));
-    double fermi_energy = 0.5 * pow(3.0 * M_PI * M_PI * n, 2.0 / 3.0);
+    // compute energy in terms of the Wigner-Seitz radius r_s: 1.84158427617643/r_s**2
+    double fermi_energy = 1.84158427617643 / pow(rs, 2.0);
     return fermi_energy;
 }

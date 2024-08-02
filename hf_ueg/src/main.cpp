@@ -18,10 +18,25 @@ double run_scf(Basis_3D &basis, const int nelec, ofstream &results_file, double 
 
     arma::mat lookup_table = basis.make_lookup_table();
     arma::mat kinetic_integral_matrix = basis.kinetic_integrals();
-    // double homo_e = kinetic_integral_matrix.diag()(nelec / 2);
-    // cout << "The HOMO energy is: " << homo_e << endl;
-    // double fermi_energy = basis.compute_fermi_energy();
-    // cout << "The Fermi energy is: " << fermi_energy << endl;
+
+    // Define the range of indices
+    int start_index = nelec / 2 - 1;
+    int end_index = nelec / 2 + 1;
+
+    // Make sure the indices are within the bounds of the diagonal
+    int diag_size = kinetic_integral_matrix.n_cols;
+    start_index = std::max(start_index, 0);
+    end_index = std::min(end_index, diag_size - 1);
+
+    // Extract values from the diagonal in the specified range
+    for (int i = start_index; i <= end_index; ++i) {
+        double energy = kinetic_integral_matrix.diag()(i);
+        std::cout << "Energy at index " << i << " is: " << energy << std::endl;
+    }
+
+    double fermi_energy = basis.compute_fermi_energy();
+    std::cout << "The Fermi energy is: " << fermi_energy << std::endl;
+
     arma::vec exchange_integral_matrix = basis.exchangeIntegrals();
     double madeleung_constant = basis.compute_madeleung_constant();
 
@@ -131,6 +146,8 @@ int main() {
             double table_uhf_energy_m179 = rs_to_uhf_m179[rs];
             cout << "r_s: " << rs << endl;
             cout << "Table RHF: " << table_rhf_energy << ", Computed RHF: " << rhf_energy << endl;
+            //compute the difference between these two quantities
+            cout << "Difference: " << abs(table_rhf_energy - rhf_energy) << endl;
             cout << "Table UHF: " << table_uhf_energy_m179 << ", Computed UHF: " << uhf_energy << endl;
         } else {
             cout << "r_s value not found in the table." << endl;

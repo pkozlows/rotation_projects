@@ -131,10 +131,11 @@ Here we might have the similar thing with the Fourier transform of $1/|\mathbf{r
 
 \section{Kinetic energy}
 
-We started by specifying a kinetic energy cutoff. In atomic units, the kinetic energy of a plane wave is given by:
+In standard units, the kinetic anergy of a plane wave is given by
 \begin{equation}
-    E_{\text{kinetic}} = \frac{\vb{k}^2}{2}
+    E_{\text{kinetic}} = \frac{\hbar^2 \vb{k}^2}{2m}
 \end{equation}
+
 Now if we try to evaluate $\vb{k}^2$ for a plane wave with wave vector $\vb{k} = (k_x, k_y, k_z)$, we get:
 \begin{equation}
     k^2 = k_x^2 + k_y^2 + k_z^2 =  \left(\frac{2\pi}{L}\right)^2 \left(n_x^2 + n_y^2 + n_z^2\right)
@@ -147,14 +148,40 @@ where \( L \) is the length of the box and \( n_x, n_y, n_z \) are integers. In 
 \begin{equation}
     L = \left( \frac{4\pi N}{3} \right)^{1/3} r_s
 \end{equation}
-Alternatively, this is:
-\begin{equation}
-    L = \left( \frac{4\pi }{3} \right)^{1/3} N r_s
-\end{equation}
-if we approximate the volume as that of a sphere with a radius of the number of electrons times \( r_s \).
 Plugging this into the expression for $E_{\text{kinetic}}$ we get:
 \begin{equation}
-    E_{\text{kinetic}} = \frac{1}{2}\left(\frac{2 \pi}{\left( \frac{4\pi N}{3} \right)^{1/3} r_s}\right)^2 \left(n_x^2 + n_y^2 + n_z^2\right) = 7.5963 \cdot N^{-2/3} r_s^{-2} \left(n_x^2 + n_y^2 + n_z^2\right)
+    E_{\text{kinetic}} = \frac{\hbar^2}{2m} \left(\frac{2\pi}{\left( \frac{4\pi N}{3} \right)^{1/3} r_s}\right)^2 \left(n_x^2 + n_y^2 + n_z^2\right) = N^{-2/3} r_s^{-2} \left(n_x^2 + n_y^2 + n_z^2\right) \times \frac{\hbar^2}{2m} \left(\frac{2\pi}{\left( \frac{4\pi}{3} \right)^{1/3}}\right)^2
+\end{equation}
+We know that the firmly wave factor for a 3 dimensional system is given by
+\begin{equation}
+    k_F = \frac{\alpha }{r_s}
+\end{equation}
+where we find that $\alpha = (\frac{9\pi }{4})^{1/3}$.With this, we can find the forme anergy
+\begin{equation}
+    E_F = \frac{k_F^2}{2} = \frac{\alpha^2}{2r_s^2} = \left(\frac{9\pi}{4}\right)^{2/3} \frac{1}{2r_s^2} = 
+\end{equation}
+Now let us consider what the fermi energy would be for this system. The energy of the wave vector for a free electron is given by:
+\begin{equation}
+    E_F = \frac{\hbar^2 \textbf{k}_F^2}{2m}
+\end{equation}
+which in natural units is just:
+\begin{equation}
+    E = \frac{\textbf{k}_F^2}{2}
+\end{equation}
+Now consider the volume of a sphere in k-space of radius $k$:
+\begin{equation}
+    V = \frac{4\pi k^3}{3}
+\end{equation}
+In order to find the density of states of the system, we need to differentiate this with respect to energy.
+%  Plugging in $k^3 = (2E)^{3/2}$, we get:
+% \begin{equation}
+%     g(E) = \frac{dV}{dE} = \frac{d}{dE} \left(\frac{4\pi (2E)^{3/2}}{3}\right) = \frac{4\pi}{3} 2^{3/2} \frac{3}{2} E^{1/2} = 2^{5/2} \pi E^{1/2}
+% \end{equation}
+At several temperature, we know that the states are filled up until the Fermi energy, so we can perform the integral to get the number of states
+% . So, the number of states up to the Fermi energy is given by:
+\begin{equation}
+    N = \int_0^{E_F} g(E) dE = \frac{8 \sqrt{2} \pi E_{F}^{\frac{3}{2}}}{3}
+%= 2^{5/2} \pi \int_0^{E_F} E^{1/2} dE = \frac{2^{7/2} \pi}{3} E_F^{3/2}
 \end{equation}
 \subsection{2D case}
 As before the kinetic energy of a plain wave is given by the same thing:
