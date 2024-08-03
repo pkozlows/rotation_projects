@@ -1,3 +1,1 @@
 Wigner-Seitz radius: 4
-Wigner-Seitz radius: 4.5
-Wigner-Seitz radius: 5

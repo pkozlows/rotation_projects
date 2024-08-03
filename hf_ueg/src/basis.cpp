@@ -39,11 +39,16 @@ pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
                 double ke = ke_nx_ny + ke_factor * nz2;
                 if (ke <= ke_cutoff) {
                     plane_wave_kinetic_pairs.emplace_back(make_tuple(nx, ny, nz), ke);
+                    //find out this information
+                    cout << "nx: " << nx << " ny: " << ny << " nz: " << nz << " ke: " << ke << endl;
                     n_pw++;
                 }
             }
         }
     }
+    cout << "---------------------" << endl;
+    cout << "Number before sorting: " << n_pw << endl;
+    cout << "---------------------" << endl;
 
     // Sort the plane waves based on kinetic energy
     sort(plane_wave_kinetic_pairs.begin(), plane_wave_kinetic_pairs.end(),
@@ -51,6 +56,17 @@ pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
                  const pair<tuple<int, int, int>, double>& b) {
                   return a.second < b.second;
               });
+    int n = 0;
+    //find out this same information as before
+    for (const auto& pair : plane_wave_kinetic_pairs) {
+        auto [nx, ny, nz] = pair.first;
+        double ke = pair.second;
+        cout << "nx: " << nx << " ny: " << ny << " nz: " << nz << " ke: " << ke << endl;
+        n++;
+    }
+    cout << "---------------------" << endl;
+    cout << "Number after sorting: " << n << endl;
+
 
     // Separate the sorted plane waves and kinetic energies
     vector<tuple<int, int, int>> sorted_plane_waves;
