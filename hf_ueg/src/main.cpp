@@ -18,10 +18,10 @@ double run_scf(Basis_3D &basis, const int nelec, ofstream &results_file, double 
 
     arma::mat lookup_table = basis.make_lookup_table();
     arma::mat kinetic_integral_matrix = basis.kinetic_integrals();
-    // double homo_e = kinetic_integral_matrix.diag()(nelec / 2);
-    // cout << "The HOMO energy is: " << homo_e << endl;
-    // double fermi_energy = basis.compute_fermi_energy();
-    // cout << "The Fermi energy is: " << fermi_energy << endl;
+    double homo_e = kinetic_integral_matrix.diag()(nelec / 2);
+    cout << "The HOMO energy is: " << homo_e << endl;
+    double fermi_energy = basis.compute_fermi_energy();
+    cout << "The Fermi energy is: " << fermi_energy << endl;
     arma::vec exchange_integral_matrix = basis.exchangeIntegrals();
     double madeleung_constant = basis.compute_madeleung_constant();
 
@@ -115,15 +115,16 @@ int main() {
         rs_to_uhf_m179[rs_values[i]] = uhf_values_m179[i];
     }
 
-    for (double rs = 4; rs <= 4.0; rs += 0.5) {
-        const double ke_cutoff = 10 / pow(rs, 2);
+    for (double rs = 4; rs <= 5.0; rs += 0.5) {
+        const double ke_cutoff = 15 / pow(rs, 2);
         cout << "Wigner-Seitz radius: " << rs << endl;
         results_file << "Wigner-Seitz radius: " << rs << endl;
         Basis_3D basis_3d(ke_cutoff, rs, nelec);
 
         // Run both RHF and UHF
         double rhf_energy = run_scf(basis_3d, nelec, results_file, rs, true);
-        // double uhf_energy = run_scf(basis_3d, nelec, results_file, rs, false);
+        cout << "Starting unrestricted "  << endl;
+        double uhf_energy = run_scf(basis_3d, nelec, results_file, rs, false);
 
         // Output comparison
         if (rs_to_rhf.find(rs) != rs_to_rhf.end()) {
@@ -131,7 +132,7 @@ int main() {
             double table_uhf_energy_m179 = rs_to_uhf_m179[rs];
             cout << "r_s: " << rs << endl;
             cout << "Table RHF: " << table_rhf_energy << ", Computed RHF: " << rhf_energy << endl;
-            // cout << "Table UHF: " << table_uhf_energy_m179 << ", Computed UHF: " << uhf_energy << endl;
+            cout << "Table UHF: " << table_uhf_energy_m179 << ", Computed UHF: " << uhf_energy << endl;
         } else {
             cout << "r_s value not found in the table." << endl;
         }

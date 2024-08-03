@@ -17,20 +17,26 @@ pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
     vector<pair<tuple<int, int, int>, double>> plane_wave_kinetic_pairs; // Pair of plane wave and kinetic energy
 
     // Define the numerical factor used to compute the kinetic energy
-    double ke_factor = 7.5963 * pow(n_elec, -2.0 / 3.0) * pow(rs, -2.0);
+    double ke_factor = 7.59633120576 * pow(n_elec, -2.0 / 3.0) * pow(rs, -2.0);
+    // cout << "ke_factor: " << ke_factor << endl;
 
     // Define the maximum value that nx, ny, nz can take
     int max_n = static_cast<int>(floor(sqrt(ke_cutoff / ke_factor)));
+    // cout << "Max n: " << max_n << endl;
+    // cout << "ke_cutoff: " << ke_cutoff << endl;
 
     for (int nx = -max_n; nx <= max_n; nx++) {
         int nx2 = nx * nx;
         double ke_nx = ke_factor * nx2;
+        // cout << "ke_nx: " << ke_nx << endl;
+
 
 
         int max_ny = static_cast<int>(floor(sqrt((ke_cutoff - ke_nx) / ke_factor)));
         for (int ny = -max_ny; ny <= max_ny; ny++) {
             int ny2 = ny * ny;
             double ke_nx_ny = ke_nx + ke_factor * ny2;
+            // cout << "ke_nx_ny: " << ke_nx_ny << endl;
             if (ke_nx_ny > ke_cutoff) continue;
 
             int max_nz = static_cast<int>(floor(sqrt((ke_cutoff - ke_nx_ny) / ke_factor)));
@@ -40,15 +46,15 @@ pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
                 if (ke <= ke_cutoff) {
                     plane_wave_kinetic_pairs.emplace_back(make_tuple(nx, ny, nz), ke);
                     //find out this information
-                    cout << "nx: " << nx << " ny: " << ny << " nz: " << nz << " ke: " << ke << endl;
+                    // cout << "nx: " << nx << " ny: " << ny << " nz: " << nz << " ke: " << ke << endl;
                     n_pw++;
                 }
             }
         }
     }
-    cout << "---------------------" << endl;
-    cout << "Number before sorting: " << n_pw << endl;
-    cout << "---------------------" << endl;
+    // cout << "---------------------" << endl;
+    // cout << "Number before sorting: " << n_pw << endl;
+    // cout << "---------------------" << endl;
 
     // Sort the plane waves based on kinetic energy
     sort(plane_wave_kinetic_pairs.begin(), plane_wave_kinetic_pairs.end(),
@@ -62,10 +68,9 @@ pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
         auto [nx, ny, nz] = pair.first;
         double ke = pair.second;
         cout << "nx: " << nx << " ny: " << ny << " nz: " << nz << " ke: " << ke << endl;
-        n++;
     }
-    cout << "---------------------" << endl;
-    cout << "Number after sorting: " << n << endl;
+    // cout << "---------------------" << endl;
+    // cout << "Number after sorting: " << n << endl;
 
 
     // Separate the sorted plane waves and kinetic energies
