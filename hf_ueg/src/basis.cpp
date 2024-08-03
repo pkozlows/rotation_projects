@@ -6,8 +6,8 @@
 using namespace std;
 
 // Base class constructor
-Basis_3D::Basis_3D(const double &ke_cutoff, const double &rs, const int &n_elec)
-    : ke_cutoff(ke_cutoff), rs(rs), n_elec(n_elec) {
+Basis_3D::Basis_3D(const double &ke_cutoff, const double &rs, const int &n_elec, const double &constant)
+    : ke_cutoff(ke_cutoff), rs(rs), n_elec(n_elec), constant(constant) {
 }
 
 
@@ -17,7 +17,7 @@ pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
     vector<pair<tuple<int, int, int>, double>> plane_wave_kinetic_pairs; // Pair of plane wave and kinetic energy
 
     // Define the numerical factor used to compute the kinetic energy
-    double ke_factor = 7.59633120576 * pow(n_elec, -2.0 / 3.0) * pow(rs, -2.0);
+    double ke_factor = constant * pow(n_elec, -2.0 / 3.0) * pow(rs, -2.0);
     // cout << "ke_factor: " << ke_factor << endl;
 
     // Define the maximum value that nx, ny, nz can take
@@ -62,15 +62,6 @@ pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
                  const pair<tuple<int, int, int>, double>& b) {
                   return a.second < b.second;
               });
-    int n = 0;
-    //find out this same information as before
-    for (const auto& pair : plane_wave_kinetic_pairs) {
-        auto [nx, ny, nz] = pair.first;
-        double ke = pair.second;
-        cout << "nx: " << nx << " ny: " << ny << " nz: " << nz << " ke: " << ke << endl;
-    }
-    // cout << "---------------------" << endl;
-    // cout << "Number after sorting: " << n << endl;
 
 
     // Separate the sorted plane waves and kinetic energies
@@ -154,6 +145,6 @@ double Basis_3D::compute_madeleung_constant() {
 double Basis_3D::compute_fermi_energy() {
     // # Express the electron density n in terms of the Wigner-Seitz radius r_s: n_expr = 3 / (4 * sp.pi * r_s**3)
     double n = 3.0 / (4.0 * M_PI * pow(rs, 3));
-    double fermi_energy = 0.5 * pow(3.0 * M_PI * M_PI * n, 2.0 / 3.0);
+    double fermi_energy = 0.5 * pow(3.0 * pow(M_PI, 2) * n, 2.0 / 3.0);
     return fermi_energy;
 }
