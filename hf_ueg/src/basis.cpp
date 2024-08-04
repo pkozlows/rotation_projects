@@ -6,9 +6,9 @@
 using namespace std;
 
 // Base class constructor
-Basis_3D::Basis_3D(const double &ke_cutoff, const double &rs, const int &n_elec, const double &constant)
-    : ke_cutoff(ke_cutoff), rs(rs), n_elec(n_elec), constant(constant) {
-}
+Basis_3D::Basis_3D(const double &ke_cutoff, const double &rs, const int &n_elec)
+    : ke_cutoff(ke_cutoff), rs(rs), n_elec(n_elec) {
+    }
 
 
 // Function to determine the number of plane waves within the kinetic energy cutoff and compute the kinetic energy integral matrix
@@ -17,7 +17,7 @@ pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
     vector<pair<tuple<int, int, int>, double>> plane_wave_kinetic_pairs; // Pair of plane wave and kinetic energy
 
     // Define the numerical factor used to compute the kinetic energy
-    double ke_factor = constant * pow(n_elec, -2.0 / 3.0) * pow(rs, -2.0);
+    double ke_factor = 7 * pow(n_elec, -2.0 / 3.0) * pow(rs, -2.0);
     // cout << "ke_factor: " << ke_factor << endl;
 
     // Define the maximum value that nx, ny, nz can take
