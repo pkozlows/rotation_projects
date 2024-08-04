@@ -11,9 +11,8 @@ using namespace std;
 // Base class
 class Scf {
 public:
-    Scf(const arma::mat &kinetic, const arma::vec &exchange, const int &nelec, const int &npws,
-        const vector<tuple<int, int, int>> &plane_waves, const arma::mat &lookup_table, 
-        const double &madeleung_constant);
+    Scf(const arma::mat &kinetic, const arma::vec &exchange, const int &nelec, const int &npws, const arma::Mat<int> &plane_waves, const arma::mat &lookup_table, const double &madeleung_constant)
+        : kinetic(kinetic), exchange(exchange), nelec(nelec), n_pw(npws), plane_waves(plane_waves), lookup_table(lookup_table), madeleung_constant(madeleung_constant) {}
 
     virtual ~Scf() {}
 
@@ -36,15 +35,13 @@ protected:
     double madeleung_constant;
     int nelec;
     int n_pw;
-    vector<tuple<int, int, int>> plane_waves;
+    arma::Mat<int> plane_waves;
 };
 
 // RHF class
 class RHF : public Scf {
 public:
-    RHF(const arma::mat &kinetic, const arma::vec &exchange, const int &nelec, const int &npws, 
-        const vector<tuple<int, int, int>> &plane_waves, const arma::mat &lookup_table, 
-        const double &madeleung_constant);
+    RHF(const arma::mat &kinetic, const arma::vec &exchange, const int &nelec, const int &npws, const arma::Mat<int> &plane_waves, const arma::mat &lookup_table, const double &madeleung_constant);
 
     arma::mat guess_rhf(const string &guess_type) override;
     arma::mat make_fock_matrix(const arma::mat &guess_density) override;
@@ -61,9 +58,7 @@ public:
 // UHF class
 class UHF : public Scf {
 public:
-    UHF(const arma::mat &kinetic, const arma::vec &exchange, const int &nelec, const int &npws, 
-        const vector<tuple<int, int, int>> &plane_waves, const arma::mat &lookup_table, 
-        const double &madeleung_constant);
+    UHF(const arma::mat &kinetic, const arma::vec &exchange, const int &nelec, const int &npws, const arma::Mat<int> &plane_waves, const arma::mat &lookup_table, const double &madeleung_constant);
 
     pair<arma::mat, arma::mat> guess_uhf() override;
     pair<arma::mat, arma::mat> make_uhf_fock_matrix(const pair<arma::mat, arma::mat> &guess_density) override;
@@ -77,7 +72,7 @@ public:
     arma::mat generate_density_matrix(const arma::mat &eigenvectors) override { return {}; }
 
 private:
-    arma::mat generate_exchange_matrix(const arma::mat &density, const vector<tuple<int, int, int>> &plane_waves, const arma::mat &lookup_table);
+    arma::mat generate_exchange_matrix(const arma::mat &guess_density, const arma::mat &lookup_table);
 };
 
 #endif // SCF_H

@@ -16,14 +16,14 @@ double run_scf(Basis_3D &basis, const int nelec, ofstream &results_file, double 
     // cout << "Number of plane waves: " << n_pw << endl;
     // results_file << "Number of plane waves: " << n_pw << endl;
 
-    arma::mat lookup_table = basis.make_lookup_table();
-    arma::mat kinetic_integral_matrix = basis.kinetic_integrals();
-    // double homo_e = kinetic_integral_matrix.diag()(nelec / 2);
-    // cout << "The HOMO energy is: " << homo_e << endl;
-    // double fermi_energy = basis.compute_fermi_energy();
-    // cout << "The Fermi energy is: " << fermi_energy << endl;
-    arma::vec exchange_integral_matrix = basis.exchangeIntegrals();
-    double madeleung_constant = basis.compute_madeleung_constant();
+    const arma::mat lookup_table = basis.make_lookup_table();
+    const arma::mat kinetic_integral_matrix = basis.kinetic_integrals();
+    double homo_e = kinetic_integral_matrix.diag()(nelec / 2);
+    cout << "The HOMO energy is: " << homo_e << endl;
+    double fermi_energy = basis.compute_fermi_energy();
+    cout << "The Fermi energy is: " << fermi_energy << endl;
+    const arma::vec exchange_integral_matrix = basis.exchangeIntegrals();
+    const double madeleung_constant = basis.compute_madeleung_constant();
 
     double previous_energy = 0.0;
     double energy = 0.0;

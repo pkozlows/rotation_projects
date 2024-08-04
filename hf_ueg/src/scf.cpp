@@ -2,16 +2,11 @@
 
 using namespace std;
 
-Scf::Scf(const arma::mat &kinetic, const arma::vec &exchange, const int &nelec, const int &npws, 
-         const vector<tuple<int, int, int>> &plane_waves, const arma::mat &lookup_table, 
-         const double &madeleung_constant)
-    : kinetic(kinetic), exchange(exchange), nelec(nelec), n_pw(npws), plane_waves(plane_waves), 
-      lookup_table(lookup_table), madeleung_constant(madeleung_constant) {}
+Scf::Scf(const arma::mat &kinetic, const arma::vec &exchange, const int &nelec, const int &npws, const arma::Mat<int> &plane_waves, const arma::mat &lookup_table, const double &madeleung_constant)
+    : kinetic(kinetic), exchange(exchange), nelec(nelec), n_pw(npws), plane_waves(plane_waves), lookup_table(lookup_table), madeleung_constant(madeleung_constant) {}
 
 // RHF class constructor
-RHF::RHF(const arma::mat &kinetic, const arma::vec &exchange, const int &nelec, const int &npws, 
-         const vector<tuple<int, int, int>> &plane_waves, const arma::mat &lookup_table, 
-         const double &madeleung_constant)
+RHF::RHF(const arma::mat &kinetic, const arma::vec &exchange, const int &nelec, const int &npws, const arma::Mat<int> &plane_waves, const arma::mat &lookup_table, const double &madeleung_constant)
     : Scf(kinetic, exchange, nelec, npws, plane_waves, lookup_table, madeleung_constant) {}
 
 arma::mat RHF::guess_rhf(const string &guess_type) {
@@ -66,9 +61,7 @@ arma::mat RHF::generate_density_matrix(const arma::mat &eigenvectors) {
 }
 
 // UHF class constructor
-UHF::UHF(const arma::mat &kinetic, const arma::vec &exchange, const int &nelec, const int &npws, 
-         const vector<tuple<int, int, int>> &plane_waves, const arma::mat &lookup_table, 
-         const double &madeleung_constant)
+UHF::UHF(const arma::mat &kinetic, const arma::vec &exchange, const int &nelec, const int &npws, const arma::Mat<int> &plane_waves, const arma::mat &lookup_table, const double &madeleung_constant)
     : Scf(kinetic, exchange, nelec, npws, plane_waves, lookup_table, madeleung_constant) {}
 
 pair<arma::mat, arma::mat> UHF::guess_uhf() {
@@ -86,13 +79,12 @@ pair<arma::mat, arma::mat> UHF::make_uhf_fock_matrix(const pair<arma::mat, arma:
     arma::mat hcore = kinetic;
 
     // Use the helper function for both alpha and beta spins
-    arma::mat alpha_exchange_matrix = generate_exchange_matrix(guess_density.first, plane_waves, lookup_table);
-    arma::mat beta_exchange_matrix = generate_exchange_matrix(guess_density.second, plane_waves, lookup_table);
-
+    arma::mat alpha_exchange_matrix = generate_exchange_matrix(guess_density.first, lookup_table);
+    arma::mat beta_exchange_matrix = generate_exchange_matrix(guess_density.second, lookup_table);
     return make_pair(hcore - 0.5 * alpha_exchange_matrix, hcore - 0.5 * beta_exchange_matrix);
 }
 
-arma::mat UHF::generate_exchange_matrix(const arma::mat &density, const vector<tuple<int, int, int>> &plane_waves, const arma::mat &lookup_table) {
+arma::mat UHF::generate_exchange_matrix(const arma::mat &density, const arma::mat &lookup_table) {
     arma::mat exchange_matrix(n_pw, n_pw, arma::fill::zeros);
     for (int p = 0; p < n_pw; ++p) {
         for (int q = 0; q < n_pw; ++q) {

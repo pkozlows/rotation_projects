@@ -12,105 +12,99 @@ Basis_3D::Basis_3D(const double &ke_cutoff, const double &rs, const int &n_elec)
 
 
 // Function to determine the number of plane waves within the kinetic energy cutoff and compute the kinetic energy integral matrix
-pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
+std::pair<int, arma::Mat<int>> Basis_3D::generate_plan_waves() {
     int n_pw = 0;
-    vector<pair<tuple<int, int, int>, double>> plane_wave_kinetic_pairs; // Pair of plane wave and kinetic energy
+    arma::Mat<int> basis; // Changed to Mat<int> for integer storage
+    arma::vec eigval;
 
     // Define the numerical factor used to compute the kinetic energy
-    double ke_factor = 7.5963 * pow(n_elec, -2.0 / 3.0) * pow(rs, -2.0);
+    double L = rs * std::pow(4.0 * n_elec * M_PI / 3., 1. / 3.); // Box length
+    double ke_factor = pow(2 * M_PI / L, 2);
 
-    // Define the maximum value that nx, ny, nz can take
-    int max_n = static_cast<int>(floor(sqrt(ke_cutoff / ke_factor)));
+    int max_n = int(std::ceil(std::sqrt(2.0 * ke_cutoff)));
 
-    for (int nx = -max_n; nx <= max_n; nx++) {
-        int nx2 = nx * nx;
-        double ke_nx = ke_factor * nx2;
+    arma::vec ns = arma::linspace(-max_n, max_n, 2 * max_n + 1);
+    arma::vec es = 0.5 * ns % ns;
 
+    std::vector<arma::Col<int>> ksp;
+    std::vector<double> spval;
 
-        int max_ny = static_cast<int>(floor(sqrt((ke_cutoff - ke_nx) / ke_factor)));
-        for (int ny = -max_ny; ny <= max_ny; ny++) {
-            int ny2 = ny * ny;
-            double ke_nx_ny = ke_nx + ke_factor * ny2;
-            if (ke_nx_ny > ke_cutoff) continue;
-
-            int max_nz = static_cast<int>(floor(sqrt((ke_cutoff - ke_nx_ny) / ke_factor)));
-            for (int nz = -max_nz; nz <= max_nz; nz++) {
-                int nz2 = nz * nz;
-                double ke = ke_nx_ny + ke_factor * nz2;
-                if (ke <= ke_cutoff) {
-                    plane_wave_kinetic_pairs.emplace_back(make_tuple(nx, ny, nz), ke);
-                    //find out this information
-                    cout << "nx: " << nx << " ny: " << ny << " nz: " << nz << " ke: " << ke << endl;
-                    n_pw++;
+    for (size_t i = 0; i < 2 * max_n + 1; i++) {
+        for (size_t j = 0; j < 2 * max_n + 1; j++) {
+            for (size_t k = 0; k < 2 * max_n + 1; k++) {
+                double ek = es(i) + es(j) + es(k);
+                if (ek <= ke_cutoff) {
+                    arma::Col<int> ktmp(3);
+                    ktmp(0) = int(ns(i));
+                    ktmp(1) = int(ns(j));
+                    ktmp(2) = int(ns(k));
+                    ksp.push_back(ktmp);
+                    spval.push_back(ke_factor * ke_factor * ek);
+                    n_pw += 1;
                 }
             }
         }
     }
-    cout << "---------------------" << endl;
-    cout << "Number before sorting: " << n_pw << endl;
-    cout << "---------------------" << endl;
 
-    // Sort the plane waves based on kinetic energy
-    sort(plane_wave_kinetic_pairs.begin(), plane_wave_kinetic_pairs.end(),
-              [](const pair<tuple<int, int, int>, double>& a,
-                 const pair<tuple<int, int, int>, double>& b) {
-                  return a.second < b.second;
-              });
-    int n = 0;
-    //find out this same information as before
-    for (const auto& pair : plane_wave_kinetic_pairs) {
-        auto [nx, ny, nz] = pair.first;
-        double ke = pair.second;
-        cout << "nx: " << nx << " ny: " << ny << " nz: " << nz << " ke: " << ke << endl;
-        n++;
+    basis.set_size(3, n_pw);
+    eigval.set_size(n_pw);
+
+    for (size_t k = 0; k < n_pw; k++) {
+        basis.col(k) = ksp[k];
+        eigval(k) = spval[k];
     }
-    cout << "---------------------" << endl;
-    cout << "Number after sorting: " << n << endl;
 
+    arma::uvec indices = arma::sort_index(eigval);
+    eigval = eigval(indices);
+    basis = basis.cols(indices);
 
-    // Separate the sorted plane waves and kinetic energies
-    vector<tuple<int, int, int>> sorted_plane_waves;
-    vector<double> sorted_kinetic_energies;
-    for (const auto& pair : plane_wave_kinetic_pairs) {
-        sorted_plane_waves.push_back(pair.first);
-        sorted_kinetic_energies.push_back(pair.second);
-    }
     this->n_pw = n_pw;
-    this->kinetic_energies = sorted_kinetic_energies;
-    this->plane_waves = sorted_plane_waves;
+    this->kinetic_energies = eigval;
+    this->plane_waves = basis;
 
-    return {n_pw, sorted_plane_waves};
+    return {n_pw, basis};
 }
+
 
 arma::mat Basis_3D::make_lookup_table() {
     arma::mat lookup_table(n_pw, n_pw);
+
     for (int i = 0; i < n_pw; i++) {
         for (int j = 0; j < n_pw; j++) {
-            auto [ix, iy, iz] = plane_waves[i];
-            auto [jx, jy, jz] = plane_waves[j];
-            //compute the momentum transfer vector between these waves
-            int qx = jx - ix;
-            int qy = jy - iy;
-            int qz = jz - iz;
-            tuple<int, int, int> Q = make_tuple(qx, qy, qz);
-            //chuck it this new back door q is within the original list
-            // Find the index of the vector Q in the list of plane waves
-            auto it = std::find(plane_waves.begin(), plane_waves.end(), Q);
-            if (it != plane_waves.end()) {
-                // Get the index of the found vector Q
-                int q_index = std::distance(plane_waves.begin(), it);
+            // Get the indices of the plane waves
+            arma::Col<int> pi = plane_waves.col(i); // i-th plane wave as Col<int>
+            arma::Col<int> pj = plane_waves.col(j); // j-th plane wave as Col<int>
+            
+            // Compute the momentum transfer vector between these waves
+            int qx = pi(0) - pj(0);
+            int qy = pi(1) - pj(1);
+            int qz = pi(2) - pj(2);
+            arma::Col<int> Q = {qx, qy, qz}; // Define Q as Col<int>
 
-                // Set the lookup table entry to the index of Q
-                lookup_table(i, j) = q_index;
-            } else {
-                // If not found, set a default value (e.g., -1 or some other indicator)
-                lookup_table(i, j) = -1;
+            // Initialize a flag to indicate if Q was found
+            bool found = false;
+            int q_index = -1;
+
+            // Search for Q in the list of plane waves
+            for (size_t k = 0; k < plane_waves.n_cols; ++k) {
+                arma::Col<int> pw = plane_waves.col(k);
+                if (arma::all(pw == Q)) {
+                    q_index = static_cast<int>(k); // Convert size_t to int
+                    found = true;
+                    break;
+                }
             }
+
+            // Set the lookup table entry to the index of Q if found, otherwise -1
+            lookup_table(i, j) = found ? q_index : -1;
         }
     }
 
     return lookup_table;
 }
+
+
+
 
 // Function to generate the kinetic integral matrix
 arma::mat Basis_3D::kinetic_integrals() {
@@ -128,7 +122,11 @@ arma::vec Basis_3D::exchangeIntegrals() {
     double factor = ((4 * M_PI) / pow(length, 3));
 
     for (int Q = 0; Q < n_pw; Q++) {
-        auto [qx, qy, qz] = plane_waves[Q];
+        arma::Col<int> q = plane_waves.col(Q);
+        int qx = q(0);
+        int qy = q(1);
+        int qz = q(2);
+
         double q2 = qx * qx + qy * qy + qz * qz;
         if (q2 > 1e-8) {
             exchange[Q] = factor / q2;
@@ -149,6 +147,6 @@ double Basis_3D::compute_madeleung_constant() {
 double Basis_3D::compute_fermi_energy() {
     // # Express the electron density n in terms of the Wigner-Seitz radius r_s: n_expr = 3 / (4 * sp.pi * r_s**3)
     double n = 3.0 / (4.0 * M_PI * pow(rs, 3));
-    double fermi_energy = 0.5 * pow(3.0 * M_PI * M_PI * n, 2.0 / 3.0);
+    double fermi_energy = 0.5 * pow(3.0 * pow(M_PI, 2) * n, 2.0 / 3.0);
     return fermi_energy;
 }
