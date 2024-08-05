@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2023.3.16)  1 AUG 2024 13:22
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2023.3.16)  4 AUG 2024 10:47
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -301,27 +301,33 @@ Overfull \hbox (6.99788pt too wide) detected at line 158
  []
 
 [4] [5]
-Overfull \hbox (56.18777pt too wide) detected at line 216
+Overfull \hbox (56.18777pt too wide) detected at line 227
 [][]\OML/cmm/m/it/12 E[] \OT1/cmr/m/n/12 = [] [] [] = [] \OML/cmm/m/it/12 h[] \OT1/cmr/m/n/12 + [] [] [] []
  []
 
-[6] (./theory.aux)
-Package rerunfilecheck Info: File `theory.out' has not changed.
-(rerunfilecheck)             Checksum: 3BB3999228461762E2C3905F2ABADE54;583.
+[6] [7] (./theory.aux)
+
+Package rerunfilecheck Warning: File `theory.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `theory.out':
+(rerunfilecheck)             Before: 57B87A1E71DA4D695F389E7208719AA3;505
+(rerunfilecheck)             After:  09EF964028E8C5DF45F1DC12FDB7C184;616.
  ) 
 Here is how much of TeX's memory you used:
- 10894 strings out of 478268
- 166622 string characters out of 5846347
- 467711 words of memory out of 5000000
- 28936 multiletter control sequences out of 15000+600000
+ 10896 strings out of 478268
+ 166643 string characters out of 5846347
+ 467725 words of memory out of 5000000
+ 28935 multiletter control sequences out of 15000+600000
  476520 words of font info for 53 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  68i,10n,77p,485b,333s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2022/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb>
-Output written on theory.pdf (6 pages, 170079 bytes).
+Output written on theory.pdf (7 pages, 171882 bytes).
 PDF statistics:
- 173 PDF objects out of 1000 (max. 8388607)
- 137 compressed objects within 2 object streams
- 51 named destinations out of 1000 (max. 500000)
- 49 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 178 PDF objects out of 1000 (max. 8388607)
+ 141 compressed objects within 2 object streams
+ 54 named destinations out of 1000 (max. 500000)
+ 41 words of extra memory for PDF output out of 10000 (max. 10000000)
 

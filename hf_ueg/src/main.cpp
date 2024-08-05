@@ -18,7 +18,7 @@ double run_scf(Basis_3D &basis, const int nelec, ofstream &results_file, double 
 
     arma::mat lookup_table = basis.make_lookup_table();
     arma::mat kinetic_integral_matrix = basis.kinetic_integrals();
-    double homo_e = kinetic_integral_matrix.diag()(nelec / 2);
+    double homo_e = kinetic_integral_matrix.diag()(nelec / 2 - 1);
     cout << "The HOMO energy is: " << homo_e << endl;
     double fermi_energy = basis.compute_fermi_energy();
     cout << "The Fermi energy is: " << fermi_energy << endl;
@@ -116,7 +116,7 @@ int main() {
     }
 
     for (double rs = 4; rs <= 5.0; rs += 0.5) {
-        const double ke_cutoff = 15 / pow(rs, 2);
+        const double ke_cutoff = 50 / pow(rs, 2);
         cout << "Wigner-Seitz radius: " << rs << endl;
         results_file << "Wigner-Seitz radius: " << rs << endl;
         Basis_3D basis_3d(ke_cutoff, rs, nelec);
