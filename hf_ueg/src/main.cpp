@@ -7,6 +7,7 @@
 #include "basis.h"
 #include "scf.h"
 #include "matrix_utils.h"
+#include <cmath>
 
 using namespace std;
 
@@ -20,6 +21,8 @@ double run_scf(Basis_3D &basis, const int nelec, ofstream &results_file, double 
     arma::mat kinetic_integral_matrix = basis.kinetic_integrals();
     double homo_e = kinetic_integral_matrix.diag()(nelec / 2);
     cout << "The HOMO energy is: " << homo_e << endl;
+    double fermi_energy = basis.compute_fermi_energy();
+    cout << "The fermi energy is: " << fermi_energy << endl;    
     arma::vec exchange_integral_matrix = basis.exchangeIntegrals();
     double madeleung_constant = basis.compute_madeleung_constant();
 
@@ -99,7 +102,6 @@ int main() {
     ofstream results_file("hf_ueg/plt/scf_id.txt");
 
     int nelec = 14;
-    double rs = 5.0; // Set your desired value for rs
 
     // Reference RHF and UHF energies
     double rs_values[] = {0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0};
@@ -113,39 +115,28 @@ int main() {
         rs_to_rhf[rs_values[i]] = rhf_values[i];
         rs_to_uhf_m179[rs_values[i]] = uhf_values_m179[i];
     }
+    for (double rs = 3.5; rs <= 5.0; rs += 0.5) {
+        cout << "Starting rs = " << rs << endl;
+        results_file << "Starting rs = " << rs << endl;
 
-    // find out the carver spawning table rhf value
-    double carver_rhf = rs_to_rhf[rs];
-    cout << "The carver RHF value is: " << carver_rhf << endl;
-    cout << "___________________ " << endl;
-
-
-    // Test constants
-    vector<double> constants = {5.25, 5.375, 5.5, 7.596333120576};
-
-    for (double constant : constants) {
         const double ke_cutoff = 15 / pow(rs, 2);
-        cout << "Testing constant: " << constant << endl;
-        results_file << "Constant: " << constant << endl;
 
-        Basis_3D basis_3d(ke_cutoff, rs, nelec, constant);
-        double fermi_energy = basis_3d.compute_fermi_energy();
-        cout << "Computed Fermi energy: " << fermi_energy << endl;
+        Basis_3D basis_3d(ke_cutoff, rs, nelec);
 
-        // Run both RHF and UHF
         double rhf_energy = run_scf(basis_3d, nelec, results_file, rs, true);
-        // cout << "Starting unrestricted "  << endl;
-        // double uhf_energy = run_scf(basis_3d, nelec, results_file, rs, false);
+        double uhf_energy = run_scf(basis_3d, nelec, results_file, rs, false);
 
-        // Output results
         cout << "Computed RHF: " << rhf_energy << endl;
-        // cout << "Computed UHF: " << uhf_energy << endl;
+        cout << "Computed UHF: " << uhf_energy << endl;
 
         results_file << "Computed RHF: " << rhf_energy << endl;
-        // results_file << "Computed UHF: " << uhf_energy << endl;
-    }
+        results_file << "Computed UHF: " << uhf_energy << endl;
 
-    results_file.close();
+        cout << "Reference RHF: " << rs_to_rhf[rs] << endl;
+        cout << "Reference UHF: " << rs_to_uhf_m179[rs] << endl;
+
+        results_file << "Reference RHF: " << rs_to_rhf[rs] << endl;
+        results_file << "Reference UHF: " << rs_to_uhf_m179[rs] << endl;
+    }
     return 0;
 }
-

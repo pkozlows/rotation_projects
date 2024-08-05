@@ -1,8 +1,20 @@
-Constant: 5.25
-Computed RHF: 0.390111
-Constant: 5.375
-Computed RHF: 0.400441
-Constant: 5.5
-Computed RHF: 0.41077
-Constant: 7.59633
+Starting rs = 3.5
+Computed RHF: 1.1536
+Computed UHF: 1.21732
+Reference RHF: 0.684122
+Reference UHF: 0.684122
+Starting rs = 4
+Computed RHF: 0.895419
+Computed UHF: 0.938109
+Reference RHF: 0.458493
+Reference UHF: 0.456724
+Starting rs = 4.5
+Computed RHF: 0.714987
+Computed UHF: 0.74497
+Reference RHF: 0.31068
+Reference UHF: 0.301432
+Starting rs = 5
 Computed RHF: 0.583997
+Computed UHF: 0.605854
+Reference RHF: 0.209867
+Reference UHF: 0.191606
