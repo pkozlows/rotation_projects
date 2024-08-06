@@ -1,0 +1,105 @@
+Starting rs = 3
+Starting calculations for nelec = 100
+Difference between Fermi and HOMO energies: 0.00873684
+Starting calculations for nelec = 200
+Difference between Fermi and HOMO energies: 0.0174977
+Starting calculations for nelec = 500
+Difference between Fermi and HOMO energies: 0.0170449
+Starting calculations for nelec = 1000
+Difference between Fermi and HOMO energies: 0.00638878
+Starting calculations for nelec = 2000
+Difference between Fermi and HOMO energies: 0.00257068
+Starting calculations for nelec = 3000
+Difference between Fermi and HOMO energies: 0.00173514
+Starting calculations for nelec = 4000
+Difference between Fermi and HOMO energies: 0.000297126
+Starting calculations for nelec = 5000
+Difference between Fermi and HOMO energies: 0.00256086
+Starting calculations for nelec = 10000
+Difference between Fermi and HOMO energies: 0.000861281
+Starting calculations for nelec = 20000
+Difference between Fermi and HOMO energies: 0.000430195
+Starting rs = 3.5
+Starting calculations for nelec = 100
+Difference between Fermi and HOMO energies: 0.0064189
+Starting calculations for nelec = 200
+Difference between Fermi and HOMO energies: 0.0128554
+Starting calculations for nelec = 500
+Difference between Fermi and HOMO energies: 0.0125228
+Starting calculations for nelec = 1000
+Difference between Fermi and HOMO energies: 0.0046938
+Starting calculations for nelec = 2000
+Difference between Fermi and HOMO energies: 0.00188866
+Starting calculations for nelec = 3000
+Difference between Fermi and HOMO energies: 0.0012748
+Starting calculations for nelec = 4000
+Difference between Fermi and HOMO energies: 0.000218296
+Starting calculations for nelec = 5000
+Difference between Fermi and HOMO energies: 0.00188145
+Starting calculations for nelec = 10000
+Difference between Fermi and HOMO energies: 0.000632778
+Starting calculations for nelec = 20000
+Difference between Fermi and HOMO energies: 0.000316062
+Starting rs = 4
+Starting calculations for nelec = 100
+Difference between Fermi and HOMO energies: 0.00491447
+Starting calculations for nelec = 200
+Difference between Fermi and HOMO energies: 0.00984243
+Starting calculations for nelec = 500
+Difference between Fermi and HOMO energies: 0.00958778
+Starting calculations for nelec = 1000
+Difference between Fermi and HOMO energies: 0.00359369
+Starting calculations for nelec = 2000
+Difference between Fermi and HOMO energies: 0.001446
+Starting calculations for nelec = 3000
+Difference between Fermi and HOMO energies: 0.000976015
+Starting calculations for nelec = 4000
+Difference between Fermi and HOMO energies: 0.000167133
+Starting calculations for nelec = 5000
+Difference between Fermi and HOMO energies: 0.00144048
+Starting calculations for nelec = 10000
+Difference between Fermi and HOMO energies: 0.000484471
+Starting calculations for nelec = 20000
+Difference between Fermi and HOMO energies: 0.000241985
+Starting rs = 4.5
+Starting calculations for nelec = 100
+Difference between Fermi and HOMO energies: 0.00388304
+Starting calculations for nelec = 200
+Difference between Fermi and HOMO energies: 0.00777673
+Starting calculations for nelec = 500
+Difference between Fermi and HOMO energies: 0.00757553
+Starting calculations for nelec = 1000
+Difference between Fermi and HOMO energies: 0.00283946
+Starting calculations for nelec = 2000
+Difference between Fermi and HOMO energies: 0.00114252
+Starting calculations for nelec = 3000
+Difference between Fermi and HOMO energies: 0.000771173
+Starting calculations for nelec = 4000
+Difference between Fermi and HOMO energies: 0.000132056
+Starting calculations for nelec = 5000
+Difference between Fermi and HOMO energies: 0.00113816
+Starting calculations for nelec = 10000
+Difference between Fermi and HOMO energies: 0.000382792
+Starting calculations for nelec = 20000
+Difference between Fermi and HOMO energies: 0.000191198
+Starting rs = 5
+Starting calculations for nelec = 100
+Difference between Fermi and HOMO energies: 0.00314526
+Starting calculations for nelec = 200
+Difference between Fermi and HOMO energies: 0.00629915
+Starting calculations for nelec = 500
+Difference between Fermi and HOMO energies: 0.00613618
+Starting calculations for nelec = 1000
+Difference between Fermi and HOMO energies: 0.00229996
+Starting calculations for nelec = 2000
+Difference between Fermi and HOMO energies: 0.000925443
+Starting calculations for nelec = 3000
+Difference between Fermi and HOMO energies: 0.00062465
+Starting calculations for nelec = 4000
+Difference between Fermi and HOMO energies: 0.000106965
+Starting calculations for nelec = 5000
+Difference between Fermi and HOMO energies: 0.000921908
+Starting calculations for nelec = 10000
+Difference between Fermi and HOMO energies: 0.000310061
+Starting calculations for nelec = 20000
+Difference between Fermi and HOMO energies: 0.00015487

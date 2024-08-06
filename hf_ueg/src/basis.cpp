@@ -6,56 +6,57 @@
 using namespace std;
 
 // Base class constructor
-Basis_3D::Basis_3D(const double &ke_cutoff, const double &rs, const int &n_elec)
-    : ke_cutoff(ke_cutoff), rs(rs), n_elec(n_elec) {
+Basis_3D::Basis_3D(const double &rs, const int &n_elec) {
+    this->rs = rs;
+    this->n_elec = n_elec;
 }
 
 
 // Function to determine the number of plane waves within the kinetic energy cutoff and compute the kinetic energy integral matrix
-pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
+pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plane_waves() {
     int n_pw = 0;
-    vector<pair<tuple<int, int, int>, double>> plane_wave_kinetic_pairs; // Pair of plane wave and kinetic energy
+    vector<pair<tuple<int, int, int>, double>> plane_wave_kinetic_pairs;
 
     double length = pow(4.0 * M_PI * n_elec / 3.0, 1.0 / 3.0) * rs;
     double constant = pow(2 * M_PI / length, 2) / 2;
-    // cout << "ke_factor: " << ke_factor << endl;
 
-    // Define the maximum value that nx, ny, nz can take
-    int max_n = static_cast<int>(floor(sqrt(ke_cutoff / constant)));
-    // cout << "Max n: " << max_n << endl;
-    // cout << "ke_cutoff: " << ke_cutoff << endl;
+    // Estimate ke_cutoff to get approximately twice the number of electrons as plane waves
+    int target_n_pw = 2 * n_elec;
+    double ke_cutoff = 0.0;
 
-    for (int nx = -max_n; nx <= max_n; nx++) {
-        int nx2 = nx * nx;
-        double ke_nx = constant * nx2;
-        // cout << "ke_nx: " << ke_nx << endl;
+    while (n_pw < target_n_pw) {
+        ke_cutoff += 0.1; // Increment the cutoff value; adjust step size as needed
+        n_pw = 0; // Reset count
 
+        // Clear and recompute plane waves
+        plane_wave_kinetic_pairs.clear();
+        
+        int max_n = static_cast<int>(floor(sqrt(ke_cutoff / constant)));
+        for (int nx = -max_n; nx <= max_n; nx++) {
+            int nx2 = nx * nx;
+            double ke_nx = constant * nx2;
 
+            int max_ny = static_cast<int>(floor(sqrt((ke_cutoff - ke_nx) / constant)));
+            for (int ny = -max_ny; ny <= max_ny; ny++) {
+                int ny2 = ny * ny;
+                double ke_nx_ny = ke_nx + constant * ny2;
 
-        int max_ny = static_cast<int>(floor(sqrt((ke_cutoff - ke_nx) / constant)));
-        for (int ny = -max_ny; ny <= max_ny; ny++) {
-            int ny2 = ny * ny;
-            double ke_nx_ny = ke_nx + constant * ny2;
-            // cout << "ke_nx_ny: " << ke_nx_ny << endl;
-            if (ke_nx_ny > ke_cutoff) continue;
+                if (ke_nx_ny > ke_cutoff) continue;
 
-            int max_nz = static_cast<int>(floor(sqrt((ke_cutoff - ke_nx_ny) / constant)));
-            for (int nz = -max_nz; nz <= max_nz; nz++) {
-                int nz2 = nz * nz;
-                double ke = ke_nx_ny + constant * nz2;
-                if (ke <= ke_cutoff) {
-                    plane_wave_kinetic_pairs.emplace_back(make_tuple(nx, ny, nz), ke);
-                    //find out this information
-                    // cout << "nx: " << nx << " ny: " << ny << " nz: " << nz << " ke: " << ke << endl;
-                    n_pw++;
+                int max_nz = static_cast<int>(floor(sqrt((ke_cutoff - ke_nx_ny) / constant)));
+                for (int nz = -max_nz; nz <= max_nz; nz++) {
+                    int nz2 = nz * nz;
+                    double ke = ke_nx_ny + constant * nz2;
+                    if (ke <= ke_cutoff) {
+                        plane_wave_kinetic_pairs.emplace_back(make_tuple(nx, ny, nz), ke);
+                        n_pw++;
+                    }
                 }
             }
         }
     }
-    cout << "Number of plain waves " << n_pw << endl;
-    // cout << "---------------------" << endl;
-    // cout << "Number before sorting: " << n_pw << endl;
-    // cout << "---------------------" << endl;
+
+    cout << "Number of plane waves: " << n_pw << endl;
 
     // Sort the plane waves based on kinetic energy
     sort(plane_wave_kinetic_pairs.begin(), plane_wave_kinetic_pairs.end(),
@@ -64,8 +65,6 @@ pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
                   return a.second < b.second;
               });
 
-
-    // Separate the sorted plane waves and kinetic energies
     vector<tuple<int, int, int>> sorted_plane_waves;
     vector<double> sorted_kinetic_energies;
     for (const auto& pair : plane_wave_kinetic_pairs) {
@@ -78,6 +77,7 @@ pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
 
     return {n_pw, sorted_plane_waves};
 }
+
 
 arma::mat Basis_3D::make_lookup_table() {
     arma::mat lookup_table(n_pw, n_pw);

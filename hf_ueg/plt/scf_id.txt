@@ -1,16 +1,28 @@
 Starting rs = 3.5
+Number of plane waves: 13997
+Number of plane waves: 13997
 Computed RHF: 0
 Computed UHF: 0
 Reference RHF: 0.684122
 Reference UHF: 0.684122
 Starting rs = 4
+Number of plane waves: 21079
+Number of plane waves: 21079
 Computed RHF: 0
 Computed UHF: 0
 Reference RHF: 0.458493
 Reference UHF: 0.456724
 Starting rs = 4.5
+Number of plane waves: 30047
+Number of plane waves: 30047
 Computed RHF: 0
 Computed UHF: 0
 Reference RHF: 0.31068
 Reference UHF: 0.301432
 Starting rs = 5
+Number of plane waves: 41155
+Number of plane waves: 41155
+Computed RHF: 0
+Computed UHF: 0
+Reference RHF: 0.209867
+Reference UHF: 0.191606
