@@ -14,18 +14,12 @@ using namespace std;
 // Function to run SCF and return the converged energy
 double run_scf(Basis_3D &basis, const int nelec, ofstream &results_file, double rs, bool use_rhf) {
     auto [n_pw, sorted_plane_waves] = basis.generate_plan_waves();
-    cout << "Number of plane waves: " << n_pw << endl;
-    results_file << "Number of plane waves: " << n_pw << endl;
 
     arma::mat lookup_table = basis.make_lookup_table();
     arma::mat kinetic_integral_matrix = basis.kinetic_integrals();
     arma::vec exchange_integral_matrix = basis.exchangeIntegrals();
     double madeleung_constant = basis.compute_madeleung_constant();
 
-    double homo_e = kinetic_integral_matrix.diag()(nelec / 2);
-    cout << "The HOMO energy is: " << homo_e << endl;
-    double fermi_energy = basis.compute_fermi_energy();
-    cout << "The fermi energy is: " << fermi_energy << endl;
     cout << "-----------------------------------" << endl;
     double previous_energy = 0.0;
     double energy = 0.0;
@@ -49,7 +43,7 @@ double run_scf(Basis_3D &basis, const int nelec, ofstream &results_file, double 
             energy = rhf.compute_energy(rhf_guess, fock_matrix);
 
             if (abs(energy - previous_energy) < energy_threshold) {
-                cout << "It took this many iterations to converge RHF: " << iteration << endl;
+                // cout << "It took this many iterations to converge RHF: " << iteration << endl;
                 break;
             }
 
@@ -105,7 +99,7 @@ double run_scf(Basis_3D &basis, const int nelec, ofstream &results_file, double 
 int main() {
     ofstream results_file("hf_ueg/plt/scf_id.txt");
 
-    int nelec = 3000;
+    int nelec = 14;
 
     // Reference RHF and UHF energies
     double rs_values[] = {0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0};
@@ -125,9 +119,8 @@ int main() {
         results_file << "Starting rs = " << rs << endl;
         cout << "--------------------------------" << endl;
 
-        const double ke_cutoff = 1;
 
-        Basis_3D basis_3d(ke_cutoff, rs, nelec);
+        Basis_3D basis_3d(rs, nelec);
 
         double rhf_energy = run_scf(basis_3d, nelec, results_file, rs, true);
         double uhf_energy = run_scf(basis_3d, nelec, results_file, rs, false);

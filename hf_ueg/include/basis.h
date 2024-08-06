@@ -9,7 +9,7 @@ using namespace std;
 
 class Basis_3D {
 public:
-    Basis_3D(const double &ke_cutoff, const double &rs, const int &n_elec);
+    Basis_3D(const double &rs, const int &n_elec);
     pair<int, vector<tuple<int, int, int>>> generate_plan_waves();
     arma::mat make_lookup_table();
     arma::mat kinetic_integrals();
@@ -19,7 +19,6 @@ public:
     
 
 private:
-    double ke_cutoff;
     double rs;
     int n_elec;
     vector<double> kinetic_energies;

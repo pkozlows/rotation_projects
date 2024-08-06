@@ -6,8 +6,8 @@
 using namespace std;
 
 // Base class constructor
-Basis_3D::Basis_3D(const double &ke_cutoff, const double &rs, const int &n_elec)
-    : ke_cutoff(ke_cutoff), rs(rs), n_elec(n_elec) {
+Basis_3D::Basis_3D(const double &rs, const int &n_elec)
+    : rs(rs), n_elec(n_elec) {
 }
 
 
@@ -16,9 +16,10 @@ pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
     int n_pw = 0;
     vector<pair<tuple<int, int, int>, double>> plane_wave_kinetic_pairs; // Pair of plane wave and kinetic energy
 
+    //compute the kinetic Autry cutoff based off of the number of electrons and the Wigner-Seitz radius
+    double ke_cutoff = 200*pow(rs, -2) * pow(n_elec, -2.0 / 3.0);
     double length = pow(4.0 * M_PI * n_elec / 3.0, 1.0 / 3.0) * rs;
     double constant = pow(2 * M_PI / length, 2) / 2;
-    // cout << "ke_factor: " << ke_factor << endl;
 
     // Define the maximum value that nx, ny, nz can take
     int max_n = static_cast<int>(floor(sqrt(ke_cutoff / constant)));
