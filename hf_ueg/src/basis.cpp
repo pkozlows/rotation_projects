@@ -52,6 +52,7 @@ pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
             }
         }
     }
+    cout << "Number of plain waves " << n_pw << endl;
     // cout << "---------------------" << endl;
     // cout << "Number before sorting: " << n_pw << endl;
     // cout << "---------------------" << endl;

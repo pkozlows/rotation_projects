@@ -1,20 +1,16 @@
 Starting rs = 3.5
-Computed RHF: 1.1536
-Computed UHF: 1.21732
+Computed RHF: 0
+Computed UHF: 0
 Reference RHF: 0.684122
 Reference UHF: 0.684122
 Starting rs = 4
-Computed RHF: 0.89542
-Computed UHF: 0.938109
+Computed RHF: 0
+Computed UHF: 0
 Reference RHF: 0.458493
 Reference UHF: 0.456724
 Starting rs = 4.5
-Computed RHF: 0.714988
-Computed UHF: 0.74497
+Computed RHF: 0
+Computed UHF: 0
 Reference RHF: 0.31068
 Reference UHF: 0.301432
 Starting rs = 5
-Computed RHF: 0.583998
-Computed UHF: 0.605854
-Reference RHF: 0.209867
-Reference UHF: 0.191606
