@@ -24,6 +24,7 @@ private:
     vector<double> kinetic_energies;
     vector<tuple<int, int, int>> plane_waves;
     int n_pw;
+    int max_n;
 };
 
 

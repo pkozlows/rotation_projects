@@ -12,7 +12,8 @@
 using namespace std;
 
 // Function to run SCF and return the converged energy
-double run_scf(Basis_3D &basis, const int nelec, ofstream &results_file, double rs, bool use_rhf) {
+double run_scf(Basis_3D &basis, const int nelec, ofstream &results_file, const double rs, bool use_rhf) {
+
     auto [n_pw, sorted_plane_waves] = basis.generate_plan_waves();
 
     arma::mat lookup_table = basis.make_lookup_table();
@@ -26,9 +27,10 @@ double run_scf(Basis_3D &basis, const int nelec, ofstream &results_file, double 
     int iteration = 0;
     const double density_threshold = 1e-6;
     const double energy_threshold = 1e-6;
+    const double volume = pow(pow(4.0 * M_PI * nelec / 3.0, 1.0 / 3.0) * rs, 3);
 
     if (use_rhf) {
-        RHF rhf(kinetic_integral_matrix, exchange_integral_matrix, nelec, n_pw, sorted_plane_waves, lookup_table, madeleung_constant);
+        RHF rhf(kinetic_integral_matrix, exchange_integral_matrix, nelec, n_pw, sorted_plane_waves, lookup_table, madeleung_constant, volume);
         arma::mat rhf_guess = rhf.guess_rhf("zeros");
         // arma::mat rhf_guess = rhf.guess_rhf("identity");
 
@@ -36,6 +38,8 @@ double run_scf(Basis_3D &basis, const int nelec, ofstream &results_file, double 
             arma::mat fock_matrix = rhf.make_fock_matrix(rhf_guess);
             arma::vec eigenvalues;
             arma::mat eigenvectors;
+            //print out the diagonal of the fock matrix
+
             arma::eig_sym(eigenvalues, eigenvectors, fock_matrix);
             arma::mat new_density = rhf.generate_density_matrix(eigenvectors);
             rhf_guess = (new_density + rhf_guess) / 2;
@@ -43,7 +47,8 @@ double run_scf(Basis_3D &basis, const int nelec, ofstream &results_file, double 
             energy = rhf.compute_energy(rhf_guess, fock_matrix);
 
             if (abs(energy - previous_energy) < energy_threshold) {
-                // cout << "It took this many iterations to converge RHF: " << iteration << endl;
+                cout << "It took this many iterations to converge RHF: " << iteration << endl;
+                print_matrix(new_density);
                 break;
             }
 
@@ -52,7 +57,7 @@ double run_scf(Basis_3D &basis, const int nelec, ofstream &results_file, double 
 
         } while (iteration < 100);
     } else {
-        UHF uhf(kinetic_integral_matrix, exchange_integral_matrix, nelec, n_pw, sorted_plane_waves, lookup_table, madeleung_constant);
+        UHF uhf(kinetic_integral_matrix, exchange_integral_matrix, nelec, n_pw, sorted_plane_waves, lookup_table, madeleung_constant, volume);
         pair<arma::mat, arma::mat> uhf_guess = uhf.guess_uhf();
 
         do {
@@ -61,11 +66,27 @@ double run_scf(Basis_3D &basis, const int nelec, ofstream &results_file, double 
             arma::mat fock_alpha = fock_matrices.first;
             arma::vec eigenvalues_alpha;
             arma::mat eigenvectors_alpha;
+            //assert that the alpha fock matrix is diagonal
+            for (int i = 0; i < fock_alpha.n_rows; i++) {
+                for (int j = 0; j < fock_alpha.n_cols; j++) {
+                    if (i != j) {
+                        assert(fock_alpha(i, j) < 1e-6);
+                    }
+                }
+            }
             arma::eig_sym(eigenvalues_alpha, eigenvectors_alpha, fock_alpha);
 
             arma::mat fock_beta = fock_matrices.second;
             arma::vec eigenvalues_beta;
             arma::mat eigenvectors_beta;
+            //assert that the beta fock matrix is diagonal
+            for (int i = 0; i < fock_beta.n_rows; i++) {
+                for (int j = 0; j < fock_beta.n_cols; j++) {
+                    if (i != j) {
+                        assert(fock_beta(i, j) < 1e-6);
+                    }
+                }
+            }
             arma::eig_sym(eigenvalues_beta, eigenvectors_beta, fock_beta);
 
             //generate new density matrices
@@ -84,6 +105,8 @@ double run_scf(Basis_3D &basis, const int nelec, ofstream &results_file, double 
 
             if (abs(energy - previous_energy) < energy_threshold) {
                 cout << "It took this many iterations to converge UHF: " << iteration << endl;
+                print_matrix(new_density.first);
+                print_matrix(new_density.second);
                 break;
             }
 
@@ -113,13 +136,14 @@ int main() {
         rs_to_rhf[rs_values[i]] = rhf_values[i];
         rs_to_uhf_m179[rs_values[i]] = uhf_values_m179[i];
     }
-    for (double rs = 3.5; rs <= 5.0; rs += 0.5) {
+    for (double rs = 3.5; rs <= 3.5; rs += 0.5) {
+        
         cout << "--------------------------------" << endl;
         cout << "Starting rs = " << rs << endl;
         results_file << "Starting rs = " << rs << endl;
         cout << "--------------------------------" << endl;
 
-
+        
         Basis_3D basis_3d(rs, nelec);
 
         double rhf_energy = run_scf(basis_3d, nelec, results_file, rs, true);

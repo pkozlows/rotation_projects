@@ -4,15 +4,14 @@ using namespace std;
 
 Scf::Scf(const arma::mat &kinetic, const arma::vec &exchange, const int &nelec, const int &npws, 
          const vector<tuple<int, int, int>> &plane_waves, const arma::mat &lookup_table, 
-         const double &madeleung_constant)
-    : kinetic(kinetic), exchange(exchange), nelec(nelec), n_pw(npws), plane_waves(plane_waves), 
-      lookup_table(lookup_table), madeleung_constant(madeleung_constant) {}
+         const double &madeleung_constant, const double &volume)
+    : kinetic(kinetic), exchange(exchange), nelec(nelec), n_pw(npws), plane_waves(plane_waves), lookup_table(lookup_table), madeleung_constant(madeleung_constant), volume(volume) {}
 
 // RHF class constructor
 RHF::RHF(const arma::mat &kinetic, const arma::vec &exchange, const int &nelec, const int &npws, 
          const vector<tuple<int, int, int>> &plane_waves, const arma::mat &lookup_table, 
-         const double &madeleung_constant)
-    : Scf(kinetic, exchange, nelec, npws, plane_waves, lookup_table, madeleung_constant) {}
+         const double &madeleung_constant, const double &volume)
+    : Scf(kinetic, exchange, nelec, npws, plane_waves, lookup_table, madeleung_constant, volume) {}
 
 arma::mat RHF::guess_rhf(const string &guess_type) {
     arma::mat density_matrix(n_pw, n_pw, arma::fill::zeros);
@@ -35,18 +34,12 @@ arma::mat RHF::make_fock_matrix(arma::mat &guess_density) {
             double sum = 0.0;
             for (int Q = 0; Q < npws; ++Q) {
                 if (lookup_table(p, Q) != -1 && lookup_table(q, Q) != -1) {
-                    int p_minus_q = lookup_table(p, Q);
-                    int q_minus_q = lookup_table(q, Q);
-                    double density_val = guess_density(p_minus_q, q_minus_q);
-                    double exchange_val = exchange(Q);
-
-                    sum += density_val * exchange_val;
+                    sum += guess_density(lookup_table(p, Q), lookup_table(q, Q)) * exchange(Q);
                 }
             }
-            exchange_matrix(p, q) = sum;
+            exchange_matrix(p, q) = sum / volume;
         }
     }
-
     return hcore - 0.5 * exchange_matrix;
 }
 
@@ -68,8 +61,8 @@ arma::mat RHF::generate_density_matrix(arma::mat &eigenvectors) {
 // UHF class constructor
 UHF::UHF(const arma::mat &kinetic, const arma::vec &exchange, const int &nelec, const int &npws, 
          const vector<tuple<int, int, int>> &plane_waves, const arma::mat &lookup_table, 
-         const double &madeleung_constant)
-    : Scf(kinetic, exchange, nelec, npws, plane_waves, lookup_table, madeleung_constant) {}
+         const double &madeleung_constant, const double &volume)
+    : Scf(kinetic, exchange, nelec, npws, plane_waves, lookup_table, madeleung_constant, volume) {}
 
 pair<arma::mat, arma::mat> UHF::guess_uhf() {
     //first provide the guess for the alpha spins
@@ -106,7 +99,7 @@ arma::mat UHF::generate_exchange_matrix(arma::mat &density, const vector<tuple<i
                     sum += density_val * exchange_val;
                 }
             }
-            exchange_matrix(p, q) = sum;
+            exchange_matrix(p, q) = sum / volume;
         }
     }
     return exchange_matrix;

@@ -17,7 +17,7 @@ pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
     vector<pair<tuple<int, int, int>, double>> plane_wave_kinetic_pairs; // Pair of plane wave and kinetic energy
 
     //compute the kinetic Autry cutoff based off of the number of electrons and the Wigner-Seitz radius
-    double ke_cutoff = 200*pow(rs, -2) * pow(n_elec, -2.0 / 3.0);
+    double ke_cutoff = 15*pow(rs, -2) * pow(n_elec, -2.0 / 3.0);
     double length = pow(4.0 * M_PI * n_elec / 3.0, 1.0 / 3.0) * rs;
     double constant = pow(2 * M_PI / length, 2) / 2;
 
@@ -25,6 +25,7 @@ pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
     int max_n = static_cast<int>(floor(sqrt(ke_cutoff / constant)));
     // cout << "Max n: " << max_n << endl;
     // cout << "ke_cutoff: " << ke_cutoff << endl;
+    this->max_n = max_n;
 
     for (int nx = -max_n; nx <= max_n; nx++) {
         int nx2 = nx * nx;
