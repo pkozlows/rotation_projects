@@ -32,9 +32,10 @@ arma::mat RHF::make_fock_matrix(arma::mat &guess_density) {
     for (int p = 0; p < npws; ++p) {
         for (int q = 0; q < npws; ++q) {
             double sum = 0.0;
-            for (int Q = 0; Q < npws; ++Q) {
+            for (int Q = 0; Q < 2*npws; ++Q) {
                 if (lookup_table(p, Q) != -1 && lookup_table(q, Q) != -1) {
                     sum += guess_density(lookup_table(p, Q), lookup_table(q, Q)) * exchange(Q);
+                    // cout << "The sum for Q= " << Q << "when p= " << p << " and q= " << q << " is " << sum << endl;
                 }
             }
             exchange_matrix(p, q) = sum / volume;

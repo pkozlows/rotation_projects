@@ -2,6 +2,7 @@
 #include <armadillo>
 #include <vector>
 #include "basis.h"
+#include "matrix_utils.h"
 
 using namespace std;
 
@@ -81,35 +82,55 @@ pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
     return {n_pw, sorted_plane_waves};
 }
 
-arma::mat Basis_3D::make_lookup_table() {
-    arma::mat lookup_table(n_pw, n_pw);
-    for (int i = 0; i < n_pw; i++) {
-        for (int j = 0; j < n_pw; j++) {
-            auto [ix, iy, iz] = plane_waves[i];
-            auto [jx, jy, jz] = plane_waves[j];
-            //compute the momentum transfer vector between these waves
-            int qx = jx - ix;
-            int qy = jy - iy;
-            int qz = jz - iz;
-            tuple<int, int, int> Q = make_tuple(qx, qy, qz);
-            //chuck it this new back door q is within the original list
-            // Find the index of the vector Q in the list of plane waves
-            auto it = std::find(plane_waves.begin(), plane_waves.end(), Q);
-            if (it != plane_waves.end()) {
-                // Get the index of the found vector Q
-                int q_index = std::distance(plane_waves.begin(), it);
-
-                // Set the lookup table entry to the index of Q
-                lookup_table(i, j) = q_index;
-            } else {
-                // If not found, set a default value (e.g., -1 or some other indicator)
-                lookup_table(i, j) = -1;
+//function to generate the list of momentum transfer effectors
+void Basis_3D::generate_momentum_transfer_vectors() {
+    vector<tuple<int, int, int>> momentum_transfer_vectors;
+    size_t n_mom = 0;
+    for (int i = -2 * max_n; i <= 2 * max_n; i++) {
+        for (int j = -2 * max_n; j <= 2 * max_n; j++) {
+            for (int k = -2 * max_n; k <= 2 * max_n; k++) {
+                momentum_transfer_vectors.push_back(make_tuple(i, j, k));
+                n_mom++;
             }
         }
     }
+    this->n_mom = n_mom;
+    this->momentum_transfer_vectors = momentum_transfer_vectors;
+    return;
+}
+
+arma::mat Basis_3D::make_lookup_table() {
+    arma::mat lookup_table(n_pw, n_mom, arma::fill::zeros);
+
+    for (int p = 0; p < n_pw; p++) {
+        auto [px, py, pz] = plane_waves[p];
+
+        for (int Q = 0; Q < n_mom; Q++) {
+            auto [qx, qy, qz] = momentum_transfer_vectors[Q];
+            int p_minus_q_x = px - qx;
+            int p_minus_q_y = py - qy;
+            int p_minus_q_z = pz - qz;
+
+            // Create tuple p_minus_q
+            tuple<int, int, int> p_minus_q = make_tuple(p_minus_q_x, p_minus_q_y, p_minus_q_z);
+
+            // Find p_minus_q in plane_waves
+            auto it = find(plane_waves.begin(), plane_waves.end(), p_minus_q);
+
+            if (it != plane_waves.end()) {
+                // Calculate index of p_minus_q in plane_waves
+                int index = distance(plane_waves.begin(), it);
+                lookup_table(p, Q) = index;
+            } else {
+                lookup_table(p, Q) = -1;
+            }
+        }
+    }
+    print_matrix(lookup_table);
 
     return lookup_table;
 }
+
 
 // Function to generate the kinetic integral matrix
 arma::mat Basis_3D::kinetic_integrals() {
@@ -121,13 +142,18 @@ arma::mat Basis_3D::kinetic_integrals() {
 
 // Function to generate the Coulomb integral matrix
 arma::vec Basis_3D::exchangeIntegrals() {
-    arma::vec exchange(n_pw, arma::fill::zeros);
-
+    arma::vec exchange(2*n_pw, arma::fill::zeros);
     double length = pow(4.0 * M_PI * n_elec / 3.0, 1.0 / 3.0) * rs;
     double factor = ((4 * M_PI) / pow(length, 3));
 
-    for (int Q = 0; Q < n_pw; Q++) {
-        auto [qx, qy, qz] = plane_waves[Q];
+    for (int Q = 0; Q < 2*n_pw; Q++) {
+        auto [qx, qy, qz] = plane_waves[Q%n_pw];
+        //check if the value of Q is > n_pw - 1 to determine if it is a double momentum transfer and then we multiply by 2
+        if (Q >= n_pw) {
+            qx *= 2;
+            qy *= 2;
+            qz *= 2;
+        }
         double q2 = qx * qx + qy * qy + qz * qz;
         if (q2 > 1e-8) {
             exchange[Q] = factor / q2;

@@ -113,14 +113,21 @@ Moving the integral over the wave vector and front and separating out the integr
     &= \frac{4\pi}{\Omega ^{3}} \int d\mathbf{q} \frac{1}{|\vb{q}|^2} \Omega  \delta(\mathbf{k}_\lambda - \mathbf{k}_\mu + \mathbf{q}) \Omega  \delta(\mathbf{k}_\sigma - \mathbf{k}_\nu - \mathbf{q}) \\
 \end{aligned}
 \end{equation}
-Canceling out the constant factors of $\Omega $:
+Canceling out the constant factors of $\Omega$:
 \begin{equation}
-    g_{\mu\lambda\nu\sigma} = \frac{4\pi}{\Omega } \int d\mathbf{q} \frac{1}{|\vb{q}|^2} \delta(\mathbf{k}_\lambda - \mathbf{k}_\mu + \mathbf{q}) \delta(\mathbf{k}_\sigma - \mathbf{k}_\nu - \mathbf{q})
+    g_{\mu\lambda\nu\sigma} = \frac{4\pi}{\Omega} \int d\mathbf{q} \frac{1}{|\mathbf{q}|^2} \delta(\mathbf{k}_\lambda - \mathbf{k}_\mu + \mathbf{q}) \delta(\mathbf{k}_\sigma - \mathbf{k}_\nu - \mathbf{q})
 \end{equation}
 This tells us that the constraint $\mathbf{q} = \mathbf{k}_\mu - \mathbf{k}_\lambda = \mathbf{k}_\sigma - \mathbf{k}_\nu$ must be satisfied. We simplify the expression for $g_{\mu\lambda\nu\sigma}$ to:
 \begin{equation}
-    g_{\mu\lambda\nu\sigma} = \frac{4\pi}{\Omega } \frac{1}{|\mathbf{k}_\mu - \mathbf{k}_\lambda|^2} \delta_{\mathbf{k}_\mu - \mathbf{k}_\lambda, \mathbf{k}_\sigma - \mathbf{k}_\nu}
+    g_{\mu\lambda\nu\sigma} = \frac{4\pi}{\Omega} \frac{1}{|\mathbf{k}_\mu - \mathbf{k}_\lambda|^2} \delta_{\mathbf{k}_\mu - \mathbf{k}_\lambda, \mathbf{k}_\sigma - \mathbf{k}_\nu}
 \end{equation}
+This can be rewritten as
+\begin{equation}
+\begin{aligned}
+K_{pq}^\sigma & = \frac{4 \pi}{\Omega} \sum_Q P_{p-Q, q-Q}^{\sigma \sigma^{\prime}} \frac{1}{\left|\mathbf{Q}\right|^2} .
+\end{aligned}
+\end{equation}
+We have to keep in mind that $Q$ is defined as the vector of all possible momentum transfers. So one could imagine a situation where $p = [3,3,3]$ and then even $Q = [6,6,6]$ would be a valid momentum transfer as this would generate a plane wave with $p-Q = [3,3,3] - [6,6,6] = [-3,-3,-3]$, which is still valid. Let's think about this more formally. It isn't enough to just concerto that $Q=2p$ because a $Q$ of $[5,5,5]$ is valved but it is not any multiple of $p$. This means that we need to consider additions of to $2p$ and not just multiply $p$ by an integer. $Q$ could also be something that is not just a list of the same indenture; we could have $p = [2,0,1]$ and $Q = [1,-1,3$ which would give the difference $p-Q = [1,1,-2]$ which that could still be a valid plane wave. 
 
 \subsection{2D case}
 Here we might have the similar thing with the Fourier transform of $1/|\mathbf{r}|$ being $\frac{2\pi}{\mathbf{q}}$ and the two-electron integral simplifying to:

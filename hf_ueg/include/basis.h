@@ -11,6 +11,7 @@ class Basis_3D {
 public:
     Basis_3D(const double &rs, const int &n_elec);
     pair<int, vector<tuple<int, int, int>>> generate_plan_waves();
+    void generate_momentum_transfer_vectors();
     arma::mat make_lookup_table();
     arma::mat kinetic_integrals();
     arma::vec exchangeIntegrals();
@@ -23,7 +24,9 @@ private:
     int n_elec;
     vector<double> kinetic_energies;
     vector<tuple<int, int, int>> plane_waves;
+    vector<tuple<int, int, int>> momentum_transfer_vectors;
     int n_pw;
+    size_t n_mom;
     int max_n;
 };
 

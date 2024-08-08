@@ -15,6 +15,7 @@ using namespace std;
 double run_scf(Basis_3D &basis, const int nelec, ofstream &results_file, const double rs, bool use_rhf) {
 
     auto [n_pw, sorted_plane_waves] = basis.generate_plan_waves();
+    basis.generate_momentum_transfer_vectors();
 
     arma::mat lookup_table = basis.make_lookup_table();
     arma::mat kinetic_integral_matrix = basis.kinetic_integrals();
@@ -48,7 +49,6 @@ double run_scf(Basis_3D &basis, const int nelec, ofstream &results_file, const d
 
             if (abs(energy - previous_energy) < energy_threshold) {
                 cout << "It took this many iterations to converge RHF: " << iteration << endl;
-                print_matrix(new_density);
                 break;
             }
 
@@ -105,8 +105,6 @@ double run_scf(Basis_3D &basis, const int nelec, ofstream &results_file, const d
 
             if (abs(energy - previous_energy) < energy_threshold) {
                 cout << "It took this many iterations to converge UHF: " << iteration << endl;
-                print_matrix(new_density.first);
-                print_matrix(new_density.second);
                 break;
             }
 
@@ -147,20 +145,20 @@ int main() {
         Basis_3D basis_3d(rs, nelec);
 
         double rhf_energy = run_scf(basis_3d, nelec, results_file, rs, true);
-        double uhf_energy = run_scf(basis_3d, nelec, results_file, rs, false);
+        // double uhf_energy = run_scf(basis_3d, nelec, results_file, rs, false);
 
         cout << "Computed RHF: " << rhf_energy << endl;
-        cout << "Computed UHF: " << uhf_energy << endl;
+        // cout << "Computed UHF: " << uhf_energy << endl;
 
         results_file << "Computed RHF: " << rhf_energy << endl;
-        results_file << "Computed UHF: " << uhf_energy << endl;
+        // results_file << "Computed UHF: " << uhf_energy << endl;
         cout << "--------------------------------" << endl;
 
         cout << "Reference RHF: " << rs_to_rhf[rs] << endl;
-        cout << "Reference UHF: " << rs_to_uhf_m179[rs] << endl;
+        // cout << "Reference UHF: " << rs_to_uhf_m179[rs] << endl;
 
         results_file << "Reference RHF: " << rs_to_rhf[rs] << endl;
-        results_file << "Reference UHF: " << rs_to_uhf_m179[rs] << endl;
+        // results_file << "Reference UHF: " << rs_to_uhf_m179[rs] << endl;
     }
     return 0;
 }

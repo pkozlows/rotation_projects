@@ -1,5 +1,1 @@
 Starting rs = 3.5
-Computed RHF: 1.28102
-Computed UHF: 1.28103
-Reference RHF: 0.684122
-Reference UHF: 0.684122
