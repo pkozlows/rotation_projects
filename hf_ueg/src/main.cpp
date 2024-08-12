@@ -20,9 +20,16 @@ double run_scf(Basis_3D &basis, const int n_elec, ofstream &results_file, const 
 
     const arma::Mat<int> lookup_table = basis.make_lookup_table();
     const arma::mat kinetic = basis.kinetic_integrals();
+    // find the trace of the kinetic matrix
+    double trace = 0.0;
+    for (int i = 0; i < n_pw; ++i) {
+        trace += kinetic(i, i);
+    }
+    cout << "The kinetic energy of all electrons is: " << 2 * trace << endl;
+
     const arma::vec exchange = basis.exchangeIntegrals();
-    const double madeleung_constant = basis.compute_madeleung_constant();
-    cout << "madeleung_constant is: " << madeleung_constant << endl;
+    // const double madeleung_constant = basis.compute_madeleung_constant();
+    // cout << "madeleung_constant is: " << madeleung_constant << endl;
 
     cout << "-----------------------------------" << endl;
     double previous_energy = 0.0;
@@ -38,34 +45,33 @@ double run_scf(Basis_3D &basis, const int n_elec, ofstream &results_file, const 
 
     do {
         arma::mat fock_matrix = rhf.make_fock_matrix(rhf_guess);
+        // diagonalize the fock matrix
         arma::vec eigenvalues;
         arma::mat eigenvectors;
-        //print out the diagonal of the fock matrix
-
         arma::eig_sym(eigenvalues, eigenvectors, fock_matrix);
-        // cout << "The eigenvalues are: " << endl;
-        // for (int i = 0; i < n_pw; ++i) {
-        //     cout << eigenvalues(i) << endl;
-        // }
+
+        // generate the new density matrix
         arma::mat new_density = rhf.generate_density_matrix(eigenvectors);
         cout << "The new density is " << endl;
         print_matrix(new_density);
         cout << "after iteration " << iteration << endl;
-        //find out the sum of the eigenvalues
+
+        // //find out the sum of the eigenvalues
         double sum = 0.0;
         for (int i = 0; i < n_pw; ++i) {
             sum += eigenvalues(i);
         }
-        cout << "The sum of the single particle energies is: " << sum << endl;
-        rhf_guess = new_density;
+        cout << "The sum of the single particle energies is: " << 2*sum << endl;
 
-        energy = rhf.compute_energy(rhf_guess, fock_matrix);
+        energy = rhf.compute_energy(new_density, fock_matrix);
 
         if (abs(energy - previous_energy) < energy_threshold) {
             cout << "It took this many iterations to converge RHF: " << iteration << endl;
             break;
         }
 
+        // reintialize variables
+        rhf_guess = new_density;
         previous_energy = energy;
         iteration++;
 

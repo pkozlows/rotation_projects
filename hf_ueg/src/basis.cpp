@@ -148,10 +148,13 @@ arma::mat Basis_3D::kinetic_integrals() {
 // Function to generate the exchange integrals; note that we just need one entry per momentum transfer vector
 arma::vec Basis_3D::exchangeIntegrals() {
     arma::vec exchange(n_mom, arma::fill::zeros);
+    double length = pow(4.0 * M_PI * n_elec / 3.0, 1.0 / 3.0) * rs;
+    double constant = pow(2 * M_PI / length, 2);
 
     for (int Q = 0; Q < n_mom; Q++) {
         auto [qx, qy, qz] = momentum_transfer_vectors[Q];
         double q2 = qx * qx + qy * qy + qz * qz;
+        q2 *= constant;
         if (q2 > 1e-8) {
             exchange[Q] = (4 * M_PI) / q2;
         }

@@ -31,6 +31,10 @@ arma::mat RHF::make_fock_matrix(arma::mat &guess_density) {
         }    
     }
     // cout << "The volume is: " << volume << endl;
+    cout << "The kinetic contribution is " << endl;
+    cout << kinetic << endl;
+    cout << "The exchange contribution is " << endl;
+    cout << 0.5 * (exchange_matrix / volume) << endl;
     cout << "The fork matrix is " << endl;
     cout << kinetic - 0.5 * (exchange_matrix / volume) << endl;
     return kinetic - 0.5 * (exchange_matrix / volume);

@@ -1,2 +1,2 @@
-Computed RHF: 1.1536
+Computed RHF: 0.684122
 Reference RHF: 0.684122
