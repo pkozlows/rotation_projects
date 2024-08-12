@@ -18,8 +18,7 @@ double run_scf(Basis_3D &basis, const int n_elec, ofstream &results_file, const 
     auto [n_mom, momentum_transfer_vectors] = basis.generate_momentum_transfer_vectors();
     
 
-    const arma::Mat<int> lookup_table_minus = basis.make_lookup_table(false);
-    const arma::Mat<int> lookup_table_plus = basis.make_lookup_table(true);
+    const arma::Mat<int> lookup_table = basis.make_lookup_table();
     const arma::mat kinetic = basis.kinetic_integrals();
     const arma::vec exchange = basis.exchangeIntegrals();
     const double madeleung_constant = basis.compute_madeleung_constant();
@@ -33,7 +32,7 @@ double run_scf(Basis_3D &basis, const int n_elec, ofstream &results_file, const 
     const double energy_threshold = 1e-6;
     const double volume = pow(pow(4.0 * M_PI * n_elec / 3.0, 1.0 / 3.0) * rs, 3);
 
-    RHF rhf(kinetic, exchange, n_elec, n_pw, n_mom, plane_waves, momentum_transfer_vectors, lookup_table_minus, lookup_table_plus, volume);
+    RHF rhf(kinetic, exchange, n_elec, n_pw, n_mom, plane_waves, momentum_transfer_vectors, lookup_table, volume);
     // arma::mat rhf_guess = rhf.guess_rhf("zeros");
     arma::mat rhf_guess = rhf.guess_rhf("identity");
 
@@ -49,13 +48,15 @@ double run_scf(Basis_3D &basis, const int n_elec, ofstream &results_file, const 
         //     cout << eigenvalues(i) << endl;
         // }
         arma::mat new_density = rhf.generate_density_matrix(eigenvectors);
+        cout << "The new density is " << endl;
         print_matrix(new_density);
+        cout << "after iteration " << iteration << endl;
         //find out the sum of the eigenvalues
         double sum = 0.0;
         for (int i = 0; i < n_pw; ++i) {
             sum += eigenvalues(i);
         }
-        cout << "The sum of the eigenvalues is: " << sum << endl;
+        cout << "The sum of the single particle energies is: " << sum << endl;
         rhf_guess = new_density;
 
         energy = rhf.compute_energy(rhf_guess, fock_matrix);

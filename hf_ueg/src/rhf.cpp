@@ -23,8 +23,8 @@ arma::mat RHF::make_fock_matrix(arma::mat &guess_density) {
             //iterate over all possible momentum transfers
             for (size_t r = 0; r < n_mom; ++r) {
                 //only append if we have valid indices
-                if (lookup_table_minus(p, r) != -1 && lookup_table_minus(q, r) != -1) {
-                    sum += exchange(r) * guess_density(lookup_table_minus(p, r), lookup_table_minus(q, r));
+                if (lookup_table(p, r) != -1 && lookup_table(q, r) != -1) {
+                    sum += exchange(r) * guess_density(lookup_table(p, r), lookup_table(q, r));
                 }
             }
             exchange_matrix(p, q) = sum;

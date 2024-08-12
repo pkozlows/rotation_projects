@@ -12,7 +12,7 @@ public:
     Basis_3D(const double &rs, const int &n_elec);
     pair<int, vector<tuple<int, int, int>>> generate_plan_waves();
     pair<size_t, vector<tuple<int, int, int>>> generate_momentum_transfer_vectors();
-    arma::Mat<int> make_lookup_table(bool addition);
+    arma::Mat<int> make_lookup_table();
     arma::mat kinetic_integrals();
     arma::vec exchangeIntegrals();
     double compute_madeleung_constant();

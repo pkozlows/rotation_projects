@@ -101,7 +101,7 @@ pair<size_t, vector<tuple<int, int, int>>> Basis_3D::generate_momentum_transfer_
     return {n_mom, momentum_transfer_vectors};
 }
 
-arma::Mat<int> Basis_3D::make_lookup_table(bool addition) {
+arma::Mat<int> Basis_3D::make_lookup_table() {
     arma::Mat<int> lookup_table(n_pw, n_mom, arma::fill::zeros);
 
     for (int p = 0; p < n_pw; p++) {
@@ -110,26 +110,16 @@ arma::Mat<int> Basis_3D::make_lookup_table(bool addition) {
         for (int Q = 0; Q < n_mom; Q++) {
             auto [qx, qy, qz] = momentum_transfer_vectors[Q];
 
-            //based on the input boolean, we either add or subtract the momentum transfer vector
-            int px_pm_qx;
-            int py_pm_qy;
-            int pz_pm_qz;
-            if (addition) {
-                px_pm_qx = px + qx;
-                py_pm_qy = py + qy;
-                pz_pm_qz = pz + qz;
-                }
-            else {
-                px_pm_qx = px - qx;
-                py_pm_qy = py - qy;
-                pz_pm_qz = pz - qz;
-            }
+            // we subtract the momentum transfer vector
+            int px_m_qx = px - qx;
+            int py_m_qy = py - qy;
+            int pz_m_qz = pz - qz;
 
             // Create tuple p_pm_Q
-            tuple<int, int, int> p_pm_Q = make_tuple(px_pm_qx, py_pm_qy, pz_pm_qz);
+            tuple<int, int, int> p_m_Q = make_tuple(px_m_qx, py_m_qy, pz_m_qz);
 
             // search for p_pm_Q in plane_waves
-            auto it = find(plane_waves.begin(), plane_waves.end(), p_pm_Q);
+            auto it = find(plane_waves.begin(), plane_waves.end(), p_m_Q);
 
             int index;
             if (it != plane_waves.end()) {
