@@ -83,10 +83,11 @@ pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
     return {n_pw, sorted_plane_waves};
 }
 
-//function to generate the list of momentum transfer effectors
-size_t Basis_3D::generate_momentum_transfer_vectors() {
+//function to generate the list of momentum transfer vectors
+pair<size_t, vector<tuple<int, int, int>>> Basis_3D::generate_momentum_transfer_vectors() {
     vector<tuple<int, int, int>> momentum_transfer_vectors;
     size_t n_mom = 0;
+    //this goes the same as when we construct the plane waves but now we try up to |2 * max_n|
     for (int i = -2 * max_n; i <= 2 * max_n; i++) {
         for (int j = -2 * max_n; j <= 2 * max_n; j++) {
             for (int k = -2 * max_n; k <= 2 * max_n; k++) {
@@ -97,39 +98,50 @@ size_t Basis_3D::generate_momentum_transfer_vectors() {
     }
     this->n_mom = n_mom;
     this->momentum_transfer_vectors = momentum_transfer_vectors;
-    return n_mom;
+    return {n_mom, momentum_transfer_vectors};
 }
 
-arma::mat Basis_3D::make_lookup_table() {
-    arma::mat lookup_table(n_pw, n_mom, arma::fill::zeros);
+arma::Mat<int> Basis_3D::make_lookup_table(bool addition) {
+    arma::Mat<int> lookup_table(n_pw, n_mom, arma::fill::zeros);
 
     for (int p = 0; p < n_pw; p++) {
         auto [px, py, pz] = plane_waves[p];
 
         for (int Q = 0; Q < n_mom; Q++) {
             auto [qx, qy, qz] = momentum_transfer_vectors[Q];
-            int p_minus_q_x = px - qx;
-            int p_minus_q_y = py - qy;
-            int p_minus_q_z = pz - qz;
 
-            // Create tuple p_minus_q
-            tuple<int, int, int> p_minus_q = make_tuple(p_minus_q_x, p_minus_q_y, p_minus_q_z);
-            // cout << "Momentum transfer backdoor " << p_minus_q_x << " " << p_minus_q_y << " " << p_minus_q_z << endl;
-
-            // Find p_minus_q in plane_waves
-            auto it = find(plane_waves.begin(), plane_waves.end(), p_minus_q);
-
-            if (it != plane_waves.end()) {
-                // Calculate index of p_minus_q in plane_waves
-                int index = distance(plane_waves.begin(), it);
-                lookup_table(p, Q) = index;
-            } else {
-                lookup_table(p, Q) = -1;
+            //based on the input boolean, we either add or subtract the momentum transfer vector
+            int px_pm_qx;
+            int py_pm_qy;
+            int pz_pm_qz;
+            if (addition) {
+                px_pm_qx = px + qx;
+                py_pm_qy = py + qy;
+                pz_pm_qz = pz + qz;
+                }
+            else {
+                px_pm_qx = px - qx;
+                py_pm_qy = py - qy;
+                pz_pm_qz = pz - qz;
             }
-            // cout << "Lookup table " << lookup_table(p, Q) << endl;
+
+            // Create tuple p_pm_Q
+            tuple<int, int, int> p_pm_Q = make_tuple(px_pm_qx, py_pm_qy, pz_pm_qz);
+
+            // search for p_pm_Q in plane_waves
+            auto it = find(plane_waves.begin(), plane_waves.end(), p_pm_Q);
+
+            int index;
+            if (it != plane_waves.end()) {
+                // if found, get the index
+                index = distance(plane_waves.begin(), it);
+            } else {
+                // if not found, set index to -1
+                index = -1;
+            }
+            lookup_table(p, Q) = index;
         }
     }
-    // print_matrix(lookup_table);
 
     return lookup_table;
 }
@@ -143,18 +155,17 @@ arma::mat Basis_3D::kinetic_integrals() {
     return kinetic_integral_matrix;
 }
 
-// Function to generate the Coulomb integral matrix
+// Function to generate the exchange integrals; note that we just need one entry per momentum transfer vector
 arma::vec Basis_3D::exchangeIntegrals() {
     arma::vec exchange(n_mom, arma::fill::zeros);
-    double length = pow(4.0 * M_PI * n_elec / 3.0, 1.0 / 3.0) * rs;
-    double factor = ((4 * M_PI) / pow(length, 3));
 
     for (int Q = 0; Q < n_mom; Q++) {
         auto [qx, qy, qz] = momentum_transfer_vectors[Q];
         double q2 = qx * qx + qy * qy + qz * qz;
         if (q2 > 1e-8) {
-            exchange[Q] = factor / q2;
+            exchange[Q] = (4 * M_PI) / q2;
         }
+        // treat case where Q = [0, 0, 0]
         else {
             exchange[Q] = 0.0;
         }

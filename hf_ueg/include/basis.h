@@ -11,8 +11,8 @@ class Basis_3D {
 public:
     Basis_3D(const double &rs, const int &n_elec);
     pair<int, vector<tuple<int, int, int>>> generate_plan_waves();
-    size_t generate_momentum_transfer_vectors();
-    arma::mat make_lookup_table();
+    pair<size_t, vector<tuple<int, int, int>>> generate_momentum_transfer_vectors();
+    arma::Mat<int> make_lookup_table(bool addition);
     arma::mat kinetic_integrals();
     arma::vec exchangeIntegrals();
     double compute_madeleung_constant();

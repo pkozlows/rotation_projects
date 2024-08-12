@@ -128,8 +128,28 @@ K_{pq}^\sigma & = \frac{4 \pi}{\Omega} \sum_Q P_{p-Q, q-Q}^{\sigma \sigma^{\prim
 \end{aligned}
 \end{equation}
 We have to keep in mind that $Q$ is defined as the vector of all possible momentum transfers. So one could imagine a situation where $p = [3,3,3]$ and then even $Q = [6,6,6]$ would be a valid momentum transfer as this would generate a plane wave with $p-Q = [3,3,3] - [6,6,6] = [-3,-3,-3]$, which is still valid. Let's think about this more formally. It isn't enough to just concerto that $Q=2p$ because a $Q$ of $[5,5,5]$ is valved but it is not any multiple of $p$. This means that we need to consider additions of to $2p$ and not just multiply $p$ by an integer. $Q$ could also be something that is not just a list of the same indenture; we could have $p = [2,0,1]$ and $Q = [1,-1,3$ which would give the difference $p-Q = [1,1,-2]$ which that could still be a valid plane wave. 
-
-\subsection{2D case}
+\subsubsection{Alternative derivation}
+We can derive the two-electron term in another way. We know this is given by
+\begin{equation}
+    \hat{V}_{ee} = \frac{1}{2 \Omega } \sum_{G_1 G_2 G_3 G_4} \frac{4\pi}{|G_2-G_3|^2} a^\dagger_{G_1} a^\dagger_{G_2} a_{G_3} a_{G_4}
+\end{equation}
+We know that the total momentum transfer must be conserved, so $G_1 + G_2 = G_3 + G_4$, and $G_4 = G_1 + G_2 - G_3$. Defining $Q=G_2-G_3$, we know that $G_4 = G_1 + Q$, whereas then $G_3 = G_2 - Q$. Redefining $G_1 \equiv G$ and $G_2 \equiv G^\prime$, we can write the two-electron term as:
+\begin{equation}
+    \hat{V}_{ee} = \frac{1}{2 \Omega } \sum_{G G^\prime Q} \frac{4\pi}{|Q|^2} a^\dagger_{G} a^\dagger_{G^\prime} a_{G^\prime - Q} a_{G + Q}
+\end{equation}
+Applying Wick's theorem gives:
+\begin{equation}
+    \hat{V}_{ee} = \frac{1}{2 \Omega } \sum_{G G^\prime Q} \frac{4\pi}{|Q|^2} \left( P_{G,G+Q}P_{G^\prime, G^\prime - Q} - P_{G, G^\prime - Q}P_{G^\prime, G + Q} \right),
+\end{equation}
+where we use the usual definition that $\expval{a^\dagger_{G_1} a_{G_2}} = P_{G_1, G_2}$, which is the density matrix.
+We are just interested in the second term for exchange, which is 
+\begin{equation}
+    \Sigma _{x} = -\frac{1}{2 \Omega } \sum_{G G^\prime} \Lambda _{G G^\prime}
+\end{equation}
+where we defined
+\begin{equation}
+    \Lambda _{G G^\prime} = \sum_{Q} \frac{4\pi}{|Q|^2} P_{G, G^\prime - Q}P_{G^\prime, G + Q}
+\end{equation}
 Here we might have the similar thing with the Fourier transform of $1/|\mathbf{r}|$ being $\frac{2\pi}{\mathbf{q}}$ and the two-electron integral simplifying to:
 \begin{equation}
     g_{\mu\lambda\nu\sigma} = \frac{2\pi}{A} \frac{1}{|\mathbf{k}_\mu - \mathbf{k}_\lambda|} \delta_{\mathbf{k}_\mu - \mathbf{k}_\lambda, \mathbf{k}_\sigma - \mathbf{k}_\nu}

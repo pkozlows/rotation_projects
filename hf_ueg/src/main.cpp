@@ -15,10 +15,11 @@ using namespace std;
 double run_scf(Basis_3D &basis, const int n_elec, ofstream &results_file, const double rs) {
 
     auto [n_pw, plane_waves] = basis.generate_plan_waves();
-    const size_t n_mom = basis.generate_momentum_transfer_vectors();
+    auto [n_mom, momentum_transfer_vectors] = basis.generate_momentum_transfer_vectors();
     
 
-    const arma::mat lookup_table = basis.make_lookup_table();
+    const arma::Mat<int> lookup_table_minus = basis.make_lookup_table(false);
+    const arma::Mat<int> lookup_table_plus = basis.make_lookup_table(true);
     const arma::mat kinetic = basis.kinetic_integrals();
     const arma::vec exchange = basis.exchangeIntegrals();
     const double madeleung_constant = basis.compute_madeleung_constant();
@@ -32,9 +33,9 @@ double run_scf(Basis_3D &basis, const int n_elec, ofstream &results_file, const 
     const double energy_threshold = 1e-6;
     const double volume = pow(pow(4.0 * M_PI * n_elec / 3.0, 1.0 / 3.0) * rs, 3);
 
-    RHF rhf(kinetic, exchange, n_elec, n_pw, n_mom, plane_waves, lookup_table, volume);
-    arma::mat rhf_guess = rhf.guess_rhf("zeros");
-    // arma::mat rhf_guess = rhf.guess_rhf("identity");
+    RHF rhf(kinetic, exchange, n_elec, n_pw, n_mom, plane_waves, momentum_transfer_vectors, lookup_table_minus, lookup_table_plus, volume);
+    // arma::mat rhf_guess = rhf.guess_rhf("zeros");
+    arma::mat rhf_guess = rhf.guess_rhf("identity");
 
     do {
         arma::mat fock_matrix = rhf.make_fock_matrix(rhf_guess);
@@ -43,10 +44,10 @@ double run_scf(Basis_3D &basis, const int n_elec, ofstream &results_file, const 
         //print out the diagonal of the fock matrix
 
         arma::eig_sym(eigenvalues, eigenvectors, fock_matrix);
-        cout << "The eigenvalues are: " << endl;
-        for (int i = 0; i < n_pw; ++i) {
-            cout << eigenvalues(i) << endl;
-        }
+        // cout << "The eigenvalues are: " << endl;
+        // for (int i = 0; i < n_pw; ++i) {
+        //     cout << eigenvalues(i) << endl;
+        // }
         arma::mat new_density = rhf.generate_density_matrix(eigenvectors);
         print_matrix(new_density);
         //find out the sum of the eigenvalues
