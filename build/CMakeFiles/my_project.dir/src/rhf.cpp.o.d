@@ -1,6 +1,6 @@
-CMakeFiles/my_project.dir/src/scf.cpp.o: \
-  /Users/patrykkozlowski/harvard/joonho/hf_ueg/src/scf.cpp \
-  /Users/patrykkozlowski/harvard/joonho/hf_ueg/include/scf.h \
+CMakeFiles/my_project.dir/src/rhf.cpp.o: \
+  /Users/patrykkozlowski/harvard/joonho/hf_ueg/src/rhf.cpp \
+  /Users/patrykkozlowski/harvard/joonho/hf_ueg/include/rhf.h \
   /opt/homebrew/include/armadillo \
   /opt/homebrew/include/armadillo_bits/config.hpp \
   /opt/homebrew/include/armadillo_bits/compiler_check.hpp \

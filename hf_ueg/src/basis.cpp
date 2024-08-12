@@ -27,6 +27,7 @@ pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
     // cout << "Max n: " << max_n << endl;
     // cout << "ke_cutoff: " << ke_cutoff << endl;
     this->max_n = max_n;
+    cout << "max_n " << max_n << endl;
 
     for (int nx = -max_n; nx <= max_n; nx++) {
         int nx2 = nx * nx;
@@ -83,7 +84,7 @@ pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
 }
 
 //function to generate the list of momentum transfer effectors
-void Basis_3D::generate_momentum_transfer_vectors() {
+size_t Basis_3D::generate_momentum_transfer_vectors() {
     vector<tuple<int, int, int>> momentum_transfer_vectors;
     size_t n_mom = 0;
     for (int i = -2 * max_n; i <= 2 * max_n; i++) {
@@ -96,7 +97,7 @@ void Basis_3D::generate_momentum_transfer_vectors() {
     }
     this->n_mom = n_mom;
     this->momentum_transfer_vectors = momentum_transfer_vectors;
-    return;
+    return n_mom;
 }
 
 arma::mat Basis_3D::make_lookup_table() {
@@ -113,6 +114,7 @@ arma::mat Basis_3D::make_lookup_table() {
 
             // Create tuple p_minus_q
             tuple<int, int, int> p_minus_q = make_tuple(p_minus_q_x, p_minus_q_y, p_minus_q_z);
+            // cout << "Momentum transfer backdoor " << p_minus_q_x << " " << p_minus_q_y << " " << p_minus_q_z << endl;
 
             // Find p_minus_q in plane_waves
             auto it = find(plane_waves.begin(), plane_waves.end(), p_minus_q);
@@ -124,9 +126,10 @@ arma::mat Basis_3D::make_lookup_table() {
             } else {
                 lookup_table(p, Q) = -1;
             }
+            // cout << "Lookup table " << lookup_table(p, Q) << endl;
         }
     }
-    print_matrix(lookup_table);
+    // print_matrix(lookup_table);
 
     return lookup_table;
 }
@@ -142,18 +145,12 @@ arma::mat Basis_3D::kinetic_integrals() {
 
 // Function to generate the Coulomb integral matrix
 arma::vec Basis_3D::exchangeIntegrals() {
-    arma::vec exchange(2*n_pw, arma::fill::zeros);
+    arma::vec exchange(n_mom, arma::fill::zeros);
     double length = pow(4.0 * M_PI * n_elec / 3.0, 1.0 / 3.0) * rs;
     double factor = ((4 * M_PI) / pow(length, 3));
 
-    for (int Q = 0; Q < 2*n_pw; Q++) {
-        auto [qx, qy, qz] = plane_waves[Q%n_pw];
-        //check if the value of Q is > n_pw - 1 to determine if it is a double momentum transfer and then we multiply by 2
-        if (Q >= n_pw) {
-            qx *= 2;
-            qy *= 2;
-            qz *= 2;
-        }
+    for (int Q = 0; Q < n_mom; Q++) {
+        auto [qx, qy, qz] = momentum_transfer_vectors[Q];
         double q2 = qx * qx + qy * qy + qz * qz;
         if (q2 > 1e-8) {
             exchange[Q] = factor / q2;

@@ -1,1 +1,2 @@
-Starting rs = 3.5
+Computed RHF: 0.513075
+Reference RHF: 0.684122
