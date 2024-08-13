@@ -1607,4 +1607,5 @@ CMakeFiles/my_project.dir/src/uhf.cpp.o: \
   /opt/homebrew/include/armadillo_bits/newarp_TridiagEigen_meat.hpp \
   /opt/homebrew/include/armadillo_bits/newarp_UpperHessenbergEigen_meat.hpp \
   /opt/homebrew/include/armadillo_bits/newarp_UpperHessenbergQR_meat.hpp \
-  /opt/homebrew/include/armadillo_bits/compiler_setup_post.hpp
+  /opt/homebrew/include/armadillo_bits/compiler_setup_post.hpp \
+  /Users/patrykkozlowski/harvard/joonho/hf_ueg/include/matrix_utils.h

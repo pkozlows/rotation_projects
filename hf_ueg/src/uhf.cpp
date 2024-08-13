@@ -1,39 +1,64 @@
 #include "uhf.h"
+#include "matrix_utils.h"
 
 using namespace std;
 
 pair<arma::mat, arma::mat> UHF::guess_uhf() {
-    //do a combination guess
-    arma::mat alpha_density(n_pw, n_pw, arma::fill::zeros);
-    arma::mat beta_density(n_pw, n_pw, arma::fill::zeros);
-    for (int i = 0; i < n_elec / 2; ++i) {
-        alpha_density(i, i) = 1.0;
-    }
-    return {alpha_density, beta_density};
+    //do guess of random positive numbers between 0 and 1 for alpha and beta
+    arma::mat density_matrix_alpha(n_pw, n_pw, arma::fill::randu);
+    arma::mat density_matrix_beta(n_pw, n_pw, arma::fill::randu);
+    return {density_matrix_alpha, density_matrix_beta};
 }
 
 pair<arma::mat, arma::mat> UHF::make_uhf_fock_matrix(const pair<arma::mat, arma::mat> &guess_density) {
+
+    arma::mat total_density = guess_density.first + guess_density.second;
+
+    arma::mat hartree(n_pw, n_pw, arma::fill::zeros);
+
     arma::mat exchange_alpha(n_pw, n_pw, arma::fill::zeros);
     arma::mat exchange_beta(n_pw, n_pw, arma::fill::zeros);
 
     for (size_t p = 0; p < n_pw; ++p) {
         for (size_t q = 0; q < n_pw; ++q) {
-            double sum_alpha = 0.0;
-            double sum_beta = 0.0;
+            //compute the difference put tween the plane wave indexed by p and q
+            auto [px, py, pz] = plane_waves[p];
+            auto [qx, qy, qz] = plane_waves[q];
+            tuple<int, int, int> p_m_q = make_tuple(px - qx, py - qy, pz - qz);
+            // search for index of p_m_q in momentum transfer vectors
+            int index = distance(momentum_transfer_vectors.begin(), find(momentum_transfer_vectors.begin(), momentum_transfer_vectors.end(), p_m_q));
+
+            double hartree_sum = 0.0;
+            for (size_t r = 0; r < n_pw; ++r) {
+                //only append if we have valid index
+                if (lookup_table(r, index) != -1) {
+                    hartree_sum += total_density(r, lookup_table(r, index));
+                }
+            }
+            hartree(p, q) = hartree_sum*exchange(index);
+            
+            double exchange_sum_alpha = 0.0;
+            double exchange_sum_beta = 0.0;
             //iterate over all possible momentum transfers
             for (size_t r = 0; r < n_mom; ++r) {
                 //only append if we have valid indices
                 if (lookup_table(p, r) != -1 && lookup_table(q, r) != -1) {
-                    sum_alpha += exchange(r) * guess_density.first(lookup_table(p, r), lookup_table(q, r));
-                    sum_beta += exchange(r) * guess_density.second(lookup_table(p, r), lookup_table(q, r));
+                    exchange_sum_alpha += exchange(r) * guess_density.first(lookup_table(p, r), lookup_table(q, r));
+                    exchange_sum_beta += exchange(r) * guess_density.second(lookup_table(p, r), lookup_table(q, r));
                 }
             }
-            exchange_alpha(p, q) = sum_alpha;
-            exchange_beta(p, q) = sum_beta;
+            exchange_alpha(p, q) = exchange_sum_alpha;
+            exchange_beta(p, q) = exchange_sum_beta;
+        
+
+
         }    
     }
-    arma::mat fock_alpha = kinetic - exchange_alpha / volume;
-    arma::mat fock_beta = kinetic - exchange_beta / volume;
+
+    print_matrix(hartree);
+
+    arma::mat fock_alpha = kinetic + (hartree - exchange_alpha) / volume;
+    arma::mat fock_beta = kinetic + (hartree - exchange_beta) / volume;
     return {fock_alpha, fock_beta};
 }
 

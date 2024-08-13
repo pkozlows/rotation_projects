@@ -66,6 +66,7 @@ double run_scf(Basis_3D &basis, const int n_elec, ofstream &results_file, const 
         pair<arma::mat, arma::mat> uhf_guess = uhf.guess_uhf();
 
         do {
+
             pair<arma::mat, arma::mat> fock_matrices = uhf.make_uhf_fock_matrix(uhf_guess);
             arma::mat fock_alpha = fock_matrices.first;
             arma::vec eigenvalues_alpha;
@@ -80,18 +81,12 @@ double run_scf(Basis_3D &basis, const int n_elec, ofstream &results_file, const 
             pair<arma::mat, arma::mat> eigenvecs = make_pair(eigenvectors_alpha, eigenvectors_beta);
             pair<arma::mat, arma::mat> new_density = uhf.generate_uhf_density_matrix(eigenvecs);
 
-            // //get the trace of both density matrices
-            // double trace_alpha = arma::trace(new_density.first);
-            // double trace_beta = arma::trace(new_density.second);
-            // cout << "The trace of the alpha density matrix is: " << trace_alpha << endl;
-            // cout << "The trace of the beta density matrix is: " << trace_beta << endl;
-
             uhf_guess = new_density;
 
             energy = uhf.compute_uhf_energy(new_density, fock_matrices);
 
             if (abs(energy - previous_energy) < energy_threshold) {
-                // cout << "The converged UHF energy is: " << energy << " after " << iteration << " iterations." << endl;
+                cout << "The converged UHF energy is: " << energy << " after " << iteration << " iterations." << endl;
                 break;
             }
 
@@ -122,7 +117,7 @@ int main() {
         rs_to_rhf[rs_values[i]] = rhf_values[i];
         rs_to_uhf_m179[rs_values[i]] = uhf_values_m179[i];
     }
-    for (double rs = 2; rs <= 5.0; rs += 0.5) {
+    for (double rs = 4.5; rs <= 4.5; rs += 0.5) {
         
         cout << "--------------------------------" << endl;
         cout << "Starting rs = " << rs << endl;
@@ -142,6 +137,7 @@ int main() {
         cout << "--------------------------------" << endl;
 
         cout << "Reference RHF: " << rs_to_rhf[rs] << endl;
+        cout << "Reference UHF: " << rs_to_uhf_m179[rs] << endl;
 
         results_file << "Reference RHF: " << rs_to_rhf[rs] << endl;
     }

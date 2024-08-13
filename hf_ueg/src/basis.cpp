@@ -156,6 +156,8 @@ arma::vec Basis_3D::exchangeIntegrals() {
     return exchange;
 }
 
+
+
 double Basis_3D::compute_madeleung_constant() {
     // E_M \approx-2.837297 \times\left(\frac{3}{4 \pi}\right)^{1 / 3} N^{2 / 3} r_\pi^{-1}
     double madeleung_constant = -2.837297 * pow(3.0 / (4.0 * M_PI), 1.0 / 3.0) * pow(n_elec, 2.0 / 3.0) * pow(rs, -1.0);
