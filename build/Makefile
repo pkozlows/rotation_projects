@@ -201,29 +201,29 @@ src/matrix_utils.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/my_project.dir/build.make CMakeFiles/my_project.dir/src/matrix_utils.cpp.s
 .PHONY : src/matrix_utils.cpp.s
 
-src/scf.o: src/scf.cpp.o
-.PHONY : src/scf.o
+src/rhf.o: src/rhf.cpp.o
+.PHONY : src/rhf.o
 
 # target to build an object file
-src/scf.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/my_project.dir/build.make CMakeFiles/my_project.dir/src/scf.cpp.o
-.PHONY : src/scf.cpp.o
+src/rhf.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/my_project.dir/build.make CMakeFiles/my_project.dir/src/rhf.cpp.o
+.PHONY : src/rhf.cpp.o
 
-src/scf.i: src/scf.cpp.i
-.PHONY : src/scf.i
+src/rhf.i: src/rhf.cpp.i
+.PHONY : src/rhf.i
 
 # target to preprocess a source file
-src/scf.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/my_project.dir/build.make CMakeFiles/my_project.dir/src/scf.cpp.i
-.PHONY : src/scf.cpp.i
+src/rhf.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/my_project.dir/build.make CMakeFiles/my_project.dir/src/rhf.cpp.i
+.PHONY : src/rhf.cpp.i
 
-src/scf.s: src/scf.cpp.s
-.PHONY : src/scf.s
+src/rhf.s: src/rhf.cpp.s
+.PHONY : src/rhf.s
 
 # target to generate assembly for a file
-src/scf.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/my_project.dir/build.make CMakeFiles/my_project.dir/src/scf.cpp.s
-.PHONY : src/scf.cpp.s
+src/rhf.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/my_project.dir/build.make CMakeFiles/my_project.dir/src/rhf.cpp.s
+.PHONY : src/rhf.cpp.s
 
 # Help Target
 help:
@@ -243,9 +243,9 @@ help:
 	@echo "... src/matrix_utils.o"
 	@echo "... src/matrix_utils.i"
 	@echo "... src/matrix_utils.s"
-	@echo "... src/scf.o"
-	@echo "... src/scf.i"
-	@echo "... src/scf.s"
+	@echo "... src/rhf.o"
+	@echo "... src/rhf.i"
+	@echo "... src/rhf.s"
 .PHONY : help
 
 
