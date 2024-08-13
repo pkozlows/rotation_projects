@@ -18,21 +18,17 @@ pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
     vector<pair<tuple<int, int, int>, double>> plane_wave_kinetic_pairs; // Pair of plane wave and kinetic energy
 
     //compute the kinetic Autry cutoff based off of the number of electrons and the Wigner-Seitz radius
-    double ke_cutoff = 15*pow(rs, -2) * pow(n_elec, -2.0 / 3.0);
+    double ke_cutoff = 30*pow(rs, -2) * pow(n_elec, -2.0 / 3.0);
     double length = pow(4.0 * M_PI * n_elec / 3.0, 1.0 / 3.0) * rs;
     double constant = pow(2 * M_PI / length, 2) / 2;
 
     // Define the maximum value that nx, ny, nz can take
     int max_n = static_cast<int>(floor(sqrt(ke_cutoff / constant)));
-    // cout << "Max n: " << max_n << endl;
-    // cout << "ke_cutoff: " << ke_cutoff << endl;
     this->max_n = max_n;
-    cout << "max_n " << max_n << endl;
 
     for (int nx = -max_n; nx <= max_n; nx++) {
         int nx2 = nx * nx;
         double ke_nx = constant * nx2;
-        // cout << "ke_nx: " << ke_nx << endl;
 
 
 
@@ -40,7 +36,6 @@ pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
         for (int ny = -max_ny; ny <= max_ny; ny++) {
             int ny2 = ny * ny;
             double ke_nx_ny = ke_nx + constant * ny2;
-            // cout << "ke_nx_ny: " << ke_nx_ny << endl;
             if (ke_nx_ny > ke_cutoff) continue;
 
             int max_nz = static_cast<int>(floor(sqrt((ke_cutoff - ke_nx_ny) / constant)));
@@ -49,17 +44,12 @@ pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
                 double ke = ke_nx_ny + constant * nz2;
                 if (ke <= ke_cutoff) {
                     plane_wave_kinetic_pairs.emplace_back(make_tuple(nx, ny, nz), ke);
-                    //find out this information
-                    // cout << "nx: " << nx << " ny: " << ny << " nz: " << nz << " ke: " << ke << endl;
                     n_pw++;
                 }
             }
         }
     }
-    cout << "Number of plain waves " << n_pw << endl;
-    // cout << "---------------------" << endl;
-    // cout << "Number before sorting: " << n_pw << endl;
-    // cout << "---------------------" << endl;
+    cout << "The number of plain waves is " << n_pw << endl;
 
     // Sort the plane waves based on kinetic energy
     sort(plane_wave_kinetic_pairs.begin(), plane_wave_kinetic_pairs.end(),

@@ -1,2 +1,14 @@
+Computed RHF: 2.87858
+Reference RHF: 2.87858
+Computed RHF: 1.67516
+Reference RHF: 1.67516
+Computed RHF: 1.04723
+Reference RHF: 1.04723
 Computed RHF: 0.684122
 Reference RHF: 0.684122
+Computed RHF: 0.458493
+Reference RHF: 0.458493
+Computed RHF: 0.31068
+Reference RHF: 0.31068
+Computed RHF: 0.209867
+Reference RHF: 0.209867

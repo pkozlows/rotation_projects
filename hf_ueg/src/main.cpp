@@ -20,11 +20,11 @@ double run_scf(Basis_3D &basis, const int n_elec, ofstream &results_file, const 
     const arma::Mat<int> lookup_table = basis.make_lookup_table();
     const arma::mat kinetic = basis.kinetic_integrals();
     // find the trace of the kinetic matrix
-    double trace = 0.0;
-    for (int i = 0; i < n_pw; ++i) {
-        trace += kinetic(i, i);
-    }
-    cout << "The kinetic energy of all electrons is: " << 2 * trace << endl;
+    // double trace = 0.0;
+    // for (int i = 0; i < n_pw; ++i) {
+    //     trace += kinetic(i, i);
+    // }
+    // cout << "The kinetic energy of all electrons is: " << 2 * trace << endl;
 
     const arma::vec exchange = basis.exchangeIntegrals();
     // const double madeleung_constant = basis.compute_madeleung_constant();
@@ -51,21 +51,21 @@ double run_scf(Basis_3D &basis, const int n_elec, ofstream &results_file, const 
 
         // generate the new density matrix
         arma::mat new_density = rhf.generate_density_matrix(eigenvectors);
-        cout << "The new density is " << endl;
-        print_matrix(new_density);
-        cout << "after iteration " << iteration << endl;
+        // cout << "The new density is " << endl;
+        // print_matrix(new_density);
+        // cout << "after iteration " << iteration << endl;
 
-        // //find out the sum of the eigenvalues
-        double sum = 0.0;
-        for (int i = 0; i < n_pw; ++i) {
-            sum += eigenvalues(i);
-        }
-        cout << "The sum of the single particle energies is: " << 2*sum << endl;
+        // // //find out the sum of the eigenvalues
+        // double sum = 0.0;
+        // for (int i = 0; i < n_pw; ++i) {
+        //     sum += eigenvalues(i);
+        // }
+        // cout << "The sum of the single particle energies is: " << 2*sum << endl;
 
         energy = rhf.compute_energy(new_density, fock_matrix);
 
         if (abs(energy - previous_energy) < energy_threshold) {
-            cout << "It took this many iterations to converge RHF: " << iteration << endl;
+            // cout << "It took this many iterations to converge RHF: " << iteration << endl;
             break;
         }
 
@@ -95,7 +95,7 @@ int main() {
         rs_to_rhf[rs_values[i]] = rhf_values[i];
         rs_to_uhf_m179[rs_values[i]] = uhf_values_m179[i];
     }
-    for (double rs = 3.5; rs <= 3.5; rs += 0.5) {
+    for (double rs = 2; rs <= 5.0; rs += 0.5) {
         
         cout << "--------------------------------" << endl;
         cout << "Starting rs = " << rs << endl;
