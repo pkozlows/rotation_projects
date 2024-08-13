@@ -5,13 +5,14 @@
 #include <map>
 #include "basis.h"
 #include "rhf.h"
+#include "uhf.h"
 #include "matrix_utils.h"
 #include <cmath>
 
 using namespace std;
 
 // Function to run SCF and return the converged energy
-double run_scf(Basis_3D &basis, const int n_elec, ofstream &results_file, const double rs) {
+double run_scf(Basis_3D &basis, const int n_elec, ofstream &results_file, const double rs, bool use_rhf) {
 
     auto [n_pw, plane_waves] = basis.generate_plan_waves();
     auto [n_mom, momentum_transfer_vectors] = basis.generate_momentum_transfer_vectors();
@@ -27,7 +28,7 @@ double run_scf(Basis_3D &basis, const int n_elec, ofstream &results_file, const 
     // cout << "The kinetic energy of all electrons is: " << 2 * trace << endl;
 
     const arma::vec exchange = basis.exchangeIntegrals();
-    // const double madeleung_constant = basis.compute_madeleung_constant();
+    const double madeleung_constant = basis.compute_madeleung_constant();
     // cout << "madeleung_constant is: " << madeleung_constant << endl;
 
     cout << "-----------------------------------" << endl;
@@ -37,44 +38,70 @@ double run_scf(Basis_3D &basis, const int n_elec, ofstream &results_file, const 
     const double density_threshold = 1e-6;
     const double energy_threshold = 1e-6;
     const double volume = pow(pow(4.0 * M_PI * n_elec / 3.0, 1.0 / 3.0) * rs, 3);
+    if (use_rhf) {
+        RHF rhf(kinetic, exchange, n_elec, n_pw, n_mom, plane_waves, momentum_transfer_vectors, lookup_table, volume);
+        arma::mat rhf_guess = rhf.guess_rhf("identity");
 
-    RHF rhf(kinetic, exchange, n_elec, n_pw, n_mom, plane_waves, momentum_transfer_vectors, lookup_table, volume);
-    // arma::mat rhf_guess = rhf.guess_rhf("zeros");
-    arma::mat rhf_guess = rhf.guess_rhf("identity");
+        do {
+            arma::mat fock_matrix = rhf.make_fock_matrix(rhf_guess);
+            arma::vec eigenvalues;
+            arma::mat eigenvectors;
+            arma::eig_sym(eigenvalues, eigenvectors, fock_matrix);
+            arma::mat new_density = rhf.generate_density_matrix(eigenvectors);
+            rhf_guess = (new_density + rhf_guess) / 2;
 
-    do {
-        arma::mat fock_matrix = rhf.make_fock_matrix(rhf_guess);
-        // diagonalize the fock matrix
-        arma::vec eigenvalues;
-        arma::mat eigenvectors;
-        arma::eig_sym(eigenvalues, eigenvectors, fock_matrix);
+            energy = rhf.compute_energy(rhf_guess, fock_matrix);
 
-        // generate the new density matrix
-        arma::mat new_density = rhf.generate_density_matrix(eigenvectors);
-        // cout << "The new density is " << endl;
-        // print_matrix(new_density);
-        // cout << "after iteration " << iteration << endl;
+            if (abs(energy - previous_energy) < energy_threshold) {
+                // cout << "The converged RHF energy is: " << energy << " after " << iteration << " iterations." << endl;
+                break;
+            }
 
-        // // //find out the sum of the eigenvalues
-        // double sum = 0.0;
-        // for (int i = 0; i < n_pw; ++i) {
-        //     sum += eigenvalues(i);
-        // }
-        // cout << "The sum of the single particle energies is: " << 2*sum << endl;
+            previous_energy = energy;
+            iteration++;
 
-        energy = rhf.compute_energy(new_density, fock_matrix);
+        } while (iteration < 100);
+    } else {
+        UHF uhf(kinetic, exchange, n_elec, n_pw, n_mom, plane_waves, momentum_transfer_vectors, lookup_table, volume);
+        pair<arma::mat, arma::mat> uhf_guess = uhf.guess_uhf();
 
-        if (abs(energy - previous_energy) < energy_threshold) {
-            // cout << "It took this many iterations to converge RHF: " << iteration << endl;
-            break;
-        }
+        do {
+            pair<arma::mat, arma::mat> fock_matrices = uhf.make_uhf_fock_matrix(uhf_guess);
+            arma::mat fock_alpha = fock_matrices.first;
+            arma::vec eigenvalues_alpha;
+            arma::mat eigenvectors_alpha;
+            arma::eig_sym(eigenvalues_alpha, eigenvectors_alpha, fock_alpha);
 
-        // reintialize variables
-        rhf_guess = new_density;
-        previous_energy = energy;
-        iteration++;
+            arma::mat fock_beta = fock_matrices.second;
+            arma::vec eigenvalues_beta;
+            arma::mat eigenvectors_beta;
+            arma::eig_sym(eigenvalues_beta, eigenvectors_beta, fock_beta);
 
-    } while (iteration < 100);
+            pair<arma::mat, arma::mat> eigenvecs = make_pair(eigenvectors_alpha, eigenvectors_beta);
+            pair<arma::mat, arma::mat> new_density = uhf.generate_uhf_density_matrix(eigenvecs);
+
+            // //get the trace of both density matrices
+            // double trace_alpha = arma::trace(new_density.first);
+            // double trace_beta = arma::trace(new_density.second);
+            // cout << "The trace of the alpha density matrix is: " << trace_alpha << endl;
+            // cout << "The trace of the beta density matrix is: " << trace_beta << endl;
+
+            uhf_guess = new_density;
+
+            energy = uhf.compute_uhf_energy(new_density, fock_matrices);
+
+            if (abs(energy - previous_energy) < energy_threshold) {
+                // cout << "The converged UHF energy is: " << energy << " after " << iteration << " iterations." << endl;
+                break;
+            }
+
+            previous_energy = energy;
+            iteration++;
+
+        } while (iteration < 100);
+    }
+
+    
     return energy;
 }
 
@@ -104,9 +131,12 @@ int main() {
         
         Basis_3D basis_3d(rs, n_elec);
 
-        double rhf_energy = run_scf(basis_3d, n_elec, results_file, rs);
+               // Run both RHF and UHF
+        double rhf_energy = run_scf(basis_3d, n_elec, results_file, rs, true);
+        double uhf_energy = run_scf(basis_3d, n_elec, results_file, rs, false);
 
         cout << "Computed RHF: " << rhf_energy << endl;
+        cout << "Computed UHF: " << uhf_energy << endl;
 
         results_file << "Computed RHF: " << rhf_energy << endl;
         cout << "--------------------------------" << endl;

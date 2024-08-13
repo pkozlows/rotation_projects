@@ -225,6 +225,30 @@ src/rhf.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/my_project.dir/build.make CMakeFiles/my_project.dir/src/rhf.cpp.s
 .PHONY : src/rhf.cpp.s
 
+src/uhf.o: src/uhf.cpp.o
+.PHONY : src/uhf.o
+
+# target to build an object file
+src/uhf.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/my_project.dir/build.make CMakeFiles/my_project.dir/src/uhf.cpp.o
+.PHONY : src/uhf.cpp.o
+
+src/uhf.i: src/uhf.cpp.i
+.PHONY : src/uhf.i
+
+# target to preprocess a source file
+src/uhf.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/my_project.dir/build.make CMakeFiles/my_project.dir/src/uhf.cpp.i
+.PHONY : src/uhf.cpp.i
+
+src/uhf.s: src/uhf.cpp.s
+.PHONY : src/uhf.s
+
+# target to generate assembly for a file
+src/uhf.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/my_project.dir/build.make CMakeFiles/my_project.dir/src/uhf.cpp.s
+.PHONY : src/uhf.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -246,6 +270,9 @@ help:
 	@echo "... src/rhf.o"
 	@echo "... src/rhf.i"
 	@echo "... src/rhf.s"
+	@echo "... src/uhf.o"
+	@echo "... src/uhf.i"
+	@echo "... src/uhf.s"
 .PHONY : help
 
 
