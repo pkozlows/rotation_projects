@@ -28,6 +28,7 @@ private:
     size_t n_pw;
     size_t n_mom;
     int max_n;
+    double ke_cutoff;
 };
 
 

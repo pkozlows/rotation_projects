@@ -20,6 +20,7 @@ pair<size_t, arma::Mat<int>> Basis_3D::generate_plan_waves() {
 
     //compute the kinetic Autry cutoff based off of the number of electrons and the Wigner-Seitz radius
     double ke_cutoff = 20*pow(rs, -2) * pow(n_elec, -2.0 / 3.0);
+    this->ke_cutoff = ke_cutoff;
     double length = pow(4.0 * M_PI * n_elec / 3.0, 1.0 / 3.0) * rs;
     double constant = pow(2 * M_PI / length, 2) / 2;
 
@@ -27,7 +28,7 @@ pair<size_t, arma::Mat<int>> Basis_3D::generate_plan_waves() {
     int max_n = static_cast<int>(floor(sqrt(ke_cutoff / constant)));
     this->max_n = max_n;
 
-    for (size_t nx = 0; nx <= 2*max_n+1; nx++) {
+    for (int nx = -max_n; nx <= max_n; nx++) {
         int nx2 = nx * nx;
         double ke_nx = constant * nx2;
         int max_ny = static_cast<int>(floor(sqrt((ke_cutoff - ke_nx) / constant)));
@@ -73,21 +74,34 @@ pair<size_t, arma::Mat<int>> Basis_3D::generate_plan_waves() {
 
 //function to generate the list of momentum transfer vectors
 pair<size_t, arma::Mat<int>> Basis_3D::generate_momentum_transfer_vectors() {
+    // Find the plane wave with the maximum kinetic energy
+    arma::Col<int> max_pw = plane_waves.col(n_pw - 1);
+    // Determine its radius in reciprocal space by taking the squared norm
+    double fermi_radius_sq = arma::dot(max_pw, max_pw);
+
     vector<arma::Col<int>> momentum_transfer_vectors;
     size_t n_mom = 0;
-    //this goes the same as when we construct the plane waves but now we try up to |2 * max_n|
-    for (int i = -2 * max_n; i <= 2 * max_n; i++) {
-        for (int j = -2 * max_n; j <= 2 * max_n; j++) {
-            for (int k = -2 * max_n; k <= 2 * max_n; k++) {
-                momentum_transfer_vectors.push_back(arma::Col<int>{i, j, k});
-                n_mom++;
+
+    // Generate momentum transfer vectors within the appropriate range
+    for (int i = -2 * max_n; i <= 2 * max_n; ++i) {
+        int i2 = i * i;
+        for (int j = -2 * max_n; j <= 2 * max_n; ++j) {
+            int j2 = j * j;
+            for (int k = -2 * max_n; k <= 2 * max_n; ++k) {
+                int k2 = k * k;
+                // Ensure the squared norm is within the appropriate range
+                if (i2 + j2 + k2 <= 4 * fermi_radius_sq) {
+                    momentum_transfer_vectors.push_back(arma::Col<int>{i, j, k});
+                    ++n_mom;
+                }
             }
         }
     }
-    //now put the momentum transfer vectors into an arma::Mat
+
+    // Convert the vector of momentum transfer vectors into an arma::Mat
     arma::Mat<int> momentum_transfer_vectors_mat(3, n_mom);
     #pragma omp parallel for
-    for (size_t k = 0; k < n_mom; k++) {
+    for (size_t k = 0; k < n_mom; ++k) {
         momentum_transfer_vectors_mat.col(k) = momentum_transfer_vectors[k];
     }
     
@@ -95,6 +109,7 @@ pair<size_t, arma::Mat<int>> Basis_3D::generate_momentum_transfer_vectors() {
     this->momentum_transfer_vectors = momentum_transfer_vectors_mat;
     return {n_mom, momentum_transfer_vectors_mat};
 }
+
 
 arma::Mat<int> Basis_3D::make_lookup_table(){
     arma::Mat<int> lookup_table(n_pw, n_mom, arma::fill::zeros);
