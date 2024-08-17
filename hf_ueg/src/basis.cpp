@@ -7,15 +7,16 @@
 using namespace std;
 
 // Base class constructor
-Basis_3D::Basis_3D(const double &rs, const int &n_elec)
+Basis_3D::Basis_3D(const float &rs, const size_t &n_elec)
     : rs(rs), n_elec(n_elec) {
 }
 
 
 // Function to determine the number of plane waves within the kinetic energy cutoff and compute the kinetic energy integral matrix
-pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
-    size_t n_pw = 0;
-    vector<pair<tuple<int, int, int>, double>> plane_wave_kinetic_pairs; // Pair of plane wave and kinetic energy
+pair<size_t, arma::Mat<int>> Basis_3D::generate_plan_waves() {
+    int n_pw = 0;
+    vector<arma::Col<int>> plane_waves;
+    vector<double> kinetic_energies;
 
     //compute the kinetic Autry cutoff based off of the number of electrons and the Wigner-Seitz radius
     double ke_cutoff = 20*pow(rs, -2) * pow(n_elec, -2.0 / 3.0);
@@ -29,21 +30,18 @@ pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
     for (int nx = -max_n; nx <= max_n; nx++) {
         int nx2 = nx * nx;
         double ke_nx = constant * nx2;
-
-
-
         int max_ny = static_cast<int>(floor(sqrt((ke_cutoff - ke_nx) / constant)));
         for (int ny = -max_ny; ny <= max_ny; ny++) {
             int ny2 = ny * ny;
             double ke_nx_ny = ke_nx + constant * ny2;
             if (ke_nx_ny > ke_cutoff) continue;
-
             int max_nz = static_cast<int>(floor(sqrt((ke_cutoff - ke_nx_ny) / constant)));
             for (int nz = -max_nz; nz <= max_nz; nz++) {
                 int nz2 = nz * nz;
-                double ke = ke_nx_ny + constant * nz2;
-                if (ke <= ke_cutoff) {
-                    plane_wave_kinetic_pairs.emplace_back(make_tuple(nx, ny, nz), ke);
+                double pw_ke = ke_nx_ny + constant * nz2; 
+                if (pw_ke <= ke_cutoff) {
+                    plane_waves.push_back(arma::Col<int>{nx, ny, nz});
+                    kinetic_energies.push_back(pw_ke);
                     n_pw++;
                 }
             }
@@ -51,74 +49,82 @@ pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
     }
     cout << "The number of plain waves is " << n_pw << endl;
 
-    // Sort the plane waves based on kinetic energy
-    sort(plane_wave_kinetic_pairs.begin(), plane_wave_kinetic_pairs.end(),
-              [](const pair<tuple<int, int, int>, double>& a,
-                 const pair<tuple<int, int, int>, double>& b) {
-                  return a.second < b.second;
-              });
 
+    arma::Mat<int> basis(3, n_pw);
+    arma::vec eigval(n_pw);
 
-    // Separate the sorted plane waves and kinetic energies
-    vector<tuple<int, int, int>> sorted_plane_waves;
-    vector<double> sorted_kinetic_energies;
-    for (const auto& pair : plane_wave_kinetic_pairs) {
-        sorted_plane_waves.push_back(pair.first);
-        sorted_kinetic_energies.push_back(pair.second);
+	
+    #pragma omp parallel for
+    for (size_t k = 0; k < n_pw; k++){
+        basis.col(k) = plane_waves[k];
+        eigval(k) = kinetic_energies[k];
     }
+    //now do the sorting
+    arma::uvec indices = arma::stable_sort_index(eigval, "ascend");
+    basis = basis.cols(indices);
+    eigval = eigval(indices);
+    
     this->n_pw = n_pw;
-    this->kinetic_energies = sorted_kinetic_energies;
-    this->plane_waves = sorted_plane_waves;
+    this->kinetic_energies = eigval;
+    this->plane_waves = basis;
 
-    return {n_pw, sorted_plane_waves};
+    return {n_pw, basis};
 }
 
 //function to generate the list of momentum transfer vectors
-pair<size_t, vector<tuple<int, int, int>>> Basis_3D::generate_momentum_transfer_vectors() {
-    vector<tuple<int, int, int>> momentum_transfer_vectors;
+pair<size_t, arma::Mat<int>> Basis_3D::generate_momentum_transfer_vectors() {
+    vector<arma::Col<int>> momentum_transfer_vectors;
     size_t n_mom = 0;
     //this goes the same as when we construct the plane waves but now we try up to |2 * max_n|
     for (int i = -2 * max_n; i <= 2 * max_n; i++) {
         for (int j = -2 * max_n; j <= 2 * max_n; j++) {
             for (int k = -2 * max_n; k <= 2 * max_n; k++) {
-                momentum_transfer_vectors.push_back(make_tuple(i, j, k));
+                momentum_transfer_vectors.push_back(arma::Col<int>{i, j, k});
                 n_mom++;
             }
         }
     }
+    //now put the momentum transfer vectors into an arma::Mat
+    arma::Mat<int> momentum_transfer_vectors_mat(3, n_mom);
+    for (size_t k = 0; k < n_mom; k++) {
+        momentum_transfer_vectors_mat.col(k) = momentum_transfer_vectors[k];
+    }
+    
     this->n_mom = n_mom;
-    this->momentum_transfer_vectors = momentum_transfer_vectors;
-    return {n_mom, momentum_transfer_vectors};
+    this->momentum_transfer_vectors = momentum_transfer_vectors_mat;
+    return {n_mom, momentum_transfer_vectors_mat};
 }
 
-arma::Mat<int> Basis_3D::make_lookup_table() {
+arma::Mat<int> Basis_3D::make_lookup_table(){
     arma::Mat<int> lookup_table(n_pw, n_mom, arma::fill::zeros);
 
     for (size_t p = 0; p < n_pw; p++) {
-        auto [px, py, pz] = plane_waves[p];
+        // Extract plane wave components
+        int px = plane_waves(0, p);
+        int py = plane_waves(1, p);
+        int pz = plane_waves(2, p);
 
         for (size_t Q = 0; Q < n_mom; Q++) {
-            auto [qx, qy, qz] = momentum_transfer_vectors[Q];
+            // Extract momentum transfer vector components
+            int px_m_qx = px - momentum_transfer_vectors(0, Q);
+            int py_m_qy = py - momentum_transfer_vectors(1, Q);
+            int pz_m_qz = pz - momentum_transfer_vectors(2, Q);
 
-            // we subtract the momentum transfer vector
-            int px_m_qx = px - qx;
-            int py_m_qy = py - qy;
-            int pz_m_qz = pz - qz;
+            // Create a column vector for the resulting vector
+            arma::Col<int> p_m_Q = {px_m_qx, py_m_qy, pz_m_qz};
 
-            // Create tuple p_pm_Q
-            tuple<int, int, int> p_m_Q = make_tuple(px_m_qx, py_m_qy, pz_m_qz);
+            // Initialize index to -1 (default value if not found)
+            int index = -1;
 
-            // search for p_pm_Q in plane_waves
-            auto it = find(plane_waves.begin(), plane_waves.end(), p_m_Q);
-
-            int index;
-            if (it != plane_waves.end()) {
-                // if found, get the index
-                index = distance(plane_waves.begin(), it);
-            } else {
-                // if not found, set index to -1
-                index = -1;
+            // Iterate through each column in plane_waves to find a match
+            for (size_t i = 0; i < n_pw; ++i) {
+                arma::Col<int> current_pw = plane_waves.col(i);
+                if (arma::all(current_pw == p_m_Q)) {
+                    index = i;
+                    break;
+                }
             }
+
             lookup_table(p, Q) = index;
         }
     }
@@ -127,22 +133,28 @@ arma::Mat<int> Basis_3D::make_lookup_table() {
 }
 
 
+
 // Function to generate the kinetic integral matrix
 arma::mat Basis_3D::kinetic_integrals() {
     // Create a diagonal matrix directly from the std::vector<double>
-    arma::mat kinetic_integral_matrix = arma::diagmat(arma::vec(kinetic_energies));
+    arma::mat kinetic_integral_matrix = arma::diagmat(kinetic_energies);
 
     return kinetic_integral_matrix;
 }
 
 // Function to generate the exchange integrals; note that we just need one entry per momentum transfer vector
-arma::vec Basis_3D::exchangeIntegrals() {
+arma::vec Basis_3D::interaction_integrals() {
     arma::vec exchange(n_mom, arma::fill::zeros);
     double length = pow(4.0 * M_PI * n_elec / 3.0, 1.0 / 3.0) * rs;
     double constant = pow(2 * M_PI / length, 2);
 
-    for (int Q = 0; Q < n_mom; Q++) {
-        auto [qx, qy, qz] = momentum_transfer_vectors[Q];
+    for (size_t Q = 0; Q < n_mom; Q++) {
+        
+        // Extract momentum transfer vector components
+        int qx = momentum_transfer_vectors(0, Q);
+        int qy = momentum_transfer_vectors(1, Q);
+        int qz = momentum_transfer_vectors(2, Q);
+
         double q2 = qx * qx + qy * qy + qz * qz;
         q2 *= constant;
         if (q2 > 1e-8) {

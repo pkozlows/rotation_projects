@@ -9,7 +9,7 @@ pair<arma::mat, arma::mat> UHF::guess_uhf() {
     arma::mat density_matrix_alpha(n_pw, n_pw, arma::fill::zeros);
     //fill the alpha density matrix with n_elec diag 1s
     for (size_t i = 0; i < n_elec; ++i) {
-        density_matrix_alpha(i, i+1) = 1.0;
+        density_matrix_alpha(i, i) = 1.0;
     }
     arma::mat density_matrix_beta(n_pw, n_pw, arma::fill::zeros);
     return {density_matrix_alpha, density_matrix_beta};
@@ -29,20 +29,31 @@ pair<arma::mat, arma::mat> UHF::make_uhf_fock_matrix(const pair<arma::mat, arma:
             // start by calculating the hartree term
 
             // calculate the momentum transfer vector
-            auto [px, py, pz] = plane_waves[p];
-            auto [qx, qy, qz] = plane_waves[q];
-            tuple<int, int, int> p_m_q = make_tuple(px - qx, py - qy, pz - qz);            
-            int index = distance(momentum_transfer_vectors.begin(), find(momentum_transfer_vectors.begin(), momentum_transfer_vectors.end(), p_m_q));
+            arma::Col<int> p_m_q(3);
+            p_m_q(0) = plane_waves(0, p) - plane_waves(0, q);
+            p_m_q(1) = plane_waves(1, p) - plane_waves(1, q);
+            p_m_q(2) = plane_waves(2, p) - plane_waves(2, q);
 
-            double hartree_sum = 0.0;
-            for (size_t r = 0; r < n_pw; ++r) {
-                // compute the index of j-Q
-                int idx = lookup_table(r, index);
-                if (idx != -1) {
-                    hartree_sum += total_density(r, idx);
+            // Find the index of p_m_q in momentum_transfer_vectors
+            size_t index = static_cast<size_t>(-1); // Default to -1 (not found)
+            for (size_t r = 0; r < n_mom; ++r) {
+                if (arma::all(momentum_transfer_vectors.col(r) == p_m_q)) {
+                    index = r;
+                    break;
                 }
             }
-            hartree(p, q) = interaction(index) * hartree_sum;
+
+            if (index != static_cast<size_t>(-1)) {
+                double hartree_sum = 0.0;
+                for (size_t r = 0; r < n_pw; ++r) {
+                    // compute the index of j-Q
+                    int idx = lookup_table(r, index);
+                    if (idx != -1) {
+                        hartree_sum += total_density(r, idx);
+                    }
+                }
+                hartree(p, q) = interaction(index) * hartree_sum;
+            }
 
             // now calculate the exchange term
             double exchange_sum_alpha = 0.0;

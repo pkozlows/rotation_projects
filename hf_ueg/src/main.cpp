@@ -12,7 +12,7 @@
 using namespace std;
 
 // Function to run SCF and return the converged energy
-double run_scf(Basis_3D &basis, const int n_elec, ofstream &results_file, const double rs, bool use_rhf) {
+double run_scf(Basis_3D &basis, const int &n_elec, const float &rs, ofstream &results_file, bool use_rhf) {
 
     auto [n_pw, plane_waves] = basis.generate_plan_waves();
     auto [n_mom, momentum_transfer_vectors] = basis.generate_momentum_transfer_vectors();
@@ -27,7 +27,7 @@ double run_scf(Basis_3D &basis, const int n_elec, ofstream &results_file, const 
     // }
     // cout << "The kinetic energy of all electrons is: " << 2 * trace << endl;
 
-    const arma::vec exchange = basis.exchangeIntegrals();
+    const arma::vec integrals = basis.interaction_integrals();
     const double madeleung_constant = basis.compute_madeleung_constant();
     // cout << "madeleung_constant is: " << madeleung_constant << endl;
 
@@ -36,10 +36,10 @@ double run_scf(Basis_3D &basis, const int n_elec, ofstream &results_file, const 
     double energy = 0.0;
     int iteration = 0;
     const double density_threshold = 1e-6;
-    const double energy_threshold = 1e-6;
+    const double energy_threshold = 1e-9;
     const double volume = pow(pow(4.0 * M_PI * n_elec / 3.0, 1.0 / 3.0) * rs, 3);
     if (use_rhf) {
-        RHF rhf(kinetic, exchange, n_elec, n_pw, n_mom, plane_waves, momentum_transfer_vectors, lookup_table, volume);
+        RHF rhf(kinetic, integrals, n_elec, n_pw, n_mom, plane_waves, momentum_transfer_vectors, lookup_table, volume);
         arma::mat rhf_guess = rhf.guess_rhf("identity");
 
         do {
@@ -65,7 +65,7 @@ double run_scf(Basis_3D &basis, const int n_elec, ofstream &results_file, const 
 
         } while (iteration < 100);
     } else {
-        UHF uhf(kinetic, exchange, n_elec, n_pw, n_mom, plane_waves, momentum_transfer_vectors, lookup_table, volume);
+        UHF uhf(kinetic, integrals, n_elec, n_pw, n_mom, plane_waves, momentum_transfer_vectors, lookup_table, volume);
         pair<arma::mat, arma::mat> uhf_guess = uhf.guess_uhf();
 
         do {
@@ -78,13 +78,13 @@ double run_scf(Basis_3D &basis, const int n_elec, ofstream &results_file, const 
             // cout << "The trace of the beta density is: " << trace_beta << endl;
             pair<arma::mat, arma::mat> fock_matrices = uhf.make_uhf_fock_matrix(uhf_guess);
             arma::mat fock_alpha = fock_matrices.first;
-            cout << "Fock alpha: " << fock_alpha << endl;
+            // cout << "Fock alpha: " << fock_alpha << endl;
             arma::vec eigenvalues_alpha;
             arma::mat eigenvectors_alpha;
             arma::eig_sym(eigenvalues_alpha, eigenvectors_alpha, fock_alpha);
 
             arma::mat fock_beta = fock_matrices.second;
-            cout << "Fock beta: " << fock_beta << endl;
+            // cout << "Fock beta: " << fock_beta << endl;
             arma::vec eigenvalues_beta;
             arma::mat eigenvectors_beta;
             arma::eig_sym(eigenvalues_beta, eigenvectors_beta, fock_beta);
@@ -130,7 +130,7 @@ int main() {
         rs_to_rhf[rs_values[i]] = rhf_values[i];
         rs_to_uhf_m179[rs_values[i]] = uhf_values_m179[i];
     }
-    for (double rs = 4; rs <= 5; rs += 0.5) {
+    for (float rs = 4; rs <= 5; rs += 0.5) {
         
         cout << "--------------------------------" << endl;
         cout << "Starting rs = " << rs << endl;
@@ -139,9 +139,8 @@ int main() {
         
         Basis_3D basis_3d(rs, n_elec);
 
-        // Run both RHF and UHF
-        double rhf_energy = run_scf(basis_3d, n_elec, results_file, rs, true);
-        double uhf_energy = run_scf(basis_3d, n_elec, results_file, rs, false);
+        double rhf_energy = run_scf(basis_3d, n_elec, rs, results_file, true);
+        double uhf_energy = run_scf(basis_3d, n_elec, rs, results_file, false);
 
         cout << "Computed RHF: " << rhf_energy << endl;
         cout << "Computed UHF: " << uhf_energy << endl;
