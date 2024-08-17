@@ -14,11 +14,11 @@ Basis_3D::Basis_3D(const double &rs, const int &n_elec)
 
 // Function to determine the number of plane waves within the kinetic energy cutoff and compute the kinetic energy integral matrix
 pair<int, vector<tuple<int, int, int>>> Basis_3D::generate_plan_waves() {
-    int n_pw = 0;
+    size_t n_pw = 0;
     vector<pair<tuple<int, int, int>, double>> plane_wave_kinetic_pairs; // Pair of plane wave and kinetic energy
 
     //compute the kinetic Autry cutoff based off of the number of electrons and the Wigner-Seitz radius
-    double ke_cutoff = 30*pow(rs, -2) * pow(n_elec, -2.0 / 3.0);
+    double ke_cutoff = 20*pow(rs, -2) * pow(n_elec, -2.0 / 3.0);
     double length = pow(4.0 * M_PI * n_elec / 3.0, 1.0 / 3.0) * rs;
     double constant = pow(2 * M_PI / length, 2) / 2;
 
@@ -94,10 +94,10 @@ pair<size_t, vector<tuple<int, int, int>>> Basis_3D::generate_momentum_transfer_
 arma::Mat<int> Basis_3D::make_lookup_table() {
     arma::Mat<int> lookup_table(n_pw, n_mom, arma::fill::zeros);
 
-    for (int p = 0; p < n_pw; p++) {
+    for (size_t p = 0; p < n_pw; p++) {
         auto [px, py, pz] = plane_waves[p];
 
-        for (int Q = 0; Q < n_mom; Q++) {
+        for (size_t Q = 0; Q < n_mom; Q++) {
             auto [qx, qy, qz] = momentum_transfer_vectors[Q];
 
             // we subtract the momentum transfer vector

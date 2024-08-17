@@ -4,33 +4,51 @@ using namespace std;
 
 
 arma::mat RHF::guess_rhf(const string &guess_type) {
+    
     arma::mat density_matrix(n_pw, n_pw, arma::fill::zeros);
-    if (guess_type == "identity") {
-        for (int i = 0; i < n_elec / 2; ++i) {
-            density_matrix(i, i) = 2.0;
-        }
-    }
+
+
     return density_matrix;
 }
 
 arma::mat RHF::make_fock_matrix(arma::mat &guess_density) {
 
+    arma::mat hartree = arma::mat(n_pw, n_pw, arma::fill::zeros);
     arma::mat exchange_matrix(n_pw, n_pw, arma::fill::zeros);
 
+    //we can do the hartree and exchange terms in the same loops
     for (size_t p = 0; p < n_pw; ++p) {
         for (size_t q = 0; q < n_pw; ++q) {
-            double sum = 0.0;
+            // start by calculating the hartree term
+
+            // calculate the momentum transfer vector
+            auto [px, py, pz] = plane_waves[p];
+            auto [qx, qy, qz] = plane_waves[q];
+            tuple<int, int, int> p_m_q = make_tuple(px - qx, py - qy, pz - qz);
+            int index = distance(momentum_transfer_vectors.begin(), find(momentum_transfer_vectors.begin(), momentum_transfer_vectors.end(), p_m_q));
+
+            double hartree_sum = 0.0;
+            for (size_t r = 0; r < n_pw; ++r) {
+                // compute the index of j-Q
+                int idx = lookup_table(r, index);
+                if (idx != -1) {
+                    hartree_sum += guess_density(r, idx);
+                }
+            }
+            hartree(p, q) = interaction(index) * hartree_sum;
+            
+            double exchange_sum = 0.0;
             //iterate over all possible momentum transfers
             for (size_t r = 0; r < n_mom; ++r) {
                 //only append if we have valid indices
                 if (lookup_table(p, r) != -1 && lookup_table(q, r) != -1) {
-                    sum += exchange(r) * guess_density(lookup_table(p, r), lookup_table(q, r));
+                    exchange_sum += interaction(r) * guess_density(lookup_table(p, r), lookup_table(q, r));
                 }
             }
-            exchange_matrix(p, q) = sum;
+            exchange_matrix(p, q) = exchange_sum;
         }    
     }
-    return kinetic - 0.5 * (exchange_matrix / volume);
+    return kinetic + (hartree - 0.5 * exchange_matrix) / volume;
 }
 
 

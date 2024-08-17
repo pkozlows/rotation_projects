@@ -121,6 +121,43 @@ This tells us that the constraint $\mathbf{q} = \mathbf{k}_\mu - \mathbf{k}_\lam
 \begin{equation}
     g_{\mu\lambda\nu\sigma} = \frac{4\pi}{\Omega} \frac{1}{|\mathbf{k}_\mu - \mathbf{k}_\lambda|^2} \delta_{\mathbf{k}_\mu - \mathbf{k}_\lambda, \mathbf{k}_\sigma - \mathbf{k}_\nu}
 \end{equation}
+Now, we want to derive the expressions for the ERI operators in the 3D case. We know that the hearty operator in hearty folk theory in first quantization is defined by:
+\begin{equation}
+    J^{\sigma }_n(\mathbf{r}) = \int d\mathbf{r}^{\prime} \psi_n^{\sigma *}(\mathbf{r}^{\prime}) \frac{1}{\left|\mathbf{r} - \mathbf{r}^{\prime}\right|} \psi_n^{\sigma }(\mathbf{r})
+\label{eq:hartree}
+\end{equation}
+So in total it is given by:
+\begin{equation}
+    J^{\sigma }(\mathbf{r}) = \sum_{N_{occ}} J^{\sigma }_n(\mathbf{r})
+\end{equation}
+In the plain wave bases, its matrix a limit is given by
+\begin{equation}
+    J^{\sigma }_{\mu\nu} = \int_{\Omega } d\mathbf{r} \phi^*_\mu(\mathbf{r}) J^{\sigma }(\mathbf{r}) \phi_\nu(\mathbf{r})
+\end{equation}
+Plugging in equation \ref{eq:hartree} we get:
+\begin{equation}
+    J^{\sigma }_{\mu\nu} = \int_{\Omega } d\mathbf{r} \phi^*_\mu(\mathbf{r}) \left( \sum_{N_{occ}} \int d\mathbf{r}^{\prime} \psi_n^{\sigma *}(\mathbf{r}^{\prime}) \frac{1}{\left|\mathbf{r} - \mathbf{r}^{\prime}\right|} \psi_n^{\sigma }(\mathbf{r}) \right) \phi_\nu(\mathbf{r})
+\end{equation}
+We know that the molecular orbitals $\psi_n^{\sigma }(\mathbf{r})$ are given by a linear combination of the plane waves as $\psi_n^{\sigma }(\mathbf{r}) = \sum_i c^{\sigma }_{n,i} \phi_i(\mathbf{r})$. Plugging this into the expression for $J^{\sigma }_{\mu\nu}$ we get:
+\begin{equation}
+    J^{\sigma }_{\mu\nu} = \sum_{N_{occ}} \int_{\Omega } d\mathbf{r} \int d\mathbf{r}^{\prime} \phi^*_\mu(\mathbf{r}) \left( \sum_i c^{\sigma}_{n,i} \phi_i(\mathbf{r}^{\prime}) \right) ^{*} \frac{1}{\left|\mathbf{r} - \mathbf{r}^{\prime}\right|} \left( \sum_j c^{\sigma }_{n,j} \phi_j(\mathbf{r}^{\prime}) \right) \phi_\nu(\mathbf{r})
+\end{equation}
+Bringing the two sums over atomic orbitals and their coefficients out to the front, we get:
+\begin{equation}
+    J^{\sigma }_{\mu\nu} = \sum_{ij} \left( \sum_{N_{occ}} \left( c^{\sigma }_{n,i} \right)^{*} c^{\sigma }_{n,j} \right) \int_{\Omega } d\mathbf{r} \int d\mathbf{r}^{\prime} \phi^*_\mu(\mathbf{r}) \phi^*_i(\mathbf{r}^{\prime}) \frac{1}{\left|\mathbf{r} - \mathbf{r}^{\prime}\right|} \phi_j(\mathbf{r}^{\prime}) \phi_\nu(\mathbf{r})
+\end{equation}
+This leads to
+\begin{equation}
+J_{\vec{k}, p q}^\sigma=\frac{4 \pi}{\Omega} \sum_{\vec{k}^{\prime}} \sum_{i j} P_{\vec{k}^{\prime}, j i}^\sigma \frac{1}{\left|\vec{G}_j-\vec{G}_i\right|^2} \delta\left[\left(\vec{G}_j+\vec{G}_q\right)-\left(\vec{G}_i+\vec{G}_p\right)\right]
+\end{equation}
+We know the delta function insists $\vec{G}_j-\vec{G}_i = \vec{G}_p - \vec{G}_q$ which means that $\vec{G}_i = \vec{G}_j - \vec{G}_p + \vec{G}_q$. Substituting this in gifts
+\begin{equation}
+J_{\vec{k}, p q}^\sigma=\frac{4 \pi}{\Omega} \sum_{\vec{k}^{\prime}} \sum_{i j} P_{\vec{k}^{\prime}, j, j - (p-q)}^\sigma \frac{1}{\left|\vec{G}_j-\left( \vec{G}_j - \vec{G}_p + \vec{G}_q \right)\right|^2}
+\end{equation}
+Defining $Q = \vec{G}_p - \vec{G}_q$ and $P_{j, j-Q}^\sigma = P_{\vec{k}^{\prime}, j, j - (p-q)}^\sigma$ we get
+\begin{equation}
+J_{\vec{k}, p q}^\sigma=\frac{4 \pi}{|Q|^2\Omega } \sum_{\vec{k}^{\prime}} \sum_{j} P_{j, j-Q}^\sigma
+\end{equation}
 This can be rewritten as
 \begin{equation}
 \begin{aligned}

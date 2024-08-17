@@ -47,13 +47,16 @@ double run_scf(Basis_3D &basis, const int n_elec, ofstream &results_file, const 
             arma::vec eigenvalues;
             arma::mat eigenvectors;
             arma::eig_sym(eigenvalues, eigenvectors, fock_matrix);
+
             arma::mat new_density = rhf.generate_density_matrix(eigenvectors);
-            rhf_guess = (new_density + rhf_guess) / 2;
+
+            rhf_guess = new_density;
 
             energy = rhf.compute_energy(rhf_guess, fock_matrix);
+            // cout << "The energy is " << energy << " after " << iteration << " iterations." << endl;
 
             if (abs(energy - previous_energy) < energy_threshold) {
-                // cout << "The converged RHF energy is: " << energy << " after " << iteration << " iterations." << endl;
+                cout << "The converged RHF energy is: " << energy << " after " << iteration << " iterations." << endl;
                 break;
             }
 
@@ -66,24 +69,34 @@ double run_scf(Basis_3D &basis, const int n_elec, ofstream &results_file, const 
         pair<arma::mat, arma::mat> uhf_guess = uhf.guess_uhf();
 
         do {
-
+            // cout << "Iteration: " << iteration << endl;
+            // cout << "Alpha density: " << uhf_guess.first << endl;
+            // cout << "Beta density: " << uhf_guess.second << endl;
+            // double trace_alpha = arma::trace(uhf_guess.first);
+            // double trace_beta = arma::trace(uhf_guess.second);
+            // cout << "The trace of the alpha density is: " << trace_alpha << endl;
+            // cout << "The trace of the beta density is: " << trace_beta << endl;
             pair<arma::mat, arma::mat> fock_matrices = uhf.make_uhf_fock_matrix(uhf_guess);
             arma::mat fock_alpha = fock_matrices.first;
+            cout << "Fock alpha: " << fock_alpha << endl;
             arma::vec eigenvalues_alpha;
             arma::mat eigenvectors_alpha;
             arma::eig_sym(eigenvalues_alpha, eigenvectors_alpha, fock_alpha);
 
             arma::mat fock_beta = fock_matrices.second;
+            cout << "Fock beta: " << fock_beta << endl;
             arma::vec eigenvalues_beta;
             arma::mat eigenvectors_beta;
             arma::eig_sym(eigenvalues_beta, eigenvectors_beta, fock_beta);
 
             pair<arma::mat, arma::mat> eigenvecs = make_pair(eigenvectors_alpha, eigenvectors_beta);
             pair<arma::mat, arma::mat> new_density = uhf.generate_uhf_density_matrix(eigenvecs);
-
+            pair<arma::mat, arma::mat> eigenvectors;
+            eigenvectors = eigenvecs;
             uhf_guess = new_density;
 
             energy = uhf.compute_uhf_energy(new_density, fock_matrices);
+            cout << "The energy is " << energy << " after " << iteration << " iterations." << endl;
 
             if (abs(energy - previous_energy) < energy_threshold) {
                 cout << "The converged UHF energy is: " << energy << " after " << iteration << " iterations." << endl;
@@ -117,7 +130,7 @@ int main() {
         rs_to_rhf[rs_values[i]] = rhf_values[i];
         rs_to_uhf_m179[rs_values[i]] = uhf_values_m179[i];
     }
-    for (double rs = 4.5; rs <= 4.5; rs += 0.5) {
+    for (double rs = 4; rs <= 5; rs += 0.5) {
         
         cout << "--------------------------------" << endl;
         cout << "Starting rs = " << rs << endl;
@@ -126,7 +139,7 @@ int main() {
         
         Basis_3D basis_3d(rs, n_elec);
 
-               // Run both RHF and UHF
+        // Run both RHF and UHF
         double rhf_energy = run_scf(basis_3d, n_elec, results_file, rs, true);
         double uhf_energy = run_scf(basis_3d, n_elec, results_file, rs, false);
 
