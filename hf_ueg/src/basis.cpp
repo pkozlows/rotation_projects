@@ -14,7 +14,7 @@ Basis_3D::Basis_3D(const float &rs, const size_t &n_elec)
 
 // Function to determine the number of plane waves within the kinetic energy cutoff and compute the kinetic energy integral matrix
 pair<size_t, arma::Mat<int>> Basis_3D::generate_plan_waves() {
-    int n_pw = 0;
+    size_t n_pw = 0;
     vector<arma::Col<int>> plane_waves;
     vector<double> kinetic_energies;
 
@@ -27,7 +27,7 @@ pair<size_t, arma::Mat<int>> Basis_3D::generate_plan_waves() {
     int max_n = static_cast<int>(floor(sqrt(ke_cutoff / constant)));
     this->max_n = max_n;
 
-    for (int nx = -max_n; nx <= max_n; nx++) {
+    for (size_t nx = 0; nx <= 2*max_n+1; nx++) {
         int nx2 = nx * nx;
         double ke_nx = constant * nx2;
         int max_ny = static_cast<int>(floor(sqrt((ke_cutoff - ke_nx) / constant)));
@@ -86,6 +86,7 @@ pair<size_t, arma::Mat<int>> Basis_3D::generate_momentum_transfer_vectors() {
     }
     //now put the momentum transfer vectors into an arma::Mat
     arma::Mat<int> momentum_transfer_vectors_mat(3, n_mom);
+    #pragma omp parallel for
     for (size_t k = 0; k < n_mom; k++) {
         momentum_transfer_vectors_mat.col(k) = momentum_transfer_vectors[k];
     }
@@ -117,9 +118,9 @@ arma::Mat<int> Basis_3D::make_lookup_table(){
             int index = -1;
 
             // Iterate through each column in plane_waves to find a match
+            #pragma omp parallel for
             for (size_t i = 0; i < n_pw; ++i) {
-                arma::Col<int> current_pw = plane_waves.col(i);
-                if (arma::all(current_pw == p_m_Q)) {
+                if (arma::all(plane_waves.col(i) == p_m_Q)) {
                     index = i;
                     break;
                 }

@@ -12,7 +12,7 @@
 using namespace std;
 
 // Function to run SCF and return the converged energy
-double run_scf(Basis_3D &basis, const int &n_elec, const float &rs, ofstream &results_file, bool use_rhf) {
+double run_scf(Basis_3D &basis, const size_t &n_elec, const float &rs, ofstream &results_file, bool use_rhf) {
 
     auto [n_pw, plane_waves] = basis.generate_plan_waves();
     auto [n_mom, momentum_transfer_vectors] = basis.generate_momentum_transfer_vectors();
@@ -116,7 +116,7 @@ double run_scf(Basis_3D &basis, const int &n_elec, const float &rs, ofstream &re
 int main() {
     ofstream results_file("hf_ueg/plt/scf_id.txt");
 
-    int n_elec = 14;
+    size_t n_elec = 14;
 
     // Reference RHF and UHF energies
     double rs_values[] = {0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0};
