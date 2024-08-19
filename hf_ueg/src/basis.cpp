@@ -13,35 +13,35 @@ Basis_3D::Basis_3D(const float &rs, const size_t &n_elec)
 
 
 // Function to determine the number of plane waves within the kinetic energy cutoff and compute the kinetic energy integral matrix
-pair<size_t, arma::Mat<int>> Basis_3D::generate_plan_waves() {
+pair<size_t, arma::Mat<size_t>> Basis_3D::generate_plan_waves() {
     size_t n_pw = 0;
-    vector<arma::Col<int>> plane_waves;
+    vector<arma::Col<size_t>> plane_waves;
     vector<double> kinetic_energies;
 
     //compute the kinetic Autry cutoff based off of the number of electrons and the Wigner-Seitz radius
-    double ke_cutoff = 20*pow(rs, -2) * pow(n_elec, -2.0 / 3.0);
+    double ke_cutoff = 100*pow(rs, -2) * pow(n_elec, -2.0 / 3.0);
     this->ke_cutoff = ke_cutoff;
     double length = pow(4.0 * M_PI * n_elec / 3.0, 1.0 / 3.0) * rs;
     double constant = pow(2 * M_PI / length, 2) / 2;
 
     // Define the maximum value that nx, ny, nz can take
-    int max_n = static_cast<int>(floor(sqrt(ke_cutoff / constant)));
+    size_t max_n = static_cast<size_t>(floor(sqrt(ke_cutoff / constant)));
     this->max_n = max_n;
 
-    for (int nx = -max_n; nx <= max_n; nx++) {
-        int nx2 = nx * nx;
+    for (size_t nx = 0; nx <= 2 * max_n; nx++) {
+        size_t nx2 = pow(nx - max_n, 2);
         double ke_nx = constant * nx2;
-        int max_ny = static_cast<int>(floor(sqrt((ke_cutoff - ke_nx) / constant)));
-        for (int ny = -max_ny; ny <= max_ny; ny++) {
-            int ny2 = ny * ny;
+        size_t max_ny = static_cast<size_t>(floor(sqrt((ke_cutoff - ke_nx) / constant)));
+        for (size_t ny = 0; ny <= 2 * max_ny; ny++) {
+            size_t ny2 = pow(ny - max_ny, 2);
             double ke_nx_ny = ke_nx + constant * ny2;
             if (ke_nx_ny > ke_cutoff) continue;
-            int max_nz = static_cast<int>(floor(sqrt((ke_cutoff - ke_nx_ny) / constant)));
-            for (int nz = -max_nz; nz <= max_nz; nz++) {
-                int nz2 = nz * nz;
+            size_t max_nz = static_cast<size_t>(floor(sqrt((ke_cutoff - ke_nx_ny) / constant)));
+            for (size_t nz = 0; nz <= 2 * max_nz; nz++) {
+                size_t nz2 = pow(nz - max_nz, 2);
                 double pw_ke = ke_nx_ny + constant * nz2; 
                 if (pw_ke <= ke_cutoff) {
-                    plane_waves.push_back(arma::Col<int>{nx, ny, nz});
+                    plane_waves.push_back(arma::Col<size_t>{nx, ny, nz});
                     kinetic_energies.push_back(pw_ke);
                     n_pw++;
                 }
@@ -51,7 +51,7 @@ pair<size_t, arma::Mat<int>> Basis_3D::generate_plan_waves() {
     cout << "The number of plain waves is " << n_pw << endl;
 
 
-    arma::Mat<int> basis(3, n_pw);
+    arma::Mat<size_t> basis(3, n_pw);
     arma::vec eigval(n_pw);
 
 	

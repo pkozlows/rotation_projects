@@ -10,7 +10,7 @@ class Basis_3D {
 public:
     Basis_3D(const float &rs, const size_t &n_elec);
    
-    pair<size_t, arma::Mat<int>> generate_plan_waves();
+    pair<size_t, arma::Mat<size_t>> generate_plan_waves();
     pair<size_t, arma::Mat<int>> generate_momentum_transfer_vectors();
     arma::Mat<int> make_lookup_table();
     arma::mat kinetic_integrals();
@@ -23,7 +23,7 @@ private:
     float rs;
     size_t n_elec;
     arma::vec kinetic_energies;
-    arma::Mat<int> plane_waves;
+    arma::Mat<size_t> plane_waves;
     arma::Mat<int> momentum_transfer_vectors;
     size_t n_pw;
     size_t n_mom;
