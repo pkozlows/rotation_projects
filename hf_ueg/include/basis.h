@@ -12,7 +12,7 @@ public:
    
     pair<size_t, arma::Mat<int>> generate_plan_waves();
     pair<size_t, arma::Mat<int>> generate_momentum_transfer_vectors();
-    arma::Mat<int> momentum_lookup_table();
+    pair<arma::Mat<int>, arma::Mat<size_t>> generate_lookup_tables();
     arma::mat kinetic_integrals();
     arma::vec interaction_integrals();
     double compute_madeleung_constant();

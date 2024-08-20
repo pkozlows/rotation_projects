@@ -18,7 +18,7 @@ double run_scf(Basis_3D &basis, const size_t &n_elec, const float &rs, ofstream 
     auto [n_mom, momentum_transfer_vectors] = basis.generate_momentum_transfer_vectors();
     
 
-    const arma::Mat<int> lookup_table = basis.momentum_lookup_table();
+    const pair<arma::Mat<int>, arma::Mat<size_t>> lookup_tables = basis.generate_lookup_tables();
     const arma::mat kinetic = basis.kinetic_integrals();
 
     const arma::vec integrals = basis.interaction_integrals();
@@ -31,7 +31,7 @@ double run_scf(Basis_3D &basis, const size_t &n_elec, const float &rs, ofstream 
     const double energy_threshold = 1e-9;
     const double volume = 4.0 * n_elec / 3.0 * M_PI * pow(rs, 3);
     if (use_rhf) {
-        RHF rhf(kinetic, integrals, n_elec, n_pw, n_mom, plane_waves, momentum_transfer_vectors, lookup_table, volume);
+        RHF rhf(kinetic, integrals, n_elec, n_pw, n_mom, plane_waves, momentum_transfer_vectors, lookup_tables, volume);
         arma::mat rhf_guess = rhf.guess_rhf("identity");
 
         do {
@@ -48,16 +48,17 @@ double run_scf(Basis_3D &basis, const size_t &n_elec, const float &rs, ofstream 
             // cout << "The energy is " << energy << " after " << iteration << " iterations." << endl;
 
             if (abs(energy - previous_energy) < energy_threshold) {
-                cout << "The converged RHF energy is: " << energy << " after " << iteration << " iterations." << endl;
+                cout << "The converged RHF energy is: " << energy << " and density matrix is: " << endl;
+                cout << rhf_guess << " after " << iteration << " iterations." << endl;
                 break;
             }
 
             previous_energy = energy;
             iteration++;
 
-        } while (iteration < 100);
+        } while (iteration < 500);
     } else {
-        UHF uhf(kinetic, integrals, n_elec, n_pw, n_mom, plane_waves, momentum_transfer_vectors, lookup_table, volume, spin_polarisation);
+        UHF uhf(kinetic, integrals, n_elec, n_pw, n_mom, plane_waves, momentum_transfer_vectors, lookup_tables, volume, spin_polarisation);
         pair<arma::mat, arma::mat> uhf_guess = uhf.guess_uhf();
 
         do {
@@ -80,7 +81,7 @@ double run_scf(Basis_3D &basis, const size_t &n_elec, const float &rs, ofstream 
             uhf_guess = new_density;
 
             energy = uhf.compute_uhf_energy(new_density, fock_matrices);
-            cout << "The energy is " << energy << " after " << iteration << " iterations." << endl;
+            // cout << "The energy is " << energy << " after " << iteration << " iterations." << endl;
 
             if (abs(energy - previous_energy) < energy_threshold) {
                 cout << "The converged UHF energy is: " << energy << " after " << iteration << " iterations." << endl;
@@ -90,7 +91,7 @@ double run_scf(Basis_3D &basis, const size_t &n_elec, const float &rs, ofstream 
             previous_energy = energy;
             iteration++;
 
-        } while (iteration < 100);
+        } while (iteration < 500);
     }
 
     

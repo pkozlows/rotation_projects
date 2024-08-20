@@ -48,40 +48,26 @@ pair<arma::mat, arma::mat> UHF::make_uhf_fock_matrix(const pair<arma::mat, arma:
         for (size_t q = 0; q < n_pw; ++q) {
             // start by calculating the hartree term
 
-            // calculate the momentum transfer vector
-            arma::Col<int> p_m_q(3);
-            p_m_q(0) = plane_waves(0, p) - plane_waves(0, q);
-            p_m_q(1) = plane_waves(1, p) - plane_waves(1, q);
-            p_m_q(2) = plane_waves(2, p) - plane_waves(2, q);
-
-            // Find the index of p_m_q in momentum_transfer_vectors
-            size_t momentumIndex;
-            for (size_t a = 0; a < n_mom; ++a) {
-                if (arma::all(momentum_transfer_vectors.col(a) == p_m_q)) {
-                    momentumIndex = a;
-                    break;
-                }
-            }
-            
+            //use the second local table to compute the index of the momentum transfer vector
+            size_t index = lookup_tables.second(p, q);
             double hartree_sum = 0.0;
             for (size_t r = 0; r < n_pw; ++r) {
                 // compute the index of j-Q
-                int idx = lookup_table(r, momentumIndex);
+                int idx = lookup_tables.first(r, index);
                 if (idx != -1) {
                     hartree_sum += total_density(r, idx);
                 }
             }
-            hartree(p, q) = interaction(momentumIndex) * hartree_sum;
+            hartree(p, q) = interaction(index) * hartree_sum;
 
             // now calculate the exchange term
             double exchange_sum_alpha = 0.0;
             double exchange_sum_beta = 0.0;
             for (size_t r = 0; r < n_mom; ++r) {
-                int p_idx = lookup_table(p, r);
-                int q_idx = lookup_table(q, r);
-                if (p_idx != -1 && q_idx != -1) {
-                    exchange_sum_alpha += interaction(r) * guess_density.first(p_idx, q_idx);
-                    exchange_sum_beta += interaction(r) * guess_density.second(p_idx, q_idx);
+                //only append if we have valid indices
+                if (lookup_tables.first(p, r) != -1 && lookup_tables.first(q, r) != -1) {
+                    exchange_sum_alpha += interaction(r) * guess_density.first(lookup_tables.first(p, r), lookup_tables.first(q, r));
+                    exchange_sum_beta += interaction(r) * guess_density.second(lookup_tables.first(p, r), lookup_tables.first(q, r));
                 }
             }
             exchange_alpha(p, q) = exchange_sum_alpha;

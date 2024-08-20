@@ -133,7 +133,7 @@ pair<arma::Mat<int>, arma::Mat<size_t>> Basis_3D::generate_lookup_tables() {
             int Qz = momentum_transfer_vectors(2, Q);
 
             // initialize index to -1 (default value if not found)
-            int index = -1 // Default to -1 (not found)
+            int index = -1; // Default to -1 (not found)
 
             // Iterate through each column in plane_waves to find a match
             #pragma omp parallel for
