@@ -12,32 +12,24 @@
 using namespace std;
 
 // Function to run SCF and return the converged energy
-double run_scf(Basis_3D &basis, const size_t &n_elec, const float &rs, ofstream &results_file, bool use_rhf) {
+double run_scf(Basis_3D &basis, const size_t &n_elec, const float &rs, ofstream &results_file, bool use_rhf, float spin_polarisation = 0.0) {
 
     auto [n_pw, plane_waves] = basis.generate_plan_waves();
     auto [n_mom, momentum_transfer_vectors] = basis.generate_momentum_transfer_vectors();
     
 
-    const arma::Mat<int> lookup_table = basis.make_lookup_table();
+    const arma::Mat<int> lookup_table = basis.momentum_lookup_table();
     const arma::mat kinetic = basis.kinetic_integrals();
-    // find the trace of the kinetic matrix
-    // double trace = 0.0;
-    // for (int i = 0; i < n_pw; ++i) {
-    //     trace += kinetic(i, i);
-    // }
-    // cout << "The kinetic energy of all electrons is: " << 2 * trace << endl;
 
     const arma::vec integrals = basis.interaction_integrals();
     const double madeleung_constant = basis.compute_madeleung_constant();
-    // cout << "madeleung_constant is: " << madeleung_constant << endl;
 
-    cout << "-----------------------------------" << endl;
     double previous_energy = 0.0;
     double energy = 0.0;
     int iteration = 0;
     const double density_threshold = 1e-6;
     const double energy_threshold = 1e-9;
-    const double volume = pow(pow(4.0 * M_PI * n_elec / 3.0, 1.0 / 3.0) * rs, 3);
+    const double volume = 4.0 * n_elec / 3.0 * M_PI * pow(rs, 3);
     if (use_rhf) {
         RHF rhf(kinetic, integrals, n_elec, n_pw, n_mom, plane_waves, momentum_transfer_vectors, lookup_table, volume);
         arma::mat rhf_guess = rhf.guess_rhf("identity");
@@ -65,26 +57,17 @@ double run_scf(Basis_3D &basis, const size_t &n_elec, const float &rs, ofstream 
 
         } while (iteration < 100);
     } else {
-        UHF uhf(kinetic, integrals, n_elec, n_pw, n_mom, plane_waves, momentum_transfer_vectors, lookup_table, volume);
+        UHF uhf(kinetic, integrals, n_elec, n_pw, n_mom, plane_waves, momentum_transfer_vectors, lookup_table, volume, spin_polarisation);
         pair<arma::mat, arma::mat> uhf_guess = uhf.guess_uhf();
 
         do {
-            // cout << "Iteration: " << iteration << endl;
-            // cout << "Alpha density: " << uhf_guess.first << endl;
-            // cout << "Beta density: " << uhf_guess.second << endl;
-            // double trace_alpha = arma::trace(uhf_guess.first);
-            // double trace_beta = arma::trace(uhf_guess.second);
-            // cout << "The trace of the alpha density is: " << trace_alpha << endl;
-            // cout << "The trace of the beta density is: " << trace_beta << endl;
             pair<arma::mat, arma::mat> fock_matrices = uhf.make_uhf_fock_matrix(uhf_guess);
             arma::mat fock_alpha = fock_matrices.first;
-            // cout << "Fock alpha: " << fock_alpha << endl;
             arma::vec eigenvalues_alpha;
             arma::mat eigenvectors_alpha;
             arma::eig_sym(eigenvalues_alpha, eigenvectors_alpha, fock_alpha);
 
             arma::mat fock_beta = fock_matrices.second;
-            // cout << "Fock beta: " << fock_beta << endl;
             arma::vec eigenvalues_beta;
             arma::mat eigenvectors_beta;
             arma::eig_sym(eigenvalues_beta, eigenvectors_beta, fock_beta);
@@ -92,6 +75,7 @@ double run_scf(Basis_3D &basis, const size_t &n_elec, const float &rs, ofstream 
             pair<arma::mat, arma::mat> eigenvecs = make_pair(eigenvectors_alpha, eigenvectors_beta);
             pair<arma::mat, arma::mat> new_density = uhf.generate_uhf_density_matrix(eigenvecs);
             pair<arma::mat, arma::mat> eigenvectors;
+
             eigenvectors = eigenvecs;
             uhf_guess = new_density;
 
@@ -140,7 +124,7 @@ int main() {
         Basis_3D basis_3d(rs, n_elec);
 
         double rhf_energy = run_scf(basis_3d, n_elec, rs, results_file, true);
-        double uhf_energy = run_scf(basis_3d, n_elec, rs, results_file, false);
+        double uhf_energy = run_scf(basis_3d, n_elec, rs, results_file, false, 0);
 
         cout << "Computed RHF: " << rhf_energy << endl;
         cout << "Computed UHF: " << uhf_energy << endl;

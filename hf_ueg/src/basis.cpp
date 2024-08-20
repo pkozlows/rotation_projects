@@ -1,8 +1,10 @@
 #include <iostream>
 #include <armadillo>
 #include <vector>
+#include <cassert>
 #include "basis.h"
 #include "matrix_utils.h"
+#include <utility>
 
 using namespace std;
 
@@ -13,35 +15,34 @@ Basis_3D::Basis_3D(const float &rs, const size_t &n_elec)
 
 
 // Function to determine the number of plane waves within the kinetic energy cutoff and compute the kinetic energy integral matrix
-pair<size_t, arma::Mat<size_t>> Basis_3D::generate_plan_waves() {
+pair<size_t, arma::Mat<int>> Basis_3D::generate_plan_waves() {
     size_t n_pw = 0;
-    vector<arma::Col<size_t>> plane_waves;
+    vector<arma::Col<int>> plane_waves;
     vector<double> kinetic_energies;
+    double length = pow(4.0 * M_PI * n_elec / 3.0, 1.0 / 3.0) * rs;
+    double unit = pow(2 * M_PI / length, 2) / 2;
 
     //compute the kinetic Autry cutoff based off of the number of electrons and the Wigner-Seitz radius
-    double ke_cutoff = 100*pow(rs, -2) * pow(n_elec, -2.0 / 3.0);
-    this->ke_cutoff = ke_cutoff;
-    double length = pow(4.0 * M_PI * n_elec / 3.0, 1.0 / 3.0) * rs;
-    double constant = pow(2 * M_PI / length, 2) / 2;
+    double ke_cutoff = 2*unit;
 
     // Define the maximum value that nx, ny, nz can take
-    size_t max_n = static_cast<size_t>(floor(sqrt(ke_cutoff / constant)));
+    int max_n = static_cast<int>(floor(sqrt(ke_cutoff / unit)));
     this->max_n = max_n;
 
-    for (size_t nx = 0; nx <= 2 * max_n; nx++) {
-        size_t nx2 = pow(nx - max_n, 2);
-        double ke_nx = constant * nx2;
-        size_t max_ny = static_cast<size_t>(floor(sqrt((ke_cutoff - ke_nx) / constant)));
-        for (size_t ny = 0; ny <= 2 * max_ny; ny++) {
-            size_t ny2 = pow(ny - max_ny, 2);
-            double ke_nx_ny = ke_nx + constant * ny2;
+    for (int nx = -max_n; nx <= max_n; nx++) {
+        size_t nx2 = nx * nx;
+        double ke_nx = unit * nx2;
+        int max_ny = static_cast<int>(floor(sqrt((ke_cutoff - ke_nx) / unit)));
+        for (int ny = -max_ny; ny <= max_ny; ny++) {
+            size_t ny2 = ny * ny;
+            double ke_nx_ny = ke_nx + unit * ny2;
             if (ke_nx_ny > ke_cutoff) continue;
-            size_t max_nz = static_cast<size_t>(floor(sqrt((ke_cutoff - ke_nx_ny) / constant)));
-            for (size_t nz = 0; nz <= 2 * max_nz; nz++) {
-                size_t nz2 = pow(nz - max_nz, 2);
-                double pw_ke = ke_nx_ny + constant * nz2; 
+            int max_nz = static_cast<int>(floor(sqrt((ke_cutoff - ke_nx_ny) / unit)));
+            for (int nz = -max_nz; nz <= max_nz; nz++) {
+                size_t nz2 = nz * nz;
+                double pw_ke = ke_nx_ny + unit * nz2; 
                 if (pw_ke <= ke_cutoff) {
-                    plane_waves.push_back(arma::Col<size_t>{nx, ny, nz});
+                    plane_waves.push_back(arma::Col<int>{nx, ny, nz});
                     kinetic_energies.push_back(pw_ke);
                     n_pw++;
                 }
@@ -51,7 +52,7 @@ pair<size_t, arma::Mat<size_t>> Basis_3D::generate_plan_waves() {
     cout << "The number of plain waves is " << n_pw << endl;
 
 
-    arma::Mat<size_t> basis(3, n_pw);
+    arma::Mat<int> basis(3, n_pw);
     arma::vec eigval(n_pw);
 
 	
@@ -111,42 +112,64 @@ pair<size_t, arma::Mat<int>> Basis_3D::generate_momentum_transfer_vectors() {
 }
 
 
-arma::Mat<int> Basis_3D::make_lookup_table(){
-    arma::Mat<int> lookup_table(n_pw, n_mom, arma::fill::zeros);
 
+pair<arma::Mat<int>, arma::Mat<size_t>> Basis_3D::generate_lookup_tables() {
+    // Initialize the lookup tables
+    arma::Mat<int> momentum_lookup_table(n_pw, n_mom, arma::fill::zeros);
+    arma::Mat<size_t> pw_lookup_table(n_pw, n_pw, arma::fill::zeros);
+
+    // Loop common to both tables
     for (size_t p = 0; p < n_pw; p++) {
         // Extract plane wave components
         int px = plane_waves(0, p);
         int py = plane_waves(1, p);
         int pz = plane_waves(2, p);
 
+        //start with the momentum lookup table
         for (size_t Q = 0; Q < n_mom; Q++) {
             // Extract momentum transfer vector components
-            int px_m_qx = px - momentum_transfer_vectors(0, Q);
-            int py_m_qy = py - momentum_transfer_vectors(1, Q);
-            int pz_m_qz = pz - momentum_transfer_vectors(2, Q);
+            int Qx = momentum_transfer_vectors(0, Q);
+            int Qy = momentum_transfer_vectors(1, Q);
+            int Qz = momentum_transfer_vectors(2, Q);
 
-            // Create a column vector for the resulting vector
-            arma::Col<int> p_m_Q = {px_m_qx, py_m_qy, pz_m_qz};
-
-            // Initialize index to -1 (default value if not found)
-            int index = -1;
+            // initialize index to -1 (default value if not found)
+            int index = -1 // Default to -1 (not found)
 
             // Iterate through each column in plane_waves to find a match
             #pragma omp parallel for
             for (size_t i = 0; i < n_pw; ++i) {
-                if (arma::all(plane_waves.col(i) == p_m_Q)) {
+                if (plane_waves(0, i) == px - Qx && plane_waves(1, i) == py - Qy && plane_waves(2, i) == pz - Qz) {
                     index = i;
                     break;
                 }
             }
 
-            lookup_table(p, Q) = index;
+            momentum_lookup_table(p, Q) = index;
+        }
+        //now to the other table 
+        for (size_t q = 0; q < n_pw; q++) {
+            // Extract momentum transfer vector components
+            int px_m_qx = px - plane_waves(0, q);
+            int py_m_qy = py - plane_waves(1, q);
+            int pz_m_qz = pz - plane_waves(2, q);
+
+            // Iterate through each column in momentum_transfer_vectors to find a match
+            #pragma omp parallel for
+            for (size_t i = 0; i < n_mom; ++i) {
+                size_t index = static_cast<size_t>(-1); // Default to -1 (not found)
+                if (momentum_transfer_vectors(0, i) == px_m_qx && momentum_transfer_vectors(1, i) == py_m_qy && momentum_transfer_vectors(2, i) == pz_m_qz) {
+                    index = i;
+                    assert(index != static_cast<size_t>(-1)); // Ensure something was found
+                    break;
+                }
+            }
         }
     }
 
-    return lookup_table;
+    // Return the pair of lookup tables
+    return make_pair(momentum_lookup_table, pw_lookup_table);
 }
+
 
 
 

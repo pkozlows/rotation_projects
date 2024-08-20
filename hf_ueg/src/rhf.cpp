@@ -4,7 +4,10 @@ using namespace std;
 
 
 arma::mat RHF::guess_rhf(const string &guess_type) {
-    
+    // //for this guess of the density matrix I want the elements to be random numbers between 0 and 1
+    // arma::mat density_matrix = arma::randu<arma::mat>(n_pw, n_pw);
+    // //I want to make the density matrix symmetric so I add the transpose of the matrix to itself
+    // density_matrix += density_matrix.t();
     arma::mat density_matrix(n_pw, n_pw, arma::fill::zeros);
 
 
@@ -13,7 +16,7 @@ arma::mat RHF::guess_rhf(const string &guess_type) {
 
 arma::mat RHF::make_fock_matrix(arma::mat &guess_density) {
 
-    arma::mat hartree = arma::mat(n_pw, n_pw, arma::fill::zeros);
+    arma::mat hartree(n_pw, n_pw, arma::fill::zeros);
     arma::mat exchange_matrix(n_pw, n_pw, arma::fill::zeros);
     
     //we can do the hartree and exchange terms in the same loops

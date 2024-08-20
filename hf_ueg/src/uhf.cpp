@@ -1,22 +1,42 @@
 #include "uhf.h"
 #include "matrix_utils.h"
 #include <cassert>
+#include <cmath> // For std::round
 
 using namespace std;
 
 pair<arma::mat, arma::mat> UHF::guess_uhf() {
-    // Generate initial guesses
+    // Determine the number of alpha and beta electrons based on polarization
+    size_t n_alpha = std::round(n_elec / 2.0 * (1 + spin_polarisation));
+    size_t n_beta = n_elec - n_alpha;
+
+    // Create density matrices
     arma::mat density_matrix_alpha(n_pw, n_pw, arma::fill::zeros);
-    //fill the alpha density matrix with n_elec diag 1s
-    for (size_t i = 0; i < n_elec; ++i) {
+    arma::mat density_matrix_beta(n_pw, n_pw, arma::fill::zeros);
+
+    // Fill the alpha density matrix with 1's on the diagonal up to n_alpha
+    for (size_t i = 0; i < n_alpha; ++i) {
         density_matrix_alpha(i, i) = 1.0;
     }
-    arma::mat density_matrix_beta(n_pw, n_pw, arma::fill::zeros);
+    // cout << "The alpha density matrix is: " << density_matrix_alpha << endl;
+
+    // Fill the beta density matrix with 1's on the diagonal up to n_beta
+    for (size_t i = 0; i < n_beta; ++i) {
+        density_matrix_beta(i, i) = 1.0;
+    }
+    //I want to add a random perturbation so I need to make a matrix of the same size as my guesses for alpha and beta but I want its entries to be random numbers between 0 and 1
+    arma::mat perturbation_alpha = arma::randu<arma::mat>(n_pw, n_pw);
+    arma::mat perturbation_beta = arma::randu<arma::mat>(n_pw, n_pw);
+    density_matrix_alpha += perturbation_alpha + perturbation_alpha.t();
+    density_matrix_beta += perturbation_beta + perturbation_beta.t();
     return {density_matrix_alpha, density_matrix_beta};
 }
 
+
+
 pair<arma::mat, arma::mat> UHF::make_uhf_fock_matrix(const pair<arma::mat, arma::mat> &guess_density) {
     arma::mat total_density = guess_density.first + guess_density.second;
+    // cout << "The total density is: " << total_density << endl;
 
     arma::mat hartree(n_pw, n_pw, arma::fill::zeros);
 
@@ -35,25 +55,23 @@ pair<arma::mat, arma::mat> UHF::make_uhf_fock_matrix(const pair<arma::mat, arma:
             p_m_q(2) = plane_waves(2, p) - plane_waves(2, q);
 
             // Find the index of p_m_q in momentum_transfer_vectors
-            size_t index = static_cast<size_t>(-1); // Default to -1 (not found)
-            for (size_t r = 0; r < n_mom; ++r) {
-                if (arma::all(momentum_transfer_vectors.col(r) == p_m_q)) {
-                    index = r;
+            size_t momentumIndex;
+            for (size_t a = 0; a < n_mom; ++a) {
+                if (arma::all(momentum_transfer_vectors.col(a) == p_m_q)) {
+                    momentumIndex = a;
                     break;
                 }
             }
-
-            if (index != static_cast<size_t>(-1)) {
-                double hartree_sum = 0.0;
-                for (size_t r = 0; r < n_pw; ++r) {
-                    // compute the index of j-Q
-                    int idx = lookup_table(r, index);
-                    if (idx != -1) {
-                        hartree_sum += total_density(r, idx);
-                    }
+            
+            double hartree_sum = 0.0;
+            for (size_t r = 0; r < n_pw; ++r) {
+                // compute the index of j-Q
+                int idx = lookup_table(r, momentumIndex);
+                if (idx != -1) {
+                    hartree_sum += total_density(r, idx);
                 }
-                hartree(p, q) = interaction(index) * hartree_sum;
             }
+            hartree(p, q) = interaction(momentumIndex) * hartree_sum;
 
             // now calculate the exchange term
             double exchange_sum_alpha = 0.0;
@@ -90,9 +108,18 @@ double UHF::compute_uhf_energy(const pair<arma::mat, arma::mat> &density_matrix,
 }
 
 pair<arma::mat, arma::mat> UHF::generate_uhf_density_matrix(const pair<arma::mat, arma::mat> &eigenvectors) {
-    size_t n_spin = n_elec / 2;
-    arma::mat occupied_eigenvectors_alpha = eigenvectors.first.cols(0, n_spin - 1);
-    arma::mat occupied_eigenvectors_beta = eigenvectors.second.cols(0, n_spin - 1);
+    int n_alpha = n_elec / 2 * (1 + spin_polarisation);
+    int n_beta = n_elec - n_alpha;
+    arma::mat occupied_eigenvectors_alpha = eigenvectors.first.cols(0, n_alpha - 1);
+    arma::mat occupied_eigenvectors_beta = eigenvectors.second.cols(0, n_beta - 1);
+    // arma::mat occupied_eigenvectors_alpha = eigenvectors.first.cols(0, n_alpha - 1);
+    // arma::mat occupied_eigenvectors_beta(n_pw, n_pw, arma::fill::zeros);
+    // if (spin_polarisation != 1) {
+    //     arma::mat occupied_eigenvectors_beta = eigenvectors.second.cols(0, n_beta - 1);
+    // }
+    // cout << "The occupied eigenvectors for alpha are: " << occupied_eigenvectors_alpha << endl;
+    // cout << "The occupied eigenvectors for beta are: " << occupied_eigenvectors_beta << endl;
+
     arma::mat density_matrix_alpha = (occupied_eigenvectors_alpha * occupied_eigenvectors_alpha.t());
     arma::mat density_matrix_beta = (occupied_eigenvectors_beta * occupied_eigenvectors_beta.t());
     return {density_matrix_alpha, density_matrix_beta};
