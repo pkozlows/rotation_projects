@@ -18,7 +18,7 @@ double run_scf(Basis_3D &basis, const size_t &n_elec, const float &rs, ofstream 
     auto [n_mom, momentum_transfer_vectors] = basis.generate_momentum_transfer_vectors();
     
 
-    const pair<arma::Mat<int>, arma::Mat<size_t>> lookup_tables = basis.generate_lookup_tables();
+    const pair<arma::Mat<int>, arma::Mat<int>> lookup_tables = basis.generate_lookup_tables();
     const arma::mat kinetic = basis.kinetic_integrals();
 
     const arma::vec integrals = basis.interaction_integrals();
@@ -42,17 +42,19 @@ double run_scf(Basis_3D &basis, const size_t &n_elec, const float &rs, ofstream 
 
             arma::mat new_density = rhf.generate_density_matrix(eigenvectors);
 
-            rhf_guess = new_density;
 
             energy = rhf.compute_energy(rhf_guess, fock_matrix);
             // cout << "The energy is " << energy << " after " << iteration << " iterations." << endl;
 
-            if (abs(energy - previous_energy) < energy_threshold) {
-                cout << "The converged RHF energy is: " << energy << " and density matrix is: " << endl;
-                cout << rhf_guess << " after " << iteration << " iterations." << endl;
+            double density_difference = arma::norm(new_density - rhf_guess, "fro");
+            if (density_difference < density_threshold && abs(energy - previous_energy) < energy_threshold) {
+                cout << " and the diagonal of the density matrix is: " << endl;
+                cout << rhf_guess.diag() << endl;
                 break;
             }
 
+
+            rhf_guess = new_density;
             previous_energy = energy;
             iteration++;
 
@@ -84,7 +86,9 @@ double run_scf(Basis_3D &basis, const size_t &n_elec, const float &rs, ofstream 
             // cout << "The energy is " << energy << " after " << iteration << " iterations." << endl;
 
             if (abs(energy - previous_energy) < energy_threshold) {
-                cout << "The converged UHF energy is: " << energy << " after " << iteration << " iterations." << endl;
+                // cout << "The converged UHF energy is: " << energy << " after " << iteration << " iterations." << " and density matrix is: " << endl;
+                // cout << uhf_guess.first << endl;
+                // cout << uhf_guess.second << endl;
                 break;
             }
 
@@ -115,7 +119,7 @@ int main() {
         rs_to_rhf[rs_values[i]] = rhf_values[i];
         rs_to_uhf_m179[rs_values[i]] = uhf_values_m179[i];
     }
-    for (float rs = 4; rs <= 5; rs += 0.5) {
+    for (float rs = 4; rs <= 4; rs += 0.5) {
         
         cout << "--------------------------------" << endl;
         cout << "Starting rs = " << rs << endl;
@@ -125,16 +129,16 @@ int main() {
         Basis_3D basis_3d(rs, n_elec);
 
         double rhf_energy = run_scf(basis_3d, n_elec, rs, results_file, true);
-        double uhf_energy = run_scf(basis_3d, n_elec, rs, results_file, false, 0);
+        // double uhf_energy = run_scf(basis_3d, n_elec, rs, results_file, false, 0);
 
         cout << "Computed RHF: " << rhf_energy << endl;
-        cout << "Computed UHF: " << uhf_energy << endl;
+        // cout << "Computed UHF: " << uhf_energy << endl;
 
         results_file << "Computed RHF: " << rhf_energy << endl;
         cout << "--------------------------------" << endl;
 
         cout << "Reference RHF: " << rs_to_rhf[rs] << endl;
-        cout << "Reference UHF: " << rs_to_uhf_m179[rs] << endl;
+        // cout << "Reference UHF: " << rs_to_uhf_m179[rs] << endl;
 
         results_file << "Reference RHF: " << rs_to_rhf[rs] << endl;
     }

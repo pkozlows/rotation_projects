@@ -5,8 +5,11 @@ using namespace std;
 
 arma::mat RHF::guess_rhf(const string &guess_type) {
     //for this guess of the density matrix I want the elements to be random numbers between 0 and 1
+    //make all the elements of the matrix trust 2s
+    // arma::mat density_matrix(n_pw, n_pw, arma::fill::ones);
+    
     arma::mat density_matrix = arma::randu<arma::mat>(n_pw, n_pw);
-    //I want to make the density matrix symmetric so I add the transpose of the matrix to itself
+    // I want to make the density matrix symmetric so I add the transpose of the matrix to itself
     density_matrix += density_matrix.t();
     // arma::mat density_matrix(n_pw, n_pw, arma::fill::zeros);
 
@@ -25,20 +28,18 @@ arma::mat RHF::make_fock_matrix(arma::mat &guess_density) {
             // start by calculating the hartree term
 
             //use the second local table to compute the index of the momentum transfer vector
-            size_t index = lookup_tables.second(p, q);
+            int index = lookup_tables.second(p, q);
             double hartree_sum = 0.0;
-            for (size_t r = 0; r < n_pw; ++r) {
+            for (int r = 0; r < n_pw; ++r) {
                 // compute the index of j-Q
                 int idx = lookup_tables.first(r, index);
                 if (idx != -1) {
                     hartree_sum += guess_density(r, idx);
                 }
             }
-            hartree(p, q) = interaction(index) * hartree_sum;
+        hartree(p, q) = interaction(index) * hartree_sum;
 
-            if (index != static_cast<size_t>(-1)) {
-            }
-            
+            //now to the exchange term
             double exchange_sum = 0.0;
             //iterate over all possible momentum transfers
             for (size_t r = 0; r < n_mom; ++r) {
@@ -47,9 +48,15 @@ arma::mat RHF::make_fock_matrix(arma::mat &guess_density) {
                     exchange_sum += interaction(r) * guess_density(lookup_tables.first(p, r), lookup_tables.first(q, r));
                 }
             }
-            exchange_matrix(p, q) = exchange_sum;
+        exchange_matrix(p, q) = exchange_sum;
         }    
     }
+    //I want you to print out the hartree and exchange matrices
+    cout << "The hartree matrix is: " << endl;
+    cout << hartree << endl;
+    cout << "The exchange matrix is: " << endl;
+    cout << exchange_matrix << endl;
+    
     return kinetic + (hartree - 0.5 * exchange_matrix) / volume;
 }
 

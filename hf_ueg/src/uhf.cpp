@@ -25,10 +25,10 @@ pair<arma::mat, arma::mat> UHF::guess_uhf() {
         density_matrix_beta(i, i) = 1.0;
     }
     //I want to add a random perturbation so I need to make a matrix of the same size as my guesses for alpha and beta but I want its entries to be random numbers between 0 and 1
-    arma::mat perturbation_alpha = arma::randu<arma::mat>(n_pw, n_pw);
-    arma::mat perturbation_beta = arma::randu<arma::mat>(n_pw, n_pw);
-    density_matrix_alpha += perturbation_alpha + perturbation_alpha.t();
-    density_matrix_beta += perturbation_beta + perturbation_beta.t();
+    // arma::mat perturbation_alpha = arma::randu<arma::mat>(n_pw, n_pw);
+    // arma::mat perturbation_beta = arma::randu<arma::mat>(n_pw, n_pw);
+    // density_matrix_alpha += perturbation_alpha + perturbation_alpha.t();
+    // density_matrix_beta += perturbation_beta + perturbation_beta.t();
     return {density_matrix_alpha, density_matrix_beta};
 }
 

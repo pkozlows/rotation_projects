@@ -113,10 +113,10 @@ pair<size_t, arma::Mat<int>> Basis_3D::generate_momentum_transfer_vectors() {
 
 
 
-pair<arma::Mat<int>, arma::Mat<size_t>> Basis_3D::generate_lookup_tables() {
+pair<arma::Mat<int>, arma::Mat<int>> Basis_3D::generate_lookup_tables() {
     // Initialize the lookup tables
     arma::Mat<int> momentum_lookup_table(n_pw, n_mom, arma::fill::zeros);
-    arma::Mat<size_t> pw_lookup_table(n_pw, n_pw, arma::fill::zeros);
+    arma::Mat<int> pw_lookup_table(n_pw, n_pw, arma::fill::zeros);
 
     // Loop common to both tables
     for (size_t p = 0; p < n_pw; p++) {
@@ -136,8 +136,8 @@ pair<arma::Mat<int>, arma::Mat<size_t>> Basis_3D::generate_lookup_tables() {
             int index = -1; // Default to -1 (not found)
 
             // Iterate through each column in plane_waves to find a match
-            #pragma omp parallel for
-            for (size_t i = 0; i < n_pw; ++i) {
+            // #pragma omp parallel for
+            for (int i = 0; i < n_pw; ++i) {
                 if (plane_waves(0, i) == px - Qx && plane_waves(1, i) == py - Qy && plane_waves(2, i) == pz - Qz) {
                     index = i;
                     break;
@@ -148,21 +148,22 @@ pair<arma::Mat<int>, arma::Mat<size_t>> Basis_3D::generate_lookup_tables() {
         }
         //now to the other table 
         for (size_t q = 0; q < n_pw; q++) {
-            // Extract momentum transfer vector components
-            int px_m_qx = px - plane_waves(0, q);
-            int py_m_qy = py - plane_waves(1, q);
-            int pz_m_qz = pz - plane_waves(2, q);
+            //get the components of the second plane wave
+            int qx = plane_waves(0, q);
+            int qy = plane_waves(1, q);
+            int qz = plane_waves(2, q);
 
             // Iterate through each column in momentum_transfer_vectors to find a match
+            int index = -1;
             #pragma omp parallel for
-            for (size_t i = 0; i < n_mom; ++i) {
-                size_t index = static_cast<size_t>(-1); // Default to -1 (not found)
-                if (momentum_transfer_vectors(0, i) == px_m_qx && momentum_transfer_vectors(1, i) == py_m_qy && momentum_transfer_vectors(2, i) == pz_m_qz) {
+            for (int i = 0; i < n_mom; ++i) {
+                if (momentum_transfer_vectors(0, i) == px - qx && momentum_transfer_vectors(1, i) == py - qy && momentum_transfer_vectors(2, i) == pz - qz) {
                     index = i;
-                    assert(index != static_cast<size_t>(-1)); // Ensure something was found
                     break;
                 }
             }
+            assert(index != -1); // Ensure something was found
+            pw_lookup_table(p, q) = index; // Default to -1 (not found)
         }
     }
 
