@@ -62,9 +62,12 @@ arma::mat RHF::make_fock_matrix(arma::mat &guess_density) {
         }    
     }
     // //I want you to print out the kinetic, normalized hartree and exchange matrices
-    // cout << "The kinetic matrix is: " << kinetic << endl;
-    // cout << "The hartree matrix is: " << hartree / volume << endl;
-    // cout << "The exchange matrix is: " << exchange_matrix / volume << endl;
+    cout << "The kinetic matrix is: " << endl;
+    cout << kinetic << endl;
+    cout << "The hartree matrix is: " << endl;
+    cout << hartree / volume << endl;
+    cout << "The exchange matrix is: " <<endl;
+    cout << exchange_matrix / volume << endl;
     
     return kinetic + (hartree - 0.5 * exchange_matrix) / volume;
 }
