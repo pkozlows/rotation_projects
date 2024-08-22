@@ -36,6 +36,8 @@ double run_scf(Basis_3D &basis, const size_t &n_elec, const float &rs, ofstream 
 
         do {
             arma::mat fock_matrix = rhf.make_fock_matrix(previous_guess);
+            cout << "The fock matrix is: " << endl;
+            cout << fock_matrix << endl;
             arma::vec eigenvalues;
             arma::mat eigenvectors;
             arma::eig_sym(eigenvalues, eigenvectors, fock_matrix);

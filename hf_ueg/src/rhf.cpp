@@ -28,42 +28,47 @@ arma::mat RHF::make_fock_matrix(arma::mat &guess_density) {
     arma::mat exchange_matrix(n_pw, n_pw, arma::fill::zeros);
     
     // we can do the hartree and exchange terms in the same loops
-    for (size_t p = 0; p < n_pw; ++p) {
-        for (size_t q = 0; q < n_pw; ++q) {
-            // start by calculating the hartree term
-
-            //use the second local table to compute the index of the momentum transfer vector
-            int index = lookup_tables.second(p, q);
-            double hartree_sum = 0.0;
-            for (int r = 0; r < n_pw; ++r) {
-                // compute the index of j-Q
-                int idx = lookup_tables.first(r, index);
-                if (idx != -1) {
-                    hartree_sum += guess_density(r, idx);
+    for (size_t mu = 0; mu < n_pw; ++mu) {
+        for (size_t nu = 0; nu < n_pw; ++nu) {
+            //defend the momentum transfer vector
+            int mu_m_nu_x = plane_waves(0, mu) - plane_waves(0, nu);
+            int mu_m_nu_y = plane_waves(1, mu) - plane_waves(1, nu);
+            int mu_m_nu_z = plane_waves(2, mu) - plane_waves(2, nu);
+            //find the index of this momentum transfer vector
+            int index = -1;
+            for (size_t i = 0; i < n_mom; ++i) {
+                if (momentum_transfer_vectors(0, i) == mu_m_nu_x && momentum_transfer_vectors(1, i) == mu_m_nu_y && momentum_transfer_vectors(2, i) == mu_m_nu_z) {
+                    index = i;
+                    break;
                 }
             }
-            hartree(p, q) = interaction(index) * hartree_sum;   
+            assert(index != -1);
+            for (size_t lambda = 0; lambda < n_pw; ++lambda) {
+
+                for (size_t sigma = 0; sigma < n_pw; ++sigma) {
+                    //compute the second momentum transfer vector mu - sigma
+                    int mu_m_sigma_x = plane_waves(0, nu) - plane_waves(0, lambda);
+                    int mu_m_sigma_y = plane_waves(1, nu) - plane_waves(1, lambda);
+                    int mu_m_sigma_z = plane_waves(2, nu) - plane_waves(2, lambda);
+                    //find the index of this momentum transfer vector
+                    int index2 = -1;
+                    for (size_t i = 0; i < n_mom; ++i) {
+                        if (momentum_transfer_vectors(0, i) == mu_m_sigma_x && momentum_transfer_vectors(1, i) == mu_m_sigma_y && momentum_transfer_vectors(2, i) == mu_m_sigma_z) {
+                            index2 = i;
+                            break;
+                        }
+                    }
+                    assert(index2 != -1);
+                    hartree(mu, nu) += guess_density(lambda, sigma) * interaction(index);
+                    exchange_matrix(mu, nu) += guess_density(lambda, sigma) * interaction(index2);
+                }
+            }
+
         }
     }
-    for (size_t p = 0; p < n_pw; ++p) {
-        for (size_t q = 0; q < n_pw; ++q) {
-
-            //now to the exchange term
-            double exchange_sum = 0.0;
-            //iterate over all possible momentum transfers
-            for (size_t r = 0; r < n_mom; ++r) {
-                //only append if we have valid indices
-                if (lookup_tables.first(p, r) != -1 && lookup_tables.first(q, r) != -1) {
-                    exchange_sum += interaction(r) * guess_density(lookup_tables.first(p, r), lookup_tables.first(q, r));
-                }
-            }
-
-            exchange_matrix(p, q) += exchange_sum;
-        }    
-    }
     // //I want you to print out the kinetic, normalized hartree and exchange matrices
-    cout << "The kinetic matrix is: " << endl;
-    cout << kinetic << endl;
+    // cout << "The kinetic matrix is: " << endl;
+    // cout << kinetic << endl;
     cout << "The hartree matrix is: " << endl;
     cout << hartree / volume << endl;
     cout << "The exchange matrix is: " <<endl;
