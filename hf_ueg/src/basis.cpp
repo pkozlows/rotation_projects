@@ -138,7 +138,7 @@ pair<arma::Mat<int>, arma::Mat<int>> Basis_3D::generate_lookup_tables() {
             // Iterate through each column in plane_waves to find a match
             // #pragma omp parallel for
             for (int i = 0; i < n_pw; ++i) {
-                if (plane_waves(0, i) == px - Qx && plane_waves(1, i) == py - Qy && plane_waves(2, i) == pz - Qz) {
+                if (plane_waves(0, i) == (px - Qx) && plane_waves(1, i) == (py - Qy) && plane_waves(2, i) == (pz - Qz)) {
                     index = i;
                     break;
                 }
@@ -146,6 +146,12 @@ pair<arma::Mat<int>, arma::Mat<int>> Basis_3D::generate_lookup_tables() {
 
             momentum_lookup_table(p, Q) = index;
         }
+    }
+    for (size_t p = 0; p < n_pw; p++) {
+        // Extract plane wave components
+        int px = plane_waves(0, p);
+        int py = plane_waves(1, p);
+        int pz = plane_waves(2, p);
         //now to the other table 
         for (size_t q = 0; q < n_pw; q++) {
             //get the components of the second plane wave

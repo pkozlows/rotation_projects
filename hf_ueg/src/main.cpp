@@ -32,29 +32,32 @@ double run_scf(Basis_3D &basis, const size_t &n_elec, const float &rs, ofstream 
     const double volume = 4.0 * n_elec / 3.0 * M_PI * pow(rs, 3);
     if (use_rhf) {
         RHF rhf(kinetic, integrals, n_elec, n_pw, n_mom, plane_waves, momentum_transfer_vectors, lookup_tables, volume);
-        arma::mat rhf_guess = rhf.guess_rhf("identity");
+        arma::mat previous_guess = rhf.guess_rhf("identity");
 
         do {
-            arma::mat fock_matrix = rhf.make_fock_matrix(rhf_guess);
+            arma::mat fock_matrix = rhf.make_fock_matrix(previous_guess);
             arma::vec eigenvalues;
             arma::mat eigenvectors;
             arma::eig_sym(eigenvalues, eigenvectors, fock_matrix);
-
+            //get the eigenvalues
+            cout << "The eigenvalues are: " << endl;
+            cout << eigenvalues << endl;
+            //check if the Eigen backdoors are orthogonal
+            assert(arma::approx_equal(eigenvectors.t() * eigenvectors, arma::eye(n_pw, n_pw), "absdiff", 1e-10));
             arma::mat new_density = rhf.generate_density_matrix(eigenvectors);
 
-
-            energy = rhf.compute_energy(rhf_guess, fock_matrix);
+            energy = rhf.compute_energy(new_density, fock_matrix);
             // cout << "The energy is " << energy << " after " << iteration << " iterations." << endl;
 
-            double density_difference = arma::norm(new_density - rhf_guess, "fro");
-            if (density_difference < density_threshold && abs(energy - previous_energy) < energy_threshold) {
-                cout << " and the diagonal of the density matrix is: " << endl;
-                cout << rhf_guess.diag() << endl;
+            double density_difference = arma::norm(new_density - previous_guess, "fro");
+            if (abs(energy - previous_energy) < energy_threshold) {
+                // cout << " and the diagonal of the density matrix is: " << endl;
+                // cout << new_density.diag() << endl;
                 break;
             }
 
 
-            rhf_guess = new_density;
+            previous_guess = new_density;
             previous_energy = energy;
             iteration++;
 
@@ -119,7 +122,7 @@ int main() {
         rs_to_rhf[rs_values[i]] = rhf_values[i];
         rs_to_uhf_m179[rs_values[i]] = uhf_values_m179[i];
     }
-    for (float rs = 4; rs <= 4; rs += 0.5) {
+    for (float rs = 4.5; rs <= 4.5; rs += 0.5) {
         
         cout << "--------------------------------" << endl;
         cout << "Starting rs = " << rs << endl;

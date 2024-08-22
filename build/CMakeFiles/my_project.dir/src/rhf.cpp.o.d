@@ -1607,4 +1607,6 @@ CMakeFiles/my_project.dir/src/rhf.cpp.o: \
   /opt/homebrew/include/armadillo_bits/newarp_TridiagEigen_meat.hpp \
   /opt/homebrew/include/armadillo_bits/newarp_UpperHessenbergEigen_meat.hpp \
   /opt/homebrew/include/armadillo_bits/newarp_UpperHessenbergQR_meat.hpp \
-  /opt/homebrew/include/armadillo_bits/compiler_setup_post.hpp
+  /opt/homebrew/include/armadillo_bits/compiler_setup_post.hpp \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk/usr/include/c++/v1/cassert \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk/usr/include/assert.h

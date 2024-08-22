@@ -1,4 +1,5 @@
 #include "rhf.h"
+#include <cassert>
 
 using namespace std;
 
@@ -12,6 +13,10 @@ arma::mat RHF::guess_rhf(const string &guess_type) {
     // I want to make the density matrix symmetric so I add the transpose of the matrix to itself
     density_matrix += density_matrix.t();
     // arma::mat density_matrix(n_pw, n_pw, arma::fill::zeros);
+    // add the identity matrix to the density matrix but only for the occupied orbitals
+    // for (size_t i = 0; i < n_elec / 2; ++i) {
+    //     density_matrix(i, i) = 2;
+    // }
 
 
     return density_matrix;
@@ -22,7 +27,7 @@ arma::mat RHF::make_fock_matrix(arma::mat &guess_density) {
     arma::mat hartree(n_pw, n_pw, arma::fill::zeros);
     arma::mat exchange_matrix(n_pw, n_pw, arma::fill::zeros);
     
-    //we can do the hartree and exchange terms in the same loops
+    // we can do the hartree and exchange terms in the same loops
     for (size_t p = 0; p < n_pw; ++p) {
         for (size_t q = 0; q < n_pw; ++q) {
             // start by calculating the hartree term
@@ -37,7 +42,11 @@ arma::mat RHF::make_fock_matrix(arma::mat &guess_density) {
                     hartree_sum += guess_density(r, idx);
                 }
             }
-        hartree(p, q) = interaction(index) * hartree_sum;
+            hartree(p, q) = interaction(index) * hartree_sum;   
+        }
+    }
+    for (size_t p = 0; p < n_pw; ++p) {
+        for (size_t q = 0; q < n_pw; ++q) {
 
             //now to the exchange term
             double exchange_sum = 0.0;
@@ -48,14 +57,14 @@ arma::mat RHF::make_fock_matrix(arma::mat &guess_density) {
                     exchange_sum += interaction(r) * guess_density(lookup_tables.first(p, r), lookup_tables.first(q, r));
                 }
             }
-        exchange_matrix(p, q) = exchange_sum;
+
+            exchange_matrix(p, q) += exchange_sum;
         }    
     }
-    //I want you to print out the hartree and exchange matrices
-    cout << "The hartree matrix is: " << endl;
-    cout << hartree << endl;
-    cout << "The exchange matrix is: " << endl;
-    cout << exchange_matrix << endl;
+    // //I want you to print out the kinetic, normalized hartree and exchange matrices
+    // cout << "The kinetic matrix is: " << kinetic << endl;
+    // cout << "The hartree matrix is: " << hartree / volume << endl;
+    // cout << "The exchange matrix is: " << exchange_matrix / volume << endl;
     
     return kinetic + (hartree - 0.5 * exchange_matrix) / volume;
 }
