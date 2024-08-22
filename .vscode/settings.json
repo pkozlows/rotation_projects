@@ -65,5 +65,6 @@
         "span": "cpp",
         "stack": "cpp",
         "armadillo": "cpp"
-    }
+    },
+    "cmake.sourceDirectory": "/Users/patrykkozlowski/harvard/joonho/hf_ueg"
 }

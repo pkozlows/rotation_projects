@@ -2,49 +2,37 @@
 #define BASIS_H
 #include <armadillo>
 #include <vector>
-#include <tuple>
 
 
 using namespace std;
 
-class Basis {
+class Basis_3D {
 public:
-    Basis(const double &ke_cutoff, const double &rs, const int &n_elec);
-    virtual ~Basis() = default;
-    virtual int n_plane_waves() = 0;
-    virtual arma::mat kinetic_integrals() = 0;
-    virtual arma::mat coulombIntegrals() = 0;
+    Basis_3D(const float &rs, const size_t &n_elec);
+   
+    pair<size_t, arma::Mat<int>> generate_plan_waves();
+    pair<size_t, arma::Mat<int>> generate_momentum_transfer_vectors();
+    pair<arma::Mat<int>, arma::Mat<int>> generate_lookup_tables();
+    arma::mat kinetic_integrals();
+    arma::vec interaction_integrals();
+    double compute_madeleung_constant();
+    double compute_fermi_energy();
+    
 
-protected:
+private:
+    float rs;
+    size_t n_elec;
+    arma::vec kinetic_energies;
+    arma::Mat<int> plane_waves;
+    arma::Mat<int> momentum_transfer_vectors;
+    size_t n_pw;
+    size_t n_mom;
+    int max_n;
     double ke_cutoff;
-    double rs;
-    int n_elec;
-    int n_pw;
 };
 
-class Basis_3D : public Basis {
-public:
-    Basis_3D(const double &ke_cutoff, const double &rs, const int &n_elec);
-    int n_plane_waves() override;
-    arma::mat kinetic_integrals() override;
-    arma::mat coulombIntegrals() override;
 
-protected:
-    vector<tuple<int, int, int>> plane_waves;
-    vector<double> kinetic_energies;
-};
 
-class Basis_2D : public Basis {
-public:
-    Basis_2D(const double &ke_cutoff, const double &rs, const int &n_elec);
-    int n_plane_waves() override;
-    arma::mat kinetic_integrals() override;
-    arma::mat coulombIntegrals() override;
 
-protected:
-    vector<tuple<int, int>> plane_waves;
-    vector<double> kinetic_energies;
-
-};
 
 #endif

@@ -1610,5 +1610,6 @@ CMakeFiles/my_project.dir/src/main.cpp.o: \
   /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk/usr/include/c++/v1/cassert \
   /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk/usr/include/assert.h \
   /Users/patrykkozlowski/harvard/joonho/hf_ueg/include/basis.h \
-  /Users/patrykkozlowski/harvard/joonho/hf_ueg/include/scf.h \
+  /Users/patrykkozlowski/harvard/joonho/hf_ueg/include/rhf.h \
+  /Users/patrykkozlowski/harvard/joonho/hf_ueg/include/uhf.h \
   /Users/patrykkozlowski/harvard/joonho/hf_ueg/include/matrix_utils.h

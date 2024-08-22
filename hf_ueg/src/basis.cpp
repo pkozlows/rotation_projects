@@ -1,227 +1,224 @@
 #include <iostream>
 #include <armadillo>
 #include <vector>
+#include <cassert>
 #include "basis.h"
+#include "matrix_utils.h"
+#include <utility>
 
 using namespace std;
 
 // Base class constructor
-Basis::Basis(const double &ke_cutoff, const double &rs, const int &n_elec)
-    : ke_cutoff(ke_cutoff), rs(rs), n_elec(n_elec) {
-        this->ke_cutoff = ke_cutoff;
-        this->rs = rs;
-        this->n_elec = n_elec;
-    }
-
-// 3D Basis implementation
-Basis_3D::Basis_3D(const double &ke_cutoff, const double &rs, const int &n_elec)
-    : Basis(ke_cutoff, rs, n_elec) {
+Basis_3D::Basis_3D(const float &rs, const size_t &n_elec)
+    : rs(rs), n_elec(n_elec) {
 }
 
 
 // Function to determine the number of plane waves within the kinetic energy cutoff and compute the kinetic energy integral matrix
-int Basis_3D::n_plane_waves() {
-    int n_pw = 0;
-    std::vector<std::tuple<int, int, int>> plane_waves;
-    std::vector<double> kinetic_energies; // To store kinetic energies
+pair<size_t, arma::Mat<int>> Basis_3D::generate_plan_waves() {
+    size_t n_pw = 0;
+    vector<arma::Col<int>> plane_waves;
+    vector<double> kinetic_energies;
+    double length = pow(4.0 * M_PI * n_elec / 3.0, 1.0 / 3.0) * rs;
+    double unit = pow(2 * M_PI / length, 2) / 2;
 
-    // Define the numerical factor used to compute the kinetic energy
-    double ke_factor = 7.5963 * pow(n_elec, -2.0/3.0) * pow(rs, -2.0);
-    
-    // Define the maximum value that nx can take
-    int max_nx = static_cast<int>(std::floor(std::sqrt(ke_cutoff / ke_factor)));
+    //compute the kinetic Autry cutoff based off of the number of electrons and the Wigner-Seitz radius
+    double ke_cutoff = 2*unit;
 
-    for (int nx = -max_nx; nx <= max_nx; nx++) {
-        int nx2 = nx * nx;
-        double ke_nx = ke_factor * nx2;
-        if (ke_nx > ke_cutoff) {
-            continue; // Skip if nx alone exceeds the cutoff
-        }
-        int max_ny = static_cast<int>(std::floor(std::sqrt((ke_cutoff - ke_nx) / ke_factor)));
+    // Define the maximum value that nx, ny, nz can take
+    int max_n = static_cast<int>(floor(sqrt(ke_cutoff / unit)));
+    this->max_n = max_n;
+
+    for (int nx = -max_n; nx <= max_n; nx++) {
+        size_t nx2 = nx * nx;
+        double ke_nx = unit * nx2;
+        int max_ny = static_cast<int>(floor(sqrt((ke_cutoff - ke_nx) / unit)));
         for (int ny = -max_ny; ny <= max_ny; ny++) {
-            int ny2 = ny * ny;
-            double ke_nx_ny = ke_nx + ke_factor * ny2;
-            if (ke_nx_ny > ke_cutoff) {
-                continue; // Skip further processing if the energy is already above the cutoff
-            }
-            int max_nz = static_cast<int>(std::floor(std::sqrt((ke_cutoff - ke_nx_ny) / ke_factor)));
+            size_t ny2 = ny * ny;
+            double ke_nx_ny = ke_nx + unit * ny2;
+            if (ke_nx_ny > ke_cutoff) continue;
+            int max_nz = static_cast<int>(floor(sqrt((ke_cutoff - ke_nx_ny) / unit)));
             for (int nz = -max_nz; nz <= max_nz; nz++) {
-                int nz2 = nz * nz;
-                double ke = ke_nx_ny + ke_factor * nz2;
-                //check if we have a valid plane wave
-                if (ke <= ke_cutoff) {
-                    plane_waves.emplace_back(nx, ny, nz);
-                    kinetic_energies.push_back(ke); // Store the kinetic energy
+                size_t nz2 = nz * nz;
+                double pw_ke = ke_nx_ny + unit * nz2; 
+                if (pw_ke <= ke_cutoff) {
+                    plane_waves.push_back(arma::Col<int>{nx, ny, nz});
+                    kinetic_energies.push_back(pw_ke);
                     n_pw++;
                 }
             }
         }
     }
+    cout << "The number of plain waves is " << n_pw << endl;
 
+
+    arma::Mat<int> basis(3, n_pw);
+    arma::vec eigval(n_pw);
+
+	
+    #pragma omp parallel for
+    for (size_t k = 0; k < n_pw; k++){
+        basis.col(k) = plane_waves[k];
+        eigval(k) = kinetic_energies[k];
+    }
+    //now do the sorting
+    arma::uvec indices = arma::stable_sort_index(eigval, "ascend");
+    basis = basis.cols(indices);
+    eigval = eigval(indices);
+    
     this->n_pw = n_pw;
-    this->plane_waves = plane_waves;
-    this->kinetic_energies = kinetic_energies;
-    return n_pw;
+    this->kinetic_energies = eigval;
+    this->plane_waves = basis;
+
+    return {n_pw, basis};
 }
+
+//function to generate the list of momentum transfer vectors
+pair<size_t, arma::Mat<int>> Basis_3D::generate_momentum_transfer_vectors() {
+    // Find the plane wave with the maximum kinetic energy
+    arma::Col<int> max_pw = plane_waves.col(n_pw - 1);
+    // Determine its radius in reciprocal space by taking the squared norm
+    double fermi_radius_sq = arma::dot(max_pw, max_pw);
+
+    vector<arma::Col<int>> momentum_transfer_vectors;
+    size_t n_mom = 0;
+
+    // Generate momentum transfer vectors within the appropriate range
+    for (int i = -2 * max_n; i <= 2 * max_n; ++i) {
+        int i2 = i * i;
+        for (int j = -2 * max_n; j <= 2 * max_n; ++j) {
+            int j2 = j * j;
+            for (int k = -2 * max_n; k <= 2 * max_n; ++k) {
+                int k2 = k * k;
+                // Ensure the squared norm is within the appropriate range
+                if (i2 + j2 + k2 <= 4 * fermi_radius_sq) {
+                    momentum_transfer_vectors.push_back(arma::Col<int>{i, j, k});
+                    ++n_mom;
+                }
+            }
+        }
+    }
+
+    // Convert the vector of momentum transfer vectors into an arma::Mat
+    arma::Mat<int> momentum_transfer_vectors_mat(3, n_mom);
+    #pragma omp parallel for
+    for (size_t k = 0; k < n_mom; ++k) {
+        momentum_transfer_vectors_mat.col(k) = momentum_transfer_vectors[k];
+    }
+    
+    this->n_mom = n_mom;
+    this->momentum_transfer_vectors = momentum_transfer_vectors_mat;
+    return {n_mom, momentum_transfer_vectors_mat};
+}
+
+
+
+pair<arma::Mat<int>, arma::Mat<int>> Basis_3D::generate_lookup_tables() {
+    // Initialize the lookup tables
+    arma::Mat<int> momentum_lookup_table(n_pw, n_mom, arma::fill::zeros);
+    arma::Mat<int> pw_lookup_table(n_pw, n_pw, arma::fill::zeros);
+
+    // Loop common to both tables
+    for (size_t p = 0; p < n_pw; p++) {
+        // Extract plane wave components
+        int px = plane_waves(0, p);
+        int py = plane_waves(1, p);
+        int pz = plane_waves(2, p);
+
+        //start with the momentum lookup table
+        for (size_t Q = 0; Q < n_mom; Q++) {
+            // Extract momentum transfer vector components
+            int Qx = momentum_transfer_vectors(0, Q);
+            int Qy = momentum_transfer_vectors(1, Q);
+            int Qz = momentum_transfer_vectors(2, Q);
+
+            // initialize index to -1 (default value if not found)
+            int index = -1; // Default to -1 (not found)
+
+            // Iterate through each column in plane_waves to find a match
+            // #pragma omp parallel for
+            for (int i = 0; i < n_pw; ++i) {
+                if (plane_waves(0, i) == px - Qx && plane_waves(1, i) == py - Qy && plane_waves(2, i) == pz - Qz) {
+                    index = i;
+                    break;
+                }
+            }
+
+            momentum_lookup_table(p, Q) = index;
+        }
+        //now to the other table 
+        for (size_t q = 0; q < n_pw; q++) {
+            //get the components of the second plane wave
+            int qx = plane_waves(0, q);
+            int qy = plane_waves(1, q);
+            int qz = plane_waves(2, q);
+
+            // Iterate through each column in momentum_transfer_vectors to find a match
+            int index = -1;
+            #pragma omp parallel for
+            for (int i = 0; i < n_mom; ++i) {
+                if (momentum_transfer_vectors(0, i) == px - qx && momentum_transfer_vectors(1, i) == py - qy && momentum_transfer_vectors(2, i) == pz - qz) {
+                    index = i;
+                    break;
+                }
+            }
+            assert(index != -1); // Ensure something was found
+            pw_lookup_table(p, q) = index; // Default to -1 (not found)
+        }
+    }
+
+    // Return the pair of lookup tables
+    return make_pair(momentum_lookup_table, pw_lookup_table);
+}
+
+
+
 
 // Function to generate the kinetic integral matrix
 arma::mat Basis_3D::kinetic_integrals() {
     // Create a diagonal matrix directly from the std::vector<double>
-    arma::mat kinetic_integral_matrix = arma::diagmat(arma::vec(kinetic_energies));
+    arma::mat kinetic_integral_matrix = arma::diagmat(kinetic_energies);
 
     return kinetic_integral_matrix;
 }
 
-// Function to generate the Coulomb integral matrix
-arma::mat Basis_3D::coulombIntegrals() {
-    int pair_product = n_pw * n_pw;
-    // Initialize a partially flattened 4-tensor of 0s to store the matrix elements
-    arma::mat coulomb_integral(pair_product, pair_product, arma::fill::zeros);
+// Function to generate the exchange integrals; note that we just need one entry per momentum transfer vector
+arma::vec Basis_3D::interaction_integrals() {
+    arma::vec exchange(n_mom, arma::fill::zeros);
+    double length = pow(4.0 * M_PI * n_elec / 3.0, 1.0 / 3.0) * rs;
+    double constant = pow(2 * M_PI / length, 2);
 
-    // Make the necessary loops
-    for (int i = 0; i < n_pw; i++) {
-        for (int j = 0; j < n_pw; j++) {
-            for (int k = 0; k < n_pw; k++) {
-                for (int l = 0; l < n_pw; l++) {
-                    // Get momentum vectors
-                    auto [qxi, qyi, qzi] = plane_waves[i];
-                    auto [qxj, qyj, qzj] = plane_waves[j];
-                    auto [qxk, qyk, qzk] = plane_waves[k];
-                    auto [qxl, qyl, qzl] = plane_waves[l];
+    for (size_t Q = 0; Q < n_mom; Q++) {
+        
+        // Extract momentum transfer vector components
+        int qx = momentum_transfer_vectors(0, Q);
+        int qy = momentum_transfer_vectors(1, Q);
+        int qz = momentum_transfer_vectors(2, Q);
 
-                    // Compute the momentum transfer vectors
-                    int qx1 = qxi - qxj;
-                    int qy1 = qyi - qyj;
-                    int qz1 = qzi - qzj;
-
-                    int qx2 = qxk - qxl;
-                    int qy2 = qyk - qyl;
-                    int qz2 = qzk - qzl;
-                    
-                    // Check if the momentum transfer differences are equal
-                    if (qx1 == qx2 && qy1 == qy2 && qz1 == qz2) {
-                        // Calculate the squared momentum transfer
-                        double q_squared = pow(sqrt(qx1 * qx1 + qy1 * qy1 + qz1 * qz1), 2);
-
-                        if (q_squared != 0) {
-                            // Compute the Coulomb integral
-                            // L = \left( \frac{4\pi N}{3} \right)^{1/3} r_s
-                            double length = pow(4.0 * M_PI * n_elec / 3.0, 1.0 / 3.0) * rs;
-                            // double factor = ((4 * M_PI) / pow(length, 3));
-                            // = \frac{32\pi^4}{L^6}
-                            double factor = (4 * M_PI) / pow(length, 3); 
-                            double term = factor / q_squared;
-
-
-                            // Assign the computed Coulomb integral to the matrix elements
-                            coulomb_integral(i * n_pw + j, k * n_pw + l) = term;
-                        }
-                    }
-                }
-            }
+        double q2 = qx * qx + qy * qy + qz * qz;
+        q2 *= constant;
+        if (q2 > 1e-8) {
+            exchange[Q] = (4 * M_PI) / q2;
+        }
+        // treat case where Q = [0, 0, 0]
+        else {
+            exchange[Q] = 0.0;
         }
     }
-
-    return coulomb_integral;
-}
-
-// 2D Basis implementation
-Basis_2D::Basis_2D(const double &ke_cutoff, const double &rs, const int &n_elec)
-    : Basis(ke_cutoff, rs, n_elec) {
+    return exchange;
 }
 
 
 
-arma::mat Basis_2D::kinetic_integrals() {
-    // Create a diagonal matrix directly from the std::vector<double>
-    arma::mat kinetic_integral_matrix = arma::diagmat(arma::vec(kinetic_energies));
-
-    return kinetic_integral_matrix;
+double Basis_3D::compute_madeleung_constant() {
+    // E_M \approx-2.837297 \times\left(\frac{3}{4 \pi}\right)^{1 / 3} N^{2 / 3} r_\pi^{-1}
+    double madeleung_constant = -2.837297 * pow(3.0 / (4.0 * M_PI), 1.0 / 3.0) * pow(n_elec, 2.0 / 3.0) * pow(rs, -1.0);
+    return madeleung_constant;
 }
 
-int Basis_2D::n_plane_waves() {
-    int n_pw = 0;
-    std::vector<std::tuple<int, int>> plane_waves;
-    std::vector<double> kinetic_energies; // To store kinetic energies
-
-    // Define the numerical factor used to compute the kinetic energy = 2\pi N^{-1} r_s^{-2} \left(n_x^2 + n_y^2\right)
-    double ke_factor = 2 * M_PI * pow(n_elec, -1.0) * pow(rs, -2.0);
-    
-    // Define the maximum value that nx can take
-    int max_nx = static_cast<int>(std::floor(std::sqrt(ke_cutoff / ke_factor)));
-
-    for (int nx = -max_nx; nx <= max_nx; nx++) {
-        int nx2 = nx * nx;
-        double ke_nx = ke_factor * nx2;
-        if (ke_nx > ke_cutoff) {
-            continue; // Skip if nx alone exceeds the cutoff
-        }
-        int max_ny = static_cast<int>(std::floor(std::sqrt((ke_cutoff - ke_nx) / ke_factor)));
-        for (int ny = -max_ny; ny <= max_ny; ny++) {
-            int ny2 = ny * ny;
-            double ke_nx_ny = ke_nx + ke_factor * ny2;
-            if (ke_nx_ny > ke_cutoff) {
-                continue; // Skip further processing if the energy is already above the cutoff
-            }
-            //check if we have a valid plane wave
-            if (ke_nx_ny <= ke_cutoff) {
-                plane_waves.emplace_back(nx, ny);
-                kinetic_energies.push_back(ke_nx_ny); // Store the kinetic energy
-                n_pw++;
-            }
-        }
-    }
-
-    this->n_pw = n_pw;
-    this->plane_waves = plane_waves;
-    this->kinetic_energies = kinetic_energies;
-    return n_pw;
+double Basis_3D::compute_fermi_energy() {
+    // # Express the electron density n in terms of the Wigner-Seitz radius r_s: n_expr = 3 / (4 * sp.pi * r_s**3)
+    double n = 3.0 / (4.0 * M_PI * pow(rs, 3));
+    double fermi_energy = 0.5 * pow(3.0 * pow(M_PI, 2) * n, 2.0 / 3.0);
+    return fermi_energy;
 }
-
-arma::mat Basis_2D::coulombIntegrals() {
-    int pair_product = n_pw * n_pw;
-    // Initialize a partially flattened 4-tensor of 0s to store the matrix elements
-    arma::mat coulomb_integral(pair_product, pair_product, arma::fill::zeros);
-
-    // Make the necessary loops
-    for (int i = 0; i < n_pw; i++) {
-        for (int j = 0; j < n_pw; j++) {
-            for (int k = 0; k < n_pw; k++) {
-                for (int l = 0; l < n_pw; l++) {
-                    // Get momentum vectors
-                    auto [qxi, qyi] = plane_waves[i];
-                    auto [qxj, qyj] = plane_waves[j];
-                    auto [qxk, qyk] = plane_waves[k];
-                    auto [qxl, qyl] = plane_waves[l];
-
-                    // Compute the momentum transfer vectors
-                    int qx1 = qxi - qxj;
-                    int qy1 = qyi - qyj;
-
-                    int qx2 = qxk - qxl;
-                    int qy2 = qyk - qyl;
-                    
-                    // Check if the momentum transfer differences are equal
-                    if (qx1 == qx2 && qy1 == qy2) {
-                        // Calculate the momentum transfer
-                        double q = sqrt(qx1 * qx1 + qy1 * qy1);
-
-                        if (q != 0) {
-                            // Compute the Coulomb integral
-                            // L = \left( \frac{4\pi N}{3} \right)^{1/3} r_s
-                            double length = pow(M_PI * n_elec, 1.0 / 2.0) * rs;
-                            // double factor = ((2 * M_PI) / pow(length, 2));
-                            // \frac{8\pi^3}{L^4}
-                            double factor = 2 * M_PI / pow(length, 2);
-                            double term = factor / q;
-                            // Assign the computed Coulomb integral to the matrix elements
-                            coulomb_integral(i * n_pw + j, k * n_pw + l) = term;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return coulomb_integral;
-}
-                        
