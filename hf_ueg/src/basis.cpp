@@ -113,30 +113,21 @@ pair<size_t, arma::Mat<int>> Basis_3D::generate_momentum_transfer_vectors() {
 
 
 
-pair<arma::Mat<int>, arma::Mat<int>> Basis_3D::generate_lookup_tables() {
-    // Initialize the lookup tables
+arma::Mat<int> Basis_3D::generate_momentum_lookup_table() {
     arma::Mat<int> momentum_lookup_table(n_pw, n_mom, arma::fill::zeros);
-    arma::Mat<int> pw_lookup_table(n_pw, n_pw, arma::fill::zeros);
 
-    // Loop common to both tables
     for (size_t p = 0; p < n_pw; p++) {
-        // Extract plane wave components
         int px = plane_waves(0, p);
         int py = plane_waves(1, p);
         int pz = plane_waves(2, p);
 
-        //start with the momentum lookup table
         for (size_t Q = 0; Q < n_mom; Q++) {
-            // Extract momentum transfer vector components
             int Qx = momentum_transfer_vectors(0, Q);
             int Qy = momentum_transfer_vectors(1, Q);
             int Qz = momentum_transfer_vectors(2, Q);
 
-            // initialize index to -1 (default value if not found)
-            int index = -1; // Default to -1 (not found)
+            int index = -1;  // Default to -1 (not found)
 
-            // Iterate through each column in plane_waves to find a match
-            // #pragma omp parallel for
             for (int i = 0; i < n_pw; ++i) {
                 if ((plane_waves(0, i) == (px - Qx)) && (plane_waves(1, i) == (py - Qy)) && (plane_waves(2, i) == (pz - Qz))) {
                     index = i;
@@ -147,20 +138,25 @@ pair<arma::Mat<int>, arma::Mat<int>> Basis_3D::generate_lookup_tables() {
             momentum_lookup_table(p, Q) = index;
         }
     }
+
+    return momentum_lookup_table;
+}
+
+arma::Mat<int> Basis_3D::generate_pw_lookup_table() {
+    arma::Mat<int> pw_lookup_table(n_pw, n_pw, arma::fill::zeros);
+
     for (size_t p = 0; p < n_pw; p++) {
-        // Extract plane wave components
         int px = plane_waves(0, p);
         int py = plane_waves(1, p);
         int pz = plane_waves(2, p);
-        //now to the other table 
+
         for (size_t q = 0; q < n_pw; q++) {
-            //get the components of the second plane wave
             int qx = plane_waves(0, q);
             int qy = plane_waves(1, q);
             int qz = plane_waves(2, q);
 
-            // Iterate through each column in momentum_transfer_vectors to find a match
-            int index = -1;
+            int index = -1;  // Default to -1 (not found)
+
             #pragma omp parallel for
             for (int i = 0; i < n_mom; ++i) {
                 if ((momentum_transfer_vectors(0, i) == (px - qx)) && (momentum_transfer_vectors(1, i) == (py - qy)) && (momentum_transfer_vectors(2, i) == (pz - qz))) {
@@ -168,14 +164,17 @@ pair<arma::Mat<int>, arma::Mat<int>> Basis_3D::generate_lookup_tables() {
                     break;
                 }
             }
-            assert(index != -1); // Ensure something was found
+
+            assert(index != -1);  // Ensure something was found
             pw_lookup_table(p, q) = index;
         }
     }
 
-    // Return the pair of lookup tables
-    return make_pair(momentum_lookup_table, pw_lookup_table);
+    return pw_lookup_table;
 }
+
+
+
 
 
 

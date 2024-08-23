@@ -20,6 +20,9 @@ public:
     arma::mat generate_density_matrix(arma::mat &eigenvectors);
 
 private:
+    arma::mat compute_hartree_matrix(const arma::mat &guess_density);
+    arma::mat compute_exchange_matrix(const arma::mat &guess_density);
+
     arma::mat kinetic;
     arma::vec interaction;
     size_t n_elec;

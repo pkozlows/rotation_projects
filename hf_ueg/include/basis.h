@@ -9,10 +9,10 @@ using namespace std;
 class Basis_3D {
 public:
     Basis_3D(const float &rs, const size_t &n_elec);
-   
+    arma::Mat<int> generate_momentum_lookup_table();
+    arma::Mat<int> generate_pw_lookup_table();
     pair<size_t, arma::Mat<int>> generate_plan_waves();
     pair<size_t, arma::Mat<int>> generate_momentum_transfer_vectors();
-    pair<arma::Mat<int>, arma::Mat<int>> generate_lookup_tables();
     arma::mat kinetic_integrals();
     arma::vec interaction_integrals();
     double compute_madeleung_constant();
