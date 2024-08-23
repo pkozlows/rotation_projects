@@ -18,7 +18,7 @@ double run_scf(Basis_3D &basis, const size_t &n_elec, const float &rs, ofstream 
     auto [n_mom, momentum_transfer_vectors] = basis.generate_momentum_transfer_vectors();
     
 
-    const pair<arma::Mat<int>, arma::Mat<int>> lookup_tables = basis.generate_lookup_tables();
+    pair<arma::Mat<int>, arma::Mat<int>> lookup_tables = make_pair(basis.generate_momentum_lookup_table(), basis.generate_pw_lookup_table());
     const arma::mat kinetic = basis.kinetic_integrals();
 
     const arma::vec integrals = basis.interaction_integrals();
@@ -32,7 +32,7 @@ double run_scf(Basis_3D &basis, const size_t &n_elec, const float &rs, ofstream 
     const double volume = 4.0 * n_elec / 3.0 * M_PI * pow(rs, 3);
     if (use_rhf) {
         RHF rhf(kinetic, integrals, n_elec, n_pw, n_mom, plane_waves, momentum_transfer_vectors, lookup_tables, volume);
-        arma::mat rhf_guess = rhf.guess_rhf("identity");
+        arma::mat rhf_guess = rhf.guess_rhf("random");
 
         do {
             arma::mat fock_matrix = rhf.make_fock_matrix(rhf_guess);
@@ -42,23 +42,32 @@ double run_scf(Basis_3D &basis, const size_t &n_elec, const float &rs, ofstream 
 
             arma::mat new_density = rhf.generate_density_matrix(eigenvectors);
 
-
-            energy = rhf.compute_energy(rhf_guess, fock_matrix);
-            // cout << "The energy is " << energy << " after " << iteration << " iterations." << endl;
+            energy = rhf.compute_energy(new_density, fock_matrix);
 
             double density_difference = arma::norm(new_density - rhf_guess, "fro");
+
             if (density_difference < density_threshold && abs(energy - previous_energy) < energy_threshold) {
-                cout << " and the diagonal of the density matrix is: " << endl;
-                cout << rhf_guess.diag() << endl;
+                cout << "SCF Converged in " << iteration << " iterations." << endl;
+                cout << "The diagonal of the final density matrix is: " << endl;
+                cout << new_density.diag() << endl;
                 break;
             }
 
-
-            rhf_guess = new_density;
+            rhf_guess += new_density;
+            rhf_guess /= 2;
             previous_energy = energy;
             iteration++;
 
         } while (iteration < 500);
+
+        // Check if the SCF didn't converge
+        if (iteration >= 500) {
+            cout << "SCF did not converge after X iterations." << endl;
+            cout << "The diagonal of the last density matrix is: " << endl;
+            cout << rhf_guess.diag() << endl;
+        }
+
+
     } else {
         UHF uhf(kinetic, integrals, n_elec, n_pw, n_mom, plane_waves, momentum_transfer_vectors, lookup_tables, volume, spin_polarisation);
         pair<arma::mat, arma::mat> uhf_guess = uhf.guess_uhf();
@@ -95,7 +104,7 @@ double run_scf(Basis_3D &basis, const size_t &n_elec, const float &rs, ofstream 
             previous_energy = energy;
             iteration++;
 
-        } while (iteration < 500);
+        } while (iteration < 200);
     }
 
     
@@ -119,7 +128,7 @@ int main() {
         rs_to_rhf[rs_values[i]] = rhf_values[i];
         rs_to_uhf_m179[rs_values[i]] = uhf_values_m179[i];
     }
-    for (float rs = 4; rs <= 4; rs += 0.5) {
+    for (float rs = 0.5; rs <= 4; rs += 0.5) {
         
         cout << "--------------------------------" << endl;
         cout << "Starting rs = " << rs << endl;

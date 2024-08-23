@@ -3,62 +3,88 @@
 using namespace std;
 
 
-arma::mat RHF::guess_rhf(const string &guess_type) {
-    //for this guess of the density matrix I want the elements to be random numbers between 0 and 1
-    //make all the elements of the matrix trust 2s
-    // arma::mat density_matrix(n_pw, n_pw, arma::fill::ones);
-    
-    arma::mat density_matrix = arma::randu<arma::mat>(n_pw, n_pw);
-    // I want to make the density matrix symmetric so I add the transpose of the matrix to itself
-    density_matrix += density_matrix.t();
-    // arma::mat density_matrix(n_pw, n_pw, arma::fill::zeros);
+arma::mat RHF::guess_rhf(const std::string &guess_type) {
+    arma::mat density_matrix;  // Declare density_matrix before the if-else ladder
 
+    if (guess_type == "identity") {
+        density_matrix = arma::mat(n_pw, n_pw, arma::fill::zeros);
+        for (size_t i = 0; i < n_elec / 2; ++i) {
+            density_matrix(i, i) = 2.0;
+        }
+    } else if (guess_type == "random") {
+        density_matrix = arma::randu<arma::mat>(n_pw, n_pw);
+        density_matrix += density_matrix.t();  // Ensure the matrix is symmetric
+    } else if (guess_type == "zeros") {
+        density_matrix = arma::mat(n_pw, n_pw, arma::fill::zeros);
+    } else {
+        // Handle unexpected guess_type values
+        throw std::invalid_argument("Invalid guess_type provided.");
+    }
 
     return density_matrix;
 }
 
-arma::mat RHF::make_fock_matrix(arma::mat &guess_density) {
-
+arma::mat RHF::compute_hartree_matrix(const arma::mat &guess_density) {
     arma::mat hartree(n_pw, n_pw, arma::fill::zeros);
-    arma::mat exchange_matrix(n_pw, n_pw, arma::fill::zeros);
-    
-    //we can do the hartree and exchange terms in the same loops
-    for (size_t p = 0; p < n_pw; ++p) {
-        for (size_t q = 0; q < n_pw; ++q) {
-            // start by calculating the hartree term
 
-            //use the second local table to compute the index of the momentum transfer vector
+    for (int p = 0; p < n_pw; ++p) {
+        for (int q = 0; q < n_pw; ++q) {
             int index = lookup_tables.second(p, q);
             double hartree_sum = 0.0;
+
             for (int r = 0; r < n_pw; ++r) {
-                // compute the index of j-Q
                 int idx = lookup_tables.first(r, index);
                 if (idx != -1) {
                     hartree_sum += guess_density(r, idx);
                 }
             }
-        hartree(p, q) = interaction(index) * hartree_sum;
 
-            //now to the exchange term
+            hartree(p, q) = interaction(index) * hartree_sum;
+        }
+    }
+
+    return hartree;
+}
+
+arma::mat RHF::compute_exchange_matrix(const arma::mat &guess_density) {
+    arma::mat exchange_matrix(n_pw, n_pw, arma::fill::zeros);
+
+    for (size_t p = 0; p < n_pw; ++p) {
+        for (size_t q = 0; q < n_pw; ++q) {
             double exchange_sum = 0.0;
-            //iterate over all possible momentum transfers
+
             for (size_t r = 0; r < n_mom; ++r) {
-                //only append if we have valid indices
                 if (lookup_tables.first(p, r) != -1 && lookup_tables.first(q, r) != -1) {
                     exchange_sum += interaction(r) * guess_density(lookup_tables.first(p, r), lookup_tables.first(q, r));
                 }
             }
-        exchange_matrix(p, q) = exchange_sum;
-        }    
+
+            exchange_matrix(p, q) = exchange_sum;
+        }
     }
-    //I want you to print out the hartree and exchange matrices
-    cout << "The hartree matrix is: " << endl;
-    cout << hartree << endl;
-    cout << "The exchange matrix is: " << endl;
-    cout << exchange_matrix << endl;
+
+    return exchange_matrix;
+}
+arma::mat RHF::make_fock_matrix(arma::mat &guess_density) {
+    arma::mat hartree = compute_hartree_matrix(guess_density);
+    arma::mat exchange_matrix = compute_exchange_matrix(guess_density);
+
+    // Optionally print the Hartree and exchange matrices for debugging
     
+    // cout << "Kinetic matrix is: " << endl;
+    // cout << kinetic << endl;
+    // cout << "The normalized Hartree matrix is: " << endl;
+    // cout << hartree / volume << endl;
+    // cout << "The normalized Exchange matrix is: " << endl;
+    // cout << exchange_matrix / volume << endl;
+
+
     return kinetic + (hartree - 0.5 * exchange_matrix) / volume;
 }
+
+
+
+
 
 
 double RHF::compute_energy(arma::mat &density_matrix, arma::mat &fock_matrix) {
