@@ -11,6 +11,7 @@
 
 using namespace std;
 
+
 // Function to run SCF and return the converged energy
 double run_scf(Basis_3D &basis, const size_t &n_elec, const float &rs, ofstream &results_file, bool use_rhf, float spin_polarisation = 0.0) {
 
@@ -32,12 +33,12 @@ double run_scf(Basis_3D &basis, const size_t &n_elec, const float &rs, ofstream 
     const double volume = 4.0 * n_elec / 3.0 * M_PI * pow(rs, 3);
     if (use_rhf) {
         RHF rhf(kinetic, integrals, n_elec, n_pw, n_mom, plane_waves, momentum_transfer_vectors, lookup_tables, volume);
-        arma::mat rhf_guess = rhf.guess_rhf("random");
+        arma::mat previous_guess = rhf.guess_rhf("random");
 
         do {
             arma::mat fock_matrix = rhf.make_fock_matrix(previous_guess);
-            cout << "The fock matrix is: " << endl;
-            cout << fock_matrix << endl;
+            // cout << "The fock matrix is: " << endl;
+            // cout << fock_matrix << endl;
             arma::vec eigenvalues;
             arma::mat eigenvectors;
             arma::eig_sym(eigenvalues, eigenvectors, fock_matrix);
@@ -45,7 +46,7 @@ double run_scf(Basis_3D &basis, const size_t &n_elec, const float &rs, ofstream 
 
             energy = rhf.compute_energy(new_density, fock_matrix);
 
-            double density_difference = arma::norm(new_density - rhf_guess, "fro");
+            double density_difference = arma::norm(new_density - previous_guess, "fro");
 
             if (density_difference < density_threshold && abs(energy - previous_energy) < energy_threshold) {
                 cout << "SCF Converged in " << iteration << " iterations." << endl;
@@ -54,18 +55,18 @@ double run_scf(Basis_3D &basis, const size_t &n_elec, const float &rs, ofstream 
                 break;
             }
 
-            rhf_guess += new_density;
-            rhf_guess /= 2;
+            previous_guess += new_density;
+            previous_guess /= 2;
             previous_energy = energy;
             iteration++;
 
-        } while (iteration < 500);
+        } while (iteration < 2000);
 
         // Check if the SCF didn't converge
         if (iteration >= 500) {
             cout << "SCF did not converge after X iterations." << endl;
             cout << "The diagonal of the last density matrix is: " << endl;
-            cout << rhf_guess.diag() << endl;
+            cout << previous_guess.diag() << endl;
         }
 
 
@@ -129,7 +130,7 @@ int main() {
         rs_to_rhf[rs_values[i]] = rhf_values[i];
         rs_to_uhf_m179[rs_values[i]] = uhf_values_m179[i];
     }
-    for (float rs = 0.5; rs <= 4; rs += 0.5) {
+    for (float rs = 3; rs <= 5; rs += 0.5) {
         
         cout << "--------------------------------" << endl;
         cout << "Starting rs = " << rs << endl;
