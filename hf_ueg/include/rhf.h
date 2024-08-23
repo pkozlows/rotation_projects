@@ -1,37 +1,34 @@
 #ifndef RHF_H
 #define RHF_H
 
-#include <armadillo>
-#include <vector>
-#include <tuple>
-#include <utility> // for std::pair
+#include "basis.h"
 
-using namespace std;
-
-// RHF class
-class RHF {
+class RHF : public Basis {
 public:
-    RHF(const arma::mat &kinetic, const arma::vec &exchange, const size_t &n_elec, size_t &n_pw, const size_t &n_mom, arma::Mat<int> &plane_waves, arma::Mat<int> &momentum_transfer_vectors, const pair<arma::Mat<int>, arma::Mat<int>> &lookup_tables, const double &volume)
-        : kinetic(kinetic), interaction(exchange), n_elec(n_elec), n_pw(n_pw), n_mom(n_mom), plane_waves(plane_waves), momentum_transfer_vectors(momentum_transfer_vectors), lookup_tables(lookup_tables), volume(volume) {}
-    // RHF-specific methods
-    arma::mat guess_rhf(const string &guess_type);
-    arma::mat make_fock_matrix(arma::mat &guess_density);
-    double compute_energy(arma::mat &density_matrix, arma::mat &fock_matrix);
-    arma::mat generate_density_matrix(arma::mat &eigenvectors);
+    RHF(const Basis &basis) : Basis(basis) {}
+
+    arma::mat guess(const std::string &guess_type);
+
+    arma::mat make_fock_matrix(const arma::mat &density_matrix);
+
+    arma::mat generate_density_matrix(const arma::mat &fock_matrix);
+
+    double compute_energy(const arma::mat &density_matrix, const arma::mat &fock_matrix);
+
+    double calculate_density_difference(const arma::mat &new_density, const arma::mat &previous_guess);
+
+    void print_density_matrix(const arma::mat &density_matrix);
+
+    void update_density_matrix(arma::mat &previous_guess, const arma::mat &new_density);
+
 
 private:
-    arma::mat compute_hartree_matrix(const arma::mat &guess_density);
-    arma::mat compute_exchange_matrix(const arma::mat &guess_density);
-
-    arma::mat kinetic;
-    arma::vec interaction;
-    size_t n_elec;
-    size_t n_pw;
-    size_t n_mom;
-    arma::Mat<int> plane_waves;
-    arma::Mat<int> momentum_transfer_vectors;
-    pair<arma::Mat<int>, arma::Mat<int>> lookup_tables;
-    double volume;
+arma::mat compute_hartree_matrix(const arma::mat &density_matrix);
+arma::mat compute_exchange_matrix(const arma::mat &density_matrix);
 };
 
-#endif // SCF_H
+
+
+
+
+#endif // RHF_H

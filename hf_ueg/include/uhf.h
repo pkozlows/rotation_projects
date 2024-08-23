@@ -1,35 +1,29 @@
 #ifndef UHF_H
 #define UHF_H
 
-#include <armadillo>
-#include <vector>
-#include <tuple>
-#include <utility> // for std::pair
+#include "basis.h"
 
-using namespace std;
-// UHF class
-class UHF {
+class UHF : public Basis {
 public:
-    UHF(const arma::mat &kinetic, const arma::vec &exchange, const size_t &n_elec, size_t &n_pw, const size_t &n_mom, arma::Mat<int> &plane_waves, arma::Mat<int> &momentum_transfer_vectors, const pair<arma::Mat<int>, arma::Mat<int>> &lookup_tables, const double &volume, float spin_polarisation)
-        : kinetic(kinetic), interaction(exchange), n_elec(n_elec), n_pw(n_pw), n_mom(n_mom), plane_waves(plane_waves), momentum_transfer_vectors(momentum_transfer_vectors), lookup_tables(lookup_tables), volume(volume), spin_polarisation(spin_polarisation) {}
-        
+    UHF(const Basis &basis, float spin_polarisation) : Basis(basis), spin_polarisation(spin_polarisation) {}
 
-    pair<arma::mat, arma::mat> guess_uhf();
-    pair<arma::mat, arma::mat> make_uhf_fock_matrix(const pair<arma::mat, arma::mat> &guess_density);
-    double compute_uhf_energy(const pair<arma::mat, arma::mat> &density_matrix, const pair<arma::mat, arma::mat> &fock_matrices);
-    pair<arma::mat, arma::mat> generate_uhf_density_matrix(const pair<arma::mat, arma::mat> &eigenvectors);
+    std::pair<arma::mat, arma::mat> guess(const std::string &guess_type);
+
+    std::pair<arma::mat, arma::mat> make_fock_matrix(const std::pair<arma::mat, arma::mat> &density_matrix);
+
+    std::pair<arma::mat, arma::mat> generate_density_matrix(const std::pair<arma::mat, arma::mat> &fock_matrix);
+
+    double compute_energy(const std::pair<arma::mat, arma::mat> &density_matrix, const std::pair<arma::mat, arma::mat> &fock_matrices);
+
+    double calculate_density_difference(const std::pair<arma::mat, arma::mat> &new_density, const std::pair<arma::mat, arma::mat> &previous_guess);
+
+    void print_density_matrix(const std::pair<arma::mat, arma::mat> &density_matrix);
+
+    void update_density_matrix(std::pair<arma::mat, arma::mat> &previous_guess, const std::pair<arma::mat, arma::mat> &new_density);
 
 private:
-    arma::mat kinetic;
-    arma::vec interaction;
-    size_t n_elec;
-    size_t n_pw;
-    size_t n_mom;
-    arma::Mat<int> plane_waves;
-    arma::Mat<int> momentum_transfer_vectors;
-    pair<arma::Mat<int>, arma::Mat<int>> lookup_tables;
-    double volume;
     float spin_polarisation;
 };
+
 
 #endif // UHF_H
