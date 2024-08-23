@@ -138,7 +138,7 @@ pair<arma::Mat<int>, arma::Mat<int>> Basis_3D::generate_lookup_tables() {
             // Iterate through each column in plane_waves to find a match
             // #pragma omp parallel for
             for (int i = 0; i < n_pw; ++i) {
-                if (plane_waves(0, i) == (px - Qx) && plane_waves(1, i) == (py - Qy) && plane_waves(2, i) == (pz - Qz)) {
+                if ((plane_waves(0, i) == (px - Qx)) && (plane_waves(1, i) == (py - Qy)) && (plane_waves(2, i) == (pz - Qz))) {
                     index = i;
                     break;
                 }
@@ -163,13 +163,13 @@ pair<arma::Mat<int>, arma::Mat<int>> Basis_3D::generate_lookup_tables() {
             int index = -1;
             #pragma omp parallel for
             for (int i = 0; i < n_mom; ++i) {
-                if (momentum_transfer_vectors(0, i) == px - qx && momentum_transfer_vectors(1, i) == py - qy && momentum_transfer_vectors(2, i) == pz - qz) {
+                if ((momentum_transfer_vectors(0, i) == (px - qx)) && (momentum_transfer_vectors(1, i) == (py - qy)) && (momentum_transfer_vectors(2, i) == (pz - qz))) {
                     index = i;
                     break;
                 }
             }
             assert(index != -1); // Ensure something was found
-            pw_lookup_table(p, q) = index; // Default to -1 (not found)
+            pw_lookup_table(p, q) = index;
         }
     }
 

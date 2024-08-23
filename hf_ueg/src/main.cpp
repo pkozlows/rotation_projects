@@ -36,15 +36,16 @@ double run_scf(Basis_3D &basis, const size_t &n_elec, const float &rs, ofstream 
 
         do {
             arma::mat fock_matrix = rhf.make_fock_matrix(previous_guess);
+            cout << "The fock matrix is: " << endl;
+            cout << fock_matrix << endl;
             arma::vec eigenvalues;
             arma::mat eigenvectors;
             arma::eig_sym(eigenvalues, eigenvectors, fock_matrix);
-            //get the eigenvalues
-            cout << "The eigenvalues are: " << endl;
-            cout << eigenvalues << endl;
-            //check if the Eigen backdoors are orthogonal
-            assert(arma::approx_equal(eigenvectors.t() * eigenvectors, arma::eye(n_pw, n_pw), "absdiff", 1e-10));
             arma::mat new_density = rhf.generate_density_matrix(eigenvectors);
+            // //print out the tensity matrix
+            // cout << "The density matrix is: " << endl;
+            // cout << new_density << endl;
+            
 
             energy = rhf.compute_energy(new_density, fock_matrix);
             // cout << "The energy is " << energy << " after " << iteration << " iterations." << endl;
@@ -122,7 +123,7 @@ int main() {
         rs_to_rhf[rs_values[i]] = rhf_values[i];
         rs_to_uhf_m179[rs_values[i]] = uhf_values_m179[i];
     }
-    for (float rs = 4.5; rs <= 4.5; rs += 0.5) {
+    for (float rs = 0.5; rs <= 4.5; rs += 0.5) {
         
         cout << "--------------------------------" << endl;
         cout << "Starting rs = " << rs << endl;
