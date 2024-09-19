@@ -1,5 +1,0 @@
-Number of electrons: 14
-Wigner-Seitz radius: 4
-Number of plane waves: 179
-0 0.0639582
-1 0.0639582

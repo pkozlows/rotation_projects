@@ -321,4 +321,12 @@ In order to determine the spin polarization, we know that $N_{\alpha }+N_{\beta 
 \begin{equation}
     N_{\alpha } = \frac{N_{\text{elec}}}{2} \left(1 + \rho\right) \quad N_{\beta } = \frac{N_{\text{elec}}}{2} \left(1 - \rho\right)
 \end{equation}
+\section{SCF convergence with DIIS}
+The idea is that we want to keep a certain "cache" of the results from previous iterations, in order to accelerate convergence of the iterative procedure. Starting with an initial guess for the density matrix $P_0$, we calculate the Fock matrix $F_0$ and corresponding energy $E_0$ of the first iteration. By di analyzing this initial fork matrix we can construct a density matrix for the next interaction as $P_1$ and said this to the guess for the next intervention. We can then calculate the Fock matrix $F_1$ and energy $E_1$ for the next iteration. This is the procedure for the classical SCF, but now we want to use DIIS. Now we want to save a certain number of folk matrices from furious iterations in order to construct a new density matrix. So we want the fork matrix at the $k$-th iteration to be a linear combination of some number of previous Fock matrices
+\begin{equation}
+    F_k = \sum_{i=(k-1)-j}^{k-1} c_i F_i,
+\end{equation}
+where $j$ in dedicates the number that we want to keep. The goal is to minimize the residual factor $R_k$ which is defined as:
+\begin{equation}
+    R_k = F_k P_k S - S P_k F_k
 \end{document}

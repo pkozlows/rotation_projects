@@ -1,0 +1,101 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{physics}
+\usepackage{hyperref}
+
+\title{scGW}
+\author{Patryk Kozlowski}
+\date{\today}
+\begin{document}
+\maketitle
+Now that we have the  $G_0$ from Hartree-Fock, our goal will be to compute successive $G_n$'s, where $n=1,2,3,...$ until we reach the self-consistent solution. We want to solve the Dyson equation:
+\begin{equation}
+    G_n(1,2)=G_{n-1}(1,2)+\int d(3,4) G_{n-1}(1,3) \Sigma_n(3,4) G_n(4,2).
+\end{equation}
+\section{Polarizability $P$}
+\begin{equation}
+    P_n(1,2)=\int d(1,2) G_{n-1}(1,2) G_{n-1}(2,1).
+\end{equation}
+\subsection{RPA}
+This must be done by performing an RPA calculation to determine the polarizability $P$.
+The Casida equation that I want to solve is
+\begin{equation}
+\begin{bmatrix}
+\textbf{A} & \textbf{B} \\
+-\textbf{B} & -\textbf{A}
+\end{bmatrix}
+\begin{bmatrix}
+\textbf{X} \\
+\textbf{Y}
+\end{bmatrix}
+=
+\omega 
+\begin{bmatrix}
+1 & 0 \\
+0 & -1
+\end{bmatrix}
+\begin{bmatrix}
+\textbf{X} \\
+\textbf{Y}
+\end{bmatrix},
+\label{eq: RPA equation}
+\end{equation}
+where we have the transition densities $\textbf{X}$ and $\textbf{Y}$ with the excitation energies $\omega$. We denote occupied and virtual orbital indices as $i,j,...$ and $a,b,...$, respectively, while general ones are $p,q,...$.
+The matrix
+$\textbf{A}$ is defined as
+\begin{equation}
+    A_{ia,jb} = \delta _{ij}\delta _{ab}(\epsilon _{a}- \epsilon _{i}) + (ia||jb)
+\label{eq: A matrix RPA}
+\end{equation}
+and $\textbf{B}$ is
+\begin{equation}
+    B_{ia,jb} = (ia||bj)
+\label{eq: B matrix RPA}.
+\end{equation}
+The virtual and occupied orbital energies are denoted as $\epsilon _{a}$ and $\epsilon _{i}$, respectively. Working in the direct interaction approximation, the two-electron integrals are defined as:
+\begin{align}
+    (ia|jb) &= \int \int \phi _{i}^{*}(\mathbf{r}_{1})\phi _{a}(\mathbf{r}_{1})\frac{1}{|\mathbf{r}_{1}-\mathbf{r}_{2}|}\phi _{j}^{*}(\mathbf{r}_{2})\phi _{b}(\mathbf{r}_{2})d\mathbf{r}_{1}d\mathbf{r}_{2} \\
+    &= \frac{4\pi}{\Omega_{vol} }\frac{1}{|\mathbf{G}_{b}-\mathbf{G}_{j}|^{2}}\delta _{\mathbf{G}_{a} - \mathbf{G}_{i}, \mathbf{G}_{j} - \mathbf{G}_{b}},
+    \label{eq: two-electron integrals}
+\end{align}
+where $\phi _{p}$ is an atomic orbital. Running a Davidson procedure on the Casida equation \ref{eq: RPA equation} will give us the selected low-lying excitation energies $\omega_{\mu}$ and the corresponding transition densities $\textbf{X}_{\mu}$ and $\textbf{Y}_{\mu}$, where $\mu$ is the index of excitation, which has then been truncated because of Davidson.
+\section{Screened Coulomb interaction $W$}
+\begin{equation}
+    W_n(1,2)=V_0(1,2)+\int d(3,4) V_0(1,3) P_n(3,4) W_n(4,2).
+\end{equation}
+$V_0$ is the bare Coulomb interaction, which is obtained from the two-electron integrals.
+We construct the coupled transition densities $\textbf{Z}_{\mu}$ as
+\begin{equation}
+    {Z}_{ia}^{\mu} = {X}_{ia}^{\mu} - {Y}_{ia}^{\mu}
+\end{equation}
+Next, we consider the contraction of the coupled transition densities with the two-electron integrals in order to form the actual excitation vectors $\textbf{V}^{\mu}$:
+\begin{equation}
+    {V}_{p,q}^{\mu} = \sum _{i,a}(pq|ia) Z_{ia}^{\mu}
+\end{equation}
+Together with the excitation energies $\Omega_{\mu}$, this constitutes $W$.
+\section{Self-energy $\Sigma$}
+\begin{equation}
+    \Sigma_n(1,2)=\int d(1,2) G_{n-1}(1,2) W_n(1,2).
+\end{equation}
+We can split the self-energy into a Hartree $\Sigma _H$, exchange $\Sigma _X$, and correlation $\Sigma _C$ part:
+\begin{equation}
+    \Sigma = \Sigma _H + \Sigma _X + \Sigma _C.
+\end{equation}
+We already found $\Sigma _H$ and $\Sigma _X$ in the prior mean-field calculation, so now we are left to find $\Sigma _C$, which is defined as
+\begin{equation}
+    \Sigma_{pp}^{\text{corr}}(\omega) = \sum_{\mu }^{\text{RPA}}\left(\sum_{i}^{\text{occupied}} \frac{V_{pi}^{\mu }V_{ip}^{\mu }}{\omega -(\epsilon _{i}-\Omega  _{\mu })}+ \sum_{a}^{\text{virtual}} \frac{V_{pa}^{\mu }V_{ap}^{\mu }}{\omega -(\epsilon _{a}+\Omega  _{\mu })}\right).
+\end{equation}
+Here, $\omega$ is the input frequency. Note that the amount of excitations $\mu$ is limited by the Davidson procedure.
+\section{Green's function $G$}
+\begin{equation}
+    G_n(1,2)=G_{n-1}(1,2)+\int d(3,4) G_{n-1}(1,3) \Sigma_n(3,4) G_n(4,2).
+\end{equation}
+We solve for this using the equation:
+\begin{equation}
+    \varepsilon_{p}^{\mathrm{G}} = \delta_{pq}F_{pq}^{\mathrm{HF}}[\gamma] + \Sigma_{pp}^{\mathrm{C,n}}(\varepsilon_{p}^{\mathrm{G}})
+\label{eq: Iterative equation}
+\end{equation}
+where in the first iteration we use $\gamma \equiv \gamma^{\mathrm{HF}}$. The $\varepsilon_{p}^{\mathrm{G}}$ are the Green's function eigenvalues being solved for in this iterative equation. In order to achieve self-consistency, I would imagine that we want to update $\gamma$ from the initial density of $G_0$ to that of $G_{n-1}$ and also have the self-energy $\Sigma_C^n$ to be the one from the previous iteration.
+\end{document}
