@@ -1,0 +1,162 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{physics}
+\usepackage{hyperref}
+
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{0in}
+\setlength{\topmargin}{0in}
+\setlength{\textwidth}{6.5in}
+\setlength{\textheight}{8.5in}
+
+\title{Proving AC}
+\author{Patryk Kozlowski}
+\date{\today}
+\begin{document}
+\maketitle
+\section{Slow}
+We want to solve for the self-energy and the interaction whose form along the real axis is:
+\begin{equation}
+\Sigma\left(\mathbf{r}, \mathbf{r}^{\prime}, \omega\right)=\frac{i}{2 \pi} \int_{-\infty}^{\infty} e^{i\omega ^{\prime}\eta }d \omega^{\prime} G_{0}\left(\mathbf{r}, \mathbf{r}^{\prime}, \omega+\omega^{\prime}\right) W_{0}\left(\mathbf{r}, \mathbf{r}^{\prime}, \omega^{\prime}\right)
+\end{equation}
+We want to evaluate the matrix element of the self-energy between two molecular orbitals. Note that in this process, the crystal momentum must be conserved. Also, we applied the resolution of the identity:
+\begin{equation}
+    \bra{n\mathbf{k}} \Sigma (\omega) \ket{n^\prime\mathbf{k}} = -\frac{1}{2 \pi} \sum_{m\mathbf{k}^{\prime}} \int_{-\infty}^{\infty} e^{i\omega ^{\prime}\eta }d \omega^{\prime} \bra{n\mathbf{k}} G_0(\mathbf{r}, \mathbf{r}^{\prime}, \omega + \omega^{\prime}) \ket{m\mathbf{k}^{\prime}}\bra{m\mathbf{k}^{\prime}}W_0(\mathbf{r}, \mathbf{r}^{\prime}, \omega^{\prime}) \ket{n^\prime\mathbf{k}}
+\end{equation}
+Now, we know that the Lehmann representation of the noninteracting Green's function is:
+\begin{equation}
+G_0\left(\mathbf{r}, \mathbf{r}^{\prime}, \omega\right)=\sum_{o \mathbf{q} } \frac{\psi_{o \mathbf{q}}(\mathbf{r}) \psi_{o \mathbf{q}}^{*}\left(\mathbf{r}^{\prime}\right)}{\omega-\epsilon_{o \mathbf{q}}+i \eta \operatorname{sgn}\left(\epsilon_{o \mathbf{q}}-\mu\right)}
+\end{equation}
+where $\mu$ is the chemical potential. Plugging this into the above equation gives:
+\begin{equation}
+    \boldsymbol{\Sigma}_{n n^{\prime}}(\mathbf{k}, \omega) = -\frac{1}{2 \pi} \sum_{m\mathbf{k}^{\prime}} \int_{-\infty}^{\infty} d \omega^{\prime} e^{i\omega ^{\prime}\eta }\sum_{o\mathbf{q}}  \frac{\bra{n\mathbf{k} o \mathbf{q}}\ket{ o \mathbf{q} m\mathbf{k}^{\prime}}}{\omega + \omega^{\prime} - \epsilon_{o \mathbf{q}} + i \eta \operatorname{sgn}\left(\epsilon_{o \mathbf{q}}-\mu\right)} \times \bra{m\mathbf{k}^{\prime}}W_0(\mathbf{r}, \mathbf{r}^{\prime}, \omega^{\prime}) \ket{n^{\prime}\mathbf{k}}
+\end{equation}
+We know that for the integrand to be nonzero, the crystal momentum must be conserved, so that \(\mathbf{k} + \mathbf{q} = \mathbf{k}^{\prime} + \mathbf{q} \implies \mathbf{k} = \mathbf{k}^{\prime}\) and also by orthogonality of the basis functions we see that \(m\equiv n\), so that the integrand becomes:
+\begin{equation}
+    \boldsymbol{\Sigma}_{n n^{\prime}}(\mathbf{k}, \omega) = -\frac{1}{2 \pi} \sum_{o\mathbf{q}} \int_{-\infty}^{\infty} d \omega^{\prime} e^{i\omega ^{\prime}\eta } \frac{\bra{n\mathbf{k}}W_0(\mathbf{r}, \mathbf{r}^{\prime}, \omega^{\prime}) \ket{n^{\prime}\mathbf{k}}}{\omega + \omega^{\prime} - \epsilon_{o \mathbf{q}} + i \eta \operatorname{sgn}\left(\epsilon_{o \mathbf{q}}-\mu\right)}
+\end{equation}
+Now, we know that the screened Coulomb interaction has the expansion in terms of the bare Coulomb potential \(v\) and the polarizability \(\chi_0\) as \(W_0 = v + v\chi_0 v + v\chi_0 v\chi_0 v + \cdots = v(1 + \chi_0 v + \chi_0 v \chi_0 v + \cdots) = v\left(1 - \chi_0v\right)^{-1}\), where we recognize the dielectric function as \(\epsilon_0 = 1 - v\chi_0\) so we can express the screened Coulomb interaction as \(W_0(\mathbf{r}, \mathbf{r}^{\prime}, \omega) = v(\mathbf{r}, \mathbf{r}^{\prime})\left(1 - \chi_0(\mathbf{r}, \mathbf{r}^{\prime}, \omega)v(\mathbf{r}, \mathbf{r}^{\prime})\right)^{-1}\), recalling that the bare Coulomb interaction should be independent of frequency. The noninteracting polarizability is given as:
+\begin{equation}
+\chi_{0}\left(\mathbf{r}, \mathbf{r}^{\prime}, \omega\right)=\sum_{j\mathbf{k} k \mathbf{k}^{\prime}}\left(f_{k \mathbf{k}}-f_{j \mathbf{k}^{\prime}}\right) \frac{\psi_{j \mathbf{k}}(\mathbf{r}) \psi_{j \mathbf{k}}^{*}\left(\mathbf{r}^{\prime}\right) \psi_{k \mathbf{k}^{\prime}}\left(\mathbf{r}^{\prime}\right) \psi_{k \mathbf{k}^{\prime}}^{*}(\mathbf{r})}{\omega-\left(\epsilon_{j \mathbf{k}}-\epsilon_{k \mathbf{k}^{\prime}}\right)+i \eta \operatorname{sgn}\left(\epsilon_{j \mathbf{k}}-\epsilon_{k \mathbf{k}^{\prime} } - \mu\right)}
+\end{equation}
+where the occupations of the KS states \(j\mathbf{k}(k\mathbf{k}^{\prime})\) with energies \(\epsilon_{j\mathbf{k}}(\epsilon_{k\mathbf{k}^{\prime}})\) are given by the Fermi-Dirac distribution \(f_{j\mathbf{k}}(f_{k\mathbf{k}^{\prime}})\), which is just a step function at zero temperature. Notice that the occupation factor will always be 0 unless \(kj\) form an occupied virtual pair. So we can separate the noninteracting polarizability into two terms, one where \(\delta_{ji}\) and \(\delta_{ka}\) and the other with \(\delta_{ja}\) and \(\delta_{ki}\), where \(i\) and \(a\) are occupied and virtual indices, respectively. This allows us to write the noninteracting polarizability as:
+\begin{equation}
+\chi_{0}\left(\mathbf{r}, \mathbf{r}^{\prime}, \omega\right)=\sum_{i\mathbf{k}a\mathbf{k}^{\prime}}\frac{\psi_{i\mathbf{k} }(\mathbf{r}) \psi_{i\mathbf{k}}^{*}\left(\mathbf{r}^{\prime}\right) \psi_{a\mathbf{k}^{\prime}}\left(\mathbf{r}^{\prime}\right) \psi_{a\mathbf{k}^{\prime}}^{*}(\mathbf{r})}{\omega+\left(\epsilon_{a\mathbf{k}}-\epsilon_{i\mathbf{k}^{\prime}}\right)-i\eta } - \sum_{a\mathbf{k}i\mathbf{k}^{\prime}}\frac{\psi_{a\mathbf{k}}(\mathbf{r}) \psi_{a\mathbf{k}}^{*}\left(\mathbf{r}^{\prime}\right) \psi_{i\mathbf{k}^{\prime}}\left(\mathbf{r}^{\prime}\right) \psi_{i\mathbf{k}^{\prime}}^{*}(\mathbf{r})}{\omega-\left(\epsilon_{a\mathbf{k}}-\epsilon_{i\mathbf{k}^{\prime}}\right)+i\eta }
+\end{equation}
+Defining the KS eigenvalue differences as \(\Omega_{i\mathbf{k}a\mathbf{k}^{\prime}} = \epsilon_{a\mathbf{k}} - \epsilon_{i\mathbf{k}^{\prime}}\), we can write the noninteracting polarizability as:
+\begin{equation}
+\chi_{0}\left(\mathbf{r}, \mathbf{r}^{\prime}, \omega\right)=\sum_{i\mathbf{k}a\mathbf{k}^{\prime}}\frac{\psi_{i\mathbf{k} }(\mathbf{r}) \psi_{i\mathbf{k}}^{*}\left(\mathbf{r}^{\prime}\right) \psi_{a\mathbf{k}^{\prime}}\left(\mathbf{r}^{\prime}\right) \psi_{a\mathbf{k}^{\prime}}^{*}(\mathbf{r})}{\omega+\Omega_{i\mathbf{k}a\mathbf{k}^{\prime}}-i\eta } - \sum_{a\mathbf{k}i\mathbf{k}^{\prime}}\frac{\psi_{a\mathbf{k}}(\mathbf{r}) \psi_{a\mathbf{k}}^{*}\left(\mathbf{r}^{\prime}\right) \psi_{i\mathbf{k}^{\prime}}\left(\mathbf{r}^{\prime}\right) \psi_{i\mathbf{k}^{\prime}}^{*}(\mathbf{r})}{\omega-\Omega_{i\mathbf{k}a\mathbf{k}^{\prime}}+i\eta }
+\end{equation}
+We solve for these excitation energies through the RPA. Note that this expression implies that the poles in the negative complex plan for positive $\Omega $ in vice versa for negative $\Omega $.
+\section{Setup}
+We start with the original form for the self-energy along the real axis:
+\begin{equation}
+\Sigma\left(\mathbf{r}, \mathbf{r}^{\prime}, \omega\right)=\frac{i}{2 \pi} \int_{-\infty}^{\infty} d \omega^{\prime} e^{i \omega^{\prime} \eta} G_{0}\left(\mathbf{r}, \mathbf{r}^{\prime}, \omega+\omega^{\prime}\right) W_{0}\left(\mathbf{r}, \mathbf{r}^{\prime}, \omega^{\prime}\right)
+\end{equation}
+But to avoid the poles, we need to evaluate along the imaginary axis, so the problem becomes:
+\begin{equation*}
+\Sigma\left(\mathbf{r}, \mathbf{r}^{\prime}, i \omega\right)=-\frac{1}{2 \pi} \int_{-\infty}^{\infty} d \omega^{\prime} G_{0}\left(\mathbf{r}, \mathbf{r}^{\prime}, i \omega+i \omega^{\prime}\right) W_{0}\left(\mathbf{r}, \mathbf{r}^{\prime}, i \omega^{\prime}\right) \tag{16}
+\end{equation*}
+We are interested in evaluating the matrix elements of this operator in the molecular orbital basis. Note that both molecular orbitals must have the same crystal momentum in order for it to be conserved in this process. We also apply the identity operator:
+\begin{equation}
+    \bra{n\mathbf{k}} \Sigma (i \omega) \ket{n^\prime\mathbf{k}} = -\frac{1}{2 \pi} \sum_{m\mathbf{k}^\prime}\int_{-\infty}^{\infty} d \omega^{\prime} \bra{n\mathbf{k}} G_0(i \omega + i \omega^{\prime}) \ket{m\mathbf{k^\prime}}\bra{m\mathbf{k^\prime}}W_0(i \omega^{\prime}) \ket{n^\prime\mathbf{k}}
+\end{equation}
+The noninteracting Green's function has the form:
+\begin{equation*}
+G_{0}\left(\mathbf{r}, \mathbf{r}^{\prime}, i \omega\right)=\sum_{m \mathbf{k}_{m}} \frac{\psi_{m \mathbf{k}_{m}}(\mathbf{r}) \psi_{m \mathbf{k}_{m}}^{*}\left(\mathbf{r^\prime}\right)}{i \omega+\epsilon_{F}-\epsilon_{m \mathbf{k}_{m}}} \implies G_{0}\left(\mathbf{k} - \mathbf{q}, i \omega + i \omega^{\prime}\right) = \sum_{m \mathbf{k}-\mathbf{q}} \frac{\psi_{m \mathbf{k}-\mathbf{q}} \psi_{m \mathbf{k}-\mathbf{q}}^{*}}{i \left(\omega + \omega^{\prime}\right) + \epsilon_{F} - \epsilon_{m \mathbf{k}-\mathbf{q}}}
+\end{equation*}
+so that the above equation simplifies to:
+\begin{equation}
+    \boldsymbol{\Sigma}_{n n^{\prime}}(\mathbf{k}, i \omega) = -\frac{1}{2 \pi N_{\mathbf{k}}} \sum_{m \mathbf{q}} \int_{-\infty}^{\infty} d \omega^{\prime} \frac{(n\mathbf{k}, m\mathbf{k}-\mathbf{q} \mid W_0 (\mathbf{q}, i\omega )\mid m \mathbf{k}-\mathbf{q}, n^{\prime}\mathbf{k})}{i \left(\omega + \omega^{\prime}\right) + \epsilon_{F} - \epsilon_{m \mathbf{k}-\mathbf{q}}}
+\end{equation}
+\section{Screened Coulomb Interaction}
+\begin{align*}
+    \left(n\mathbf{k}, m\mathbf{k}-\mathbf{q}\left|W_{0}(\mathbf{q}, i\omega )\right| m\mathbf{k}-\mathbf{q}, n^{\prime}\mathbf{k}\right) &= \int \int d \mathbf{r}_1 d \mathbf{r}_2 \psi_{n\mathbf{k}}^{*}(\mathbf{r}_1) \psi_{m\mathbf{k}-\mathbf{q}}(\mathbf{r}_1) W_0(\mathbf{q}, \mathbf{r}_1, \mathbf{r}_2, i\omega ) \psi_{m\mathbf{k}-\mathbf{q}}^{*}(\mathbf{r}_2) \psi_{n^{\prime}\mathbf{k}}(\mathbf{r}_2) \\
+\end{align*}
+We expand the orbital pair product $\psi_{n \mathbf{k}}^{*}(\mathbf{r}) \psi_{m \mathbf{k}-\mathbf{q}}(\mathbf{r})$ in the auxiliary basis
+
+\begin{equation*}
+\psi_{n \mathbf{k}}^{*}(\mathbf{r}) \psi_{m \mathbf{k}-\mathbf{q}}(\mathbf{r})=\sum_{P} b_{P \mathbf{q}}^{n \mathbf{k}, m \mathbf{k}-\mathbf{q}} \phi_{P \mathbf{q}}(\mathbf{r}) \tag{20}
+\end{equation*}
+and
+\begin{equation}
+    \psi_{m\mathbf{k}-\mathbf{q}}^{*}(\mathbf{r}) \psi_{n^{\prime}\mathbf{k}}(\mathbf{r}) = \sum_{Q} b_{Q(-\mathbf{q})}^{m\mathbf{k}-\mathbf{q}, n^{\prime}\mathbf{k}} \phi_{Q(-\mathbf{q})}(\mathbf{r})
+\end{equation}
+where we have recognized the fact that in the former there is a momentum transfer of $\mathbf{q}$, and in the latter, there is a momentum transfer of $-\mathbf{q}$.
+Substituting in gives
+\begin{align}
+    \left(n\mathbf{k}, m\mathbf{k}-\mathbf{q}\left|W_{0}(\mathbf{q}, i\omega )\right| m\mathbf{k}-\mathbf{q}, n^{\prime}\mathbf{k}\right)\\ = \sum_{PQ} b_{P\mathbf{q}}^{n\mathbf{k}, m\mathbf{k}-\mathbf{q}} \left[\iint d\mathbf{r}_1 d\mathbf{r}_2 \phi_{P\mathbf{q}}(\mathbf{r}_1) W_0(\mathbf{q}, \mathbf{r}_1, \mathbf{r}_2, i\omega ) \phi_{Q(-\mathbf{q})}(\mathbf{r}_2)\right] b_{Q(-\mathbf{q})}^{m\mathbf{k}-\mathbf{q}, n^{\prime}\mathbf{k}}
+\end{align}
+with
+
+\begin{equation}
+b_{P \mathbf{q}}^{n \mathbf{k}, m \mathbf{k}-\mathbf{q}}=\sum_{R}(n \mathbf{k}, m \mathbf{k}-\mathbf{q} \mid R \mathbf{q}) \cdot \mathbf{J}_{R P}^{-1}(\mathbf{q})
+\label{eq:nonchol}
+\end{equation}
+Now is a good place to recall their definition of the density fitting where the ERIs are represented as:
+
+
+\begin{equation*}
+\left(p \mathbf{k}_{p} q \mathbf{k}_{q} \mid r \mathbf{k}_{r} s \mathbf{k}_{s}\right)=\sum_{P Q}\left(p \mathbf{k}_{p} q \mathbf{k}_{q} \mid P \mathbf{k}_{p q}\right) \mathbf{J}_{P Q}^{-1}\left(Q \mathbf{k}_{r s} \mid r \mathbf{k}_{r} s \mathbf{r}_{s}\right), \tag{11}
+\end{equation*}
+with
+\begin{align*}
+\mathbf{J}_{P Q}(\mathbf{k}) & =\iint d \mathbf{r} d \mathbf{r}^{\prime} \phi_{P(-\mathbf{k})}(\mathbf{r}) \frac{1}{\left|\mathbf{r}-\mathbf{r}^{\prime}\right|} \phi_{Q \mathbf{k}}\left(\mathbf{r}^{\prime}\right),  \tag{12}\\
+\left(Q \mathbf{k}_{r s} \mid r \mathbf{k}_{r} s \mathbf{k}_{s}\right) & =\iint d \mathbf{r} d \mathbf{r}^{\prime} \phi_{Q \mathbf{k}_{r s}}(\mathbf{r}) \frac{1}{\left|\mathbf{r}-\mathbf{r}^{\prime}\right|} \phi_{r \mathbf{k}_{r}}^{*}\left(\mathbf{r}^{\prime}\right) \phi_{s \mathbf{k}_{s}}\left(\mathbf{r}^{\prime}\right) . \tag{13}
+\end{align*}
+Note that these $b$ are then not yet our Cholesky vectors, since each one contains $\frac{|\mathbf{r}-\mathbf{r}^{\prime}|}{|\mathbf{r}-\mathbf{r}^{\prime}|}$ scaling, i.e., there should be a factor of $\mathbf{J}^{-\frac{1}{2}}$  instead of $\mathbf{J}^{-1}$ in \ref{eq:nonchol} if we are to apply the Cholesky vectors.
+At this point, we use the expansion of the screened Coulomb interaction:
+\begin{align}
+    W_0 &= v + v\chi_0 v + v\chi_0 v\chi_0 v + \cdots\\
+    &= v(1 + \chi_0 v + \chi_0 v \chi_0 v + \cdots)\\
+    &= v^{1/2} \left(1 - \chi_0\right)^{-1} v^{1/2}
+\end{align}
+simplifying to 
+\begin{align}
+    \left(n\mathbf{k}, m\mathbf{k}-\mathbf{q}\left|W_{0}(\mathbf{q}, i\omega )\right| m\mathbf{k}-\mathbf{q}, n^{\prime}\mathbf{k}\right) &= \sum_{PQ} b_{P\mathbf{q}}^{n\mathbf{k}, m\mathbf{k}-\mathbf{q}} \left[\mathbf{J^{\frac{1}{2}}}\left( \mathbf{I} - \boldsymbol{\Pi}(\mathbf{q}, i\omega ) \right) \mathbf{J^{\frac{1}{2}}}\right]^{-1}_{PQ} b_{Q(-\mathbf{q})}^{m\mathbf{k}-\mathbf{q}, n^{\prime}\mathbf{k}}\\
+    &= \sum_{PQ} v_{P}^{n m}\left[\mathbf{I}-\mathbf{\Pi}\left(\mathbf{q}, i \omega^{\prime}\right)\right]_{P Q}^{-1} v_{Q}^{m n^{\prime}}
+\end{align}
+where $\mathbf{J}_{PQ}$ is the Coulomb interaction projected onto the auxiliary basis, and we have defined
+\begin{equation}
+    v_{P\mathbf{q}}^{n \mathbf{k}, m \mathbf{k}-\mathbf{q}} = \sum_{pq} C_{pn}(\mathbf{k}) C_{qm}(\mathbf{k}-\mathbf{q}) v_{P\mathbf{q}}^{p\mathbf{k}, q\mathbf{k}-\mathbf{q}}
+\label{eq:mochol}
+\end{equation}
+with
+\begin{equation}
+    v_{P\mathbf{q}}^{p\mathbf{k}, q\mathbf{k}-\mathbf{q}} = \sum_R (p\mathbf{k}, q\mathbf{k}-\mathbf{q} \mid R\mathbf{q}) \mathbf{J}_{RP}^{-1/2}(\mathbf{q})
+\end{equation}
+If we first rename $\mathbf{k^\prime} = \mathbf{k}-\mathbf{q} \implies \mathbf{k} = \mathbf{k^\prime} + \mathbf{q}$, and then we are free to redefine $\mathbf{q} \rightarrow -\mathbf{q}$, so that \ref{eq:mochol} becomes
+\begin{equation}
+    v_{P\mathbf{-q}}^{n \mathbf{k}-\mathbf{q}, m \mathbf{k}} = \sum_{pq} C_{pn}(\mathbf{k}-\mathbf{q}) C_{qm}(\mathbf{k}) v_{P\mathbf{-q}}^{p\mathbf{k}-\mathbf{q}, q\mathbf{k}}
+\end{equation}
+\section{Integration}
+but we know that the bare Coulomb potential projected onto the auxiliary basis is given by
+\begin{equation}
+    v_{P\mathbf{q}}^{n\mathbf{k}, m\mathbf{k}-\mathbf{q}} = \sum_{pq} C_{pn}(\mathbf{k}) C_{qm}(\mathbf{k}-\mathbf{q}) v_{P\mathbf{q}}^{p\mathbf{k}, q\mathbf{k}-\mathbf{q}}
+\end{equation}
+
+To ease notation, some momentum labels are suppressed in the above and following equations (e.g., we will use $b_{P}^{n m}$ to denote $b_{P \mathbf{q}}^{n \mathbf{k}, m \mathbf{k}-\mathbf{q}}$ ). Using Eqs. 19-21, the matrix elements of $W_{0}$ are computed as
+
+\begin{align*}
+& \left(n \mathbf{k}, m \mathbf{k}-\mathbf{q}\left|W_{0}\right| m \mathbf{k}-\mathbf{q}, n^{\prime} \mathbf{k}\right) \\
+& =\sum_{P Q} b_{P}^{n m}\left[\iint d \mathbf{r} d \mathbf{r}^{\prime} \phi_{P \mathbf{q}}(\mathbf{r}) W_{0}\left(\mathbf{r}, \mathbf{r}^{\prime}, i \omega^{\prime}\right) \phi_{Q(-\mathbf{q})}\left(\mathbf{r}^{\prime}\right)\right] b_{Q}^{m n^{\prime}} \\
+& =\sum_{P Q} b_{P}^{n m}\left[\mathbf{J}_{P Q}(\mathbf{q})+\left(\mathbf{J}^{1 / 2} \boldsymbol{\Pi} \mathbf{J}^{1 / 2}\right)_{P Q}(\mathbf{q})+\ldots\right] b_{Q}^{m n^{\prime}}  \tag{22}\\
+& =\sum_{P Q} v_{P}^{n m}\left[\mathbf{I}-\mathbf{\Pi}\left(\mathbf{q}, i \omega^{\prime}\right)\right]_{P Q}^{-1} v_{Q}^{m n^{\prime}}
+\end{align*}
+
+The 3-center 2-electron integral $v_{P}^{n m}$ between auxiliary basis function $P$ and molecular orbital pairs $n m$ is obtained from an AO to MO transformation of the GDF AO integrals defined in Eq. 15:
+
+\begin{equation*}
+v_{P}^{n m}=\sum_{p} \sum_{q} C_{p n}(\mathbf{k}) C_{q m}(\mathbf{k}-\mathbf{q}) v_{P \mathbf{q}}^{p \mathbf{k}, q \mathbf{k}-\mathbf{q}} \tag{23}
+\end{equation*}
+
+where $C(\mathbf{k})$ refers to the MO coefficients in the AO basis. $\Pi\left(\mathbf{q}, i \omega^{\prime}\right)$ in Eq. 22 is an auxiliary density response function:
+
+\begin{equation*}
+\boldsymbol{\Pi}_{P Q}\left(\mathbf{q}, i \omega^{\prime}\right)=\frac{2}{N_{\mathbf{k}}} \sum_{\mathbf{k}} \sum_{i}^{\mathrm{occ}} \sum_{a}^{\text {vir }} v_{P}^{i a} \frac{\epsilon_{i \mathbf{k}}-\epsilon_{a \mathbf{k}-\mathbf{q}}}{\omega^{\prime 2}+\left(\epsilon_{i \mathbf{k}}-\epsilon_{a \mathbf{k}-\mathbf{q}}\right)^{2}} v_{Q}^{a i} \tag{24}
+\end{equation*}
+
+
+\end{document}

@@ -12,55 +12,101 @@
 \maketitle
 Now that we have the  $G_0$ from Hartree-Fock, our goal will be to compute successive $G_n$'s, where $n=1,2,3,...$ until we reach the self-consistent solution. We want to solve the Dyson equation:
 \begin{equation}
-    G_n(1,2)=G_{n-1}(1,2)+\int d(3,4) G_{n-1}(1,3) \Sigma_n(3,4) G_n(4,2).
+    G_n(1,2)=G_{n-1}(1,2)+\int d3d4 G_{n-1}(1,3) \Sigma_n(3,4) G_n(4,2),
 \end{equation}
 \section{Polarizability $P$}
 \begin{equation}
-    P_n(1,2)=\int d(1,2) G_{n-1}(1,2) G_{n-1}(2,1).
+    P_n(1,2)=-iG_{n-1}(1,2)G_{n-1}(2,1).
 \end{equation}
 \subsection{RPA}
-This must be done by performing an RPA calculation to determine the polarizability $P$.
-The Casida equation that I want to solve is
+ We denote occupied and virtual orbital indices as $i,j,...$ and $a,b,...$, respectively, while general ones are $p,q,...$.
+Noting that we will have separate spin channels, The matrix $\textbf{A}$ has 4 blocks, e.g.,
 \begin{equation}
-\begin{bmatrix}
-\textbf{A} & \textbf{B} \\
--\textbf{B} & -\textbf{A}
-\end{bmatrix}
-\begin{bmatrix}
-\textbf{X} \\
-\textbf{Y}
-\end{bmatrix}
-=
-\omega 
-\begin{bmatrix}
-1 & 0 \\
-0 & -1
-\end{bmatrix}
-\begin{bmatrix}
-\textbf{X} \\
-\textbf{Y}
-\end{bmatrix},
-\label{eq: RPA equation}
+    \textbf{A} = \begin{bmatrix}
+    \textbf{A}_{\alpha \alpha  } & \textbf{A}_{\alpha \beta } \\
+    \textbf{A}_{\beta \alpha } & \textbf{A}_{\beta \beta}
+    \end{bmatrix},
 \end{equation}
-where we have the transition densities $\textbf{X}$ and $\textbf{Y}$ with the excitation energies $\omega$. We denote occupied and virtual orbital indices as $i,j,...$ and $a,b,...$, respectively, while general ones are $p,q,...$.
-The matrix
-$\textbf{A}$ is defined as
+where the matrix elements are defined as
 \begin{equation}
-    A_{ia,jb} = \delta _{ij}\delta _{ab}(\epsilon _{a}- \epsilon _{i}) + (ia||jb)
+    A_{ia,jb}^{\sigma \sigma ^{\prime}} = \delta _{ij}\delta _{ab}\delta _{\sigma \sigma ^{\prime}}(\epsilon _{a}- \epsilon _{i}) + [i_{\sigma}a_{\sigma}||b_{\sigma ^{\prime}}j_{\sigma ^{\prime}}].
 \label{eq: A matrix RPA}
 \end{equation}
 and $\textbf{B}$ is
 \begin{equation}
-    B_{ia,jb} = (ia||bj)
+    B_{ia,jb}^{\sigma \sigma ^{\prime}} = [i_{\sigma}a_{\sigma}||j_{\sigma ^{\prime}}b_{\sigma ^{\prime}}].
 \label{eq: B matrix RPA}.
 \end{equation}
-The virtual and occupied orbital energies are denoted as $\epsilon _{a}$ and $\epsilon _{i}$, respectively. Working in the direct interaction approximation, the two-electron integrals are defined as:
+Taking the direct approximation, the two-electron integrals are given by
 \begin{align}
-    (ia|jb) &= \int \int \phi _{i}^{*}(\mathbf{r}_{1})\phi _{a}(\mathbf{r}_{1})\frac{1}{|\mathbf{r}_{1}-\mathbf{r}_{2}|}\phi _{j}^{*}(\mathbf{r}_{2})\phi _{b}(\mathbf{r}_{2})d\mathbf{r}_{1}d\mathbf{r}_{2} \\
-    &= \frac{4\pi}{\Omega_{vol} }\frac{1}{|\mathbf{G}_{b}-\mathbf{G}_{j}|^{2}}\delta _{\mathbf{G}_{a} - \mathbf{G}_{i}, \mathbf{G}_{j} - \mathbf{G}_{b}},
-    \label{eq: two-electron integrals}
+    [i_{\sigma}a_{\sigma}|j_{\sigma ^{\prime}}b_{\sigma ^{\prime}}] &= \int \int d\mathbf{x}_1 d\mathbf{x}_2 \phi _{i_{\sigma}}^{*}(\mathbf{x}_1) \phi _{a_{\sigma}}^{*}(\mathbf{x}_1) \frac{1}{|\mathbf{r}_1 - \mathbf{r}_2|} \phi _{j_{\sigma ^{\prime}}}(\mathbf{x}_2) \phi _{b_{\sigma ^{\prime}}}(\mathbf{x}_2) \nonumber \\
 \end{align}
-where $\phi _{p}$ is an atomic orbital. Running a Davidson procedure on the Casida equation \ref{eq: RPA equation} will give us the selected low-lying excitation energies $\omega_{\mu}$ and the corresponding transition densities $\textbf{X}_{\mu}$ and $\textbf{Y}_{\mu}$, where $\mu$ is the index of excitation, which has then been truncated because of Davidson.
+Note that we can only have an excitation at a certain spatial index if the spin is the same.
+We can use the Cholesky decomposition to approximate these integrals. We can express the two-electron integrals in terms of the Cholesky vectors as
+\begin{equation}
+    (pq|rs) = \sum _{\zeta} L_{pq}^{\zeta} L_{rs}^{\zeta} = \sum _{\mu \nu \lambda \sigma} \sum_{\zeta} C_{\mu p} C_{\nu q} C_{\lambda r} C_{\sigma s} L_{\mu \nu}^{\zeta} L_{\lambda \sigma}^{\zeta}.
+\end{equation}
+ The Casida equation is then
+\begin{equation}
+\begin{bmatrix}
+\begin{pmatrix}
+    A_{\alpha \alpha} & A_{\alpha \beta} \\
+    A_{\beta \alpha} & A_{\beta \beta}
+\end{pmatrix}
+& 
+\begin{pmatrix}
+    B_{\alpha \alpha} & B_{\alpha \beta} \\
+    B_{\beta \alpha} & B_{\beta \beta}
+\end{pmatrix}
+\\
+\begin{pmatrix}
+    -B_{\alpha \alpha} & -B_{\alpha \beta} \\
+    -B_{\beta \alpha} & -B_{\beta \beta}
+\end{pmatrix}
+&
+\begin{pmatrix}
+    -A_{\alpha \alpha} & -A_{\alpha \beta} \\
+    -A_{\beta \alpha} & -A_{\beta \beta}
+\end{pmatrix}
+\end{bmatrix}
+\begin{bmatrix}
+\begin{pmatrix}
+    X_{\alpha \alpha} & X_{\alpha \beta} \\
+    X_{\beta \alpha} & X_{\beta \beta}
+\end{pmatrix}
+\\
+\begin{pmatrix}
+    Y_{\alpha \alpha} & Y_{\alpha \beta} \\
+    Y_{\beta \alpha} & Y_{\beta \beta}
+\end{pmatrix}
+\end{bmatrix}
+=
+\omega
+\begin{bmatrix}
+\begin{pmatrix}
+    1 & 0 \\
+    0 & 1
+\end{pmatrix}
+\\
+\begin{pmatrix}
+    -1 & 0 \\
+    0 & -1
+\end{pmatrix}
+\end{bmatrix}
+\begin{bmatrix}
+\begin{pmatrix}
+    X_{\alpha \alpha} & X_{\alpha \beta} \\
+    X_{\beta \alpha} & X_{\beta \beta}
+\end{pmatrix}
+\\
+\begin{pmatrix}
+    Y_{\alpha \alpha} & Y_{\alpha \beta} \\
+    Y_{\beta \alpha} & Y_{\beta \beta}
+\end{pmatrix}
+\end{bmatrix},
+\label{eq: RPA equation}
+\end{equation}
+where we have the transition densities $\textbf{X}$ and $\textbf{Y}$ with the excitation energies $\omega$.
 \section{Screened Coulomb interaction $W$}
 \begin{equation}
     W_n(1,2)=V_0(1,2)+\int d(3,4) V_0(1,3) P_n(3,4) W_n(4,2).
@@ -68,7 +114,7 @@ where $\phi _{p}$ is an atomic orbital. Running a Davidson procedure on the Casi
 $V_0$ is the bare Coulomb interaction, which is obtained from the two-electron integrals.
 We construct the coupled transition densities $\textbf{Z}_{\mu}$ as
 \begin{equation}
-    {Z}_{ia}^{\mu} = {X}_{ia}^{\mu} - {Y}_{ia}^{\mu}
+    {Z}_{ia}^{\mu} = {X}_{ia}^{\mu} + {Y}_{ia}^{\mu}
 \end{equation}
 Next, we consider the contraction of the coupled transition densities with the two-electron integrals in order to form the actual excitation vectors $\textbf{V}^{\mu}$:
 \begin{equation}
@@ -98,4 +144,95 @@ We solve for this using the equation:
 \label{eq: Iterative equation}
 \end{equation}
 where in the first iteration we use $\gamma \equiv \gamma^{\mathrm{HF}}$. The $\varepsilon_{p}^{\mathrm{G}}$ are the Green's function eigenvalues being solved for in this iterative equation. In order to achieve self-consistency, I would imagine that we want to update $\gamma$ from the initial density of $G_0$ to that of $G_{n-1}$ and also have the self-energy $\Sigma_C^n$ to be the one from the previous iteration.
+\section{Hubbard model}
+In order to determine these MO integrals for the Hubbard model, at first we only care about the repulsion between two electrons with opposite spin on the same site, with the proportional coefficient being \( U \). The ERIs in the atomic basis are \( (\mu\mu|\mu\mu) \), so if we want to transform this into the MO basis with \( (ia|jb) \), we need \( (ia|jb) = U_{\mu} C_{\mu i} C_{\mu a} C_{\mu j} C_{\mu b} \), where \( U_{\mu} \) is the on-site repulsion and \( C_{\mu i} \) is the coefficient of the \( i \)-th MO in the \( \mu \)-th atomic orbital. I was thinking about this with Aadi, and we realized that the Hartree-Fock term calculation might be the same as a Hartree one; the exchange matrix \( K \) would be the same as the Coulomb \( J \), but I guess this would be true only in the restricted formalism. My correlation self-energy is off by an order of magnitude, so I suspect that I might not be generating my integrals correctly. For the ab initio system, we have something like this for the correlation self-energy:
+\begin{equation}
+\begin{aligned}
+\Sigma_{pq}^{\mathrm{c}}\left(\varepsilon_{\mathrm{s}}^{\mathrm{H}}\right)= & \sum_{jbkc} \sum_{\mathrm{I}}\left(\sum_i \frac{(ip | jb)(iq | kc)}{\varepsilon_{\mathrm{s}}^{\mathrm{H}}-\Omega_{\mathrm{I}}-\varepsilon_{\mathrm{i}}^{\mathrm{H}}-\mathrm{i} \eta}\right. \\
+& \left.+\sum_a \frac{(ap | jb)(aq | kc)}{\varepsilon_{\mathrm{s}}^{\mathrm{H}}+\Omega_{\mathrm{I}}-\varepsilon_a^{\mathrm{H}}+\mathrm{i} \eta}\right) M_{jbkc}^{\mathrm{I}}
+\end{aligned}
+\end{equation}
+Our job is to specify this for the Hubbard model, where the integrals are \( (ip | jb) = U_{\mu} C_{\mu i} C_{\mu p} C_{\mu j} C_{\mu b} \).
+\section{}
+I want to prove equivalence between $$\sum_{jbkc} \sum_{a} \sum_{\mu } (ap|jb)(aq|kc)M_{jbkc}^{\mu}$$ and $$\sum_{a} \sum_{\mu } V_{pa}^{\mu }V_{aq}^{\mu }$$, where we know that
+\begin{equation}
+    M_{jbkc}^{\mu} = X_{jb}^{\mu}X_{kc}^{\mu} + X_{jb}^{\mu}Y_{kc}^{\mu} + Y_{jb}^{\mu}X_{kc}^{\mu} + Y_{jb}^{\mu}Y_{kc}^{\mu}.
+\end{equation}
+where \( X_{ia}^{\mu} \) and \( Y_{ia}^{\mu} \) are the transition densities from diagonalizing the Casida equation in the RPA.
+We started by deriving \( V_{pq}^{\mu} \) in the unrestricted formalism. Recall that
+\begin{equation}
+    V_{pq}^{\mu} = \sum _{i,a}(pq|ia) Z_{ia}^{\mu}
+\end{equation}
+where \( Z_{ia}^{\mu} = X_{ia}^{\mu} + Y_{ia}^{\mu} \). We can then expand
+\begin{equation}
+    V_{pa}^{\mu}V_{aq}^{\mu} = \sum _{jbkc} (pa|jb)(aq|kc)Z_{jb}^{\mu}Z_{kc}^{\mu}.
+\end{equation}
+\section{Cholesky decomposition}
+We want to approximate the two-electron integrals in the Hubbard model with the Cholesky decomposition. In order to express something like $(ia|jb)$ in terms of the Cholesky decomposition, we need to first define
+\begin{equation}
+    L_{\mu \nu}^p = \delta _{\mu \nu} \sqrt{U_{\mu}},
+\end{equation}
+Note that in the Hubbard model, we have $dim(p)=1$. Then we can form
+\begin{equation}
+    L_{ia}^p = \sum _{\mu \nu} C_{\mu i} C_{\nu a} L_{\mu \nu}^p.
+\end{equation}
+And then in order to build the A matrix of the Casida equation, we can write
+\begin{equation}
+    A_{ia,jb} = \sum _{p} L_{ia}^p L_{jb}^p = \delta _{ij}\delta _{ab}\left( \epsilon _a - \epsilon _i \right) + (ia|jb).
+\end{equation}
+\section{Use of the Cholesky vectors}
+we want to solve a Casida equation of the form
+\begin{equation}
+\begin{bmatrix}
+\textbf{A} & \textbf{B} \\
+-\textbf{B} & -\textbf{A}
+\end{bmatrix}
+\begin{bmatrix}
+\textbf{X} \\
+\textbf{Y}
+\end{bmatrix}
+=
+\omega
+\begin{bmatrix}
+1 & 0 \\
+0 & -1
+\end{bmatrix}
+\begin{bmatrix}
+\textbf{X} \\
+\textbf{Y}
+\end{bmatrix},
+\end{equation}
+where we have the transition densities $\textbf{X}$ and $\textbf{Y}$ with the excitation energies $\omega$. The definition of elements of the matrix $\textbf{A}$ is given by
+\begin{equation}
+    A_{ia,jb} = \delta _{ij}\delta _{ab}(\epsilon _{a}- \epsilon _{i}) + (ia|bj)
+\end{equation}
+and $\textbf{B}$ is
+\begin{equation}
+    B_{ia,jb} = (ia|jb).
+\end{equation}
+We can express the two-electron integrals in terms of the Cholesky vectors as
+\begin{equation}
+    (pq|rs) = \sum _{\zeta} L_{pq}^{\zeta} L_{rs}^{\zeta} = \sum _{\mu \nu \lambda \sigma} \sum_{\zeta} C_{\mu p} C_{\nu q} C_{\lambda r} C_{\sigma s} L_{\mu \nu}^{\zeta} L_{\lambda \sigma}^{\zeta}.
+\end{equation}
+so that we can write
+\begin{equation}
+    A_{ia,jb} = \delta _{ij}\delta _{ab}\left( \epsilon _a - \epsilon _i \right) + \sum _{p} L_{ia}^p L_{bj}^p.
+\end{equation}
+and
+\begin{equation}
+    B_{ia,jb} = \sum _{p} L_{ia}^p L_{jb}^p.
+\end{equation}
+and then when we evaluate the self energies we also need them for the $V_{pq}^{\mu}$:
+\begin{equation}
+    \Sigma_{pq}^C(\omega) = \sum _{\mu} \left( \sum _i \frac{V_{pi}^{\mu}V_{iq}^{\mu}}{\omega - (\epsilon_i - \Omega_{\mu})} + \sum _a \frac{V_{pa}^{\mu}V_{aq}^{\mu}}{\omega - (\epsilon_a + \Omega_{\mu})} \right).
+\end{equation}
+where $V_{pq}^{\mu}$ is constructed conventionally as
+\begin{equation}
+    V_{pq}^{\mu} = \sum _{ia} (pq|ia) Z_{ia}^{\mu} \implies = \sum_{ia} \sum _{\zeta} L_{pq}^{\zeta} L_{ia}^{\zeta} Z_{ia}^{\mu}.
+\end{equation}
+and finding Z is just $Z_{ia}^{\mu} = X_{ia}^{\mu} + Y_{ia}^{\mu}$, where $X_{ia}^{\mu}$ and $Y_{ia}^{\mu}$ are the transition densities from diagonalizing the Casida equation in the RPA.
+For the exchange self-energy, we have
+\begin{equation}
+    \Sigma_{pq}^x = - \sum _{i} (pi|iq) = - \sum _{i} \sum _{\zeta} L_{pi}^{\zeta} L_{iq}^{\zeta}.
+\end{equation}
 \end{document}
